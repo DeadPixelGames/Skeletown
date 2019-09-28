@@ -50,21 +50,38 @@ export default class FileLoader {
             // Los eventos asociados a la petición los realizamos en
             // la promesa para poder cargar el contenido asíncronamente
             return new Promise((resolve) => {
+                // Asignamos, ya dentro de la promesa para poder cargar
+                // el archivo asíncronamente, el evento que se encargará
+                // de gestionar los cambios de estado de la petición
                 request.onreadystatechange = function () {
+                    // Cuando el proceso de la petición haya terminado
                     if (this.readyState == 4) {
+                        // Si ha cargado el archivo correctamente, resolvemos
+                        // la promesa con los datos
                         if (this.status == 200) {
                             resolve(request.response);
+                            // Si no, lanzamos el error producido
                         }
                         else {
                             throw new Error("No se ha podido cargar el archivo " + path + ". Código de error: " + this.status);
                         }
                     }
                 };
+                // Lanzamos la petición. La lanzamos después de asignar el
+                // evento para no arriesgarnos a que la petición cambie de
+                // estado antes de que nosotros asignemos el evento
                 request.open("GET", path, true);
                 request.send();
             });
         });
     }
+    /**
+     * Carga elementos multimedia y los almacena cono elementos del DOM.
+     * Los elementos cargados no aparecerán en el documento a menos que
+     * se agreguen explícitamente.
+     * @param path La ruta donde se encuentra el archivo a cargar
+     * @param tag La etiqueta HTML que el elemento lleva asociada
+     */
     static loadMedia(path, tag) {
         return __awaiter(this, void 0, void 0, function* () {
             var element = document.createElement(tag);

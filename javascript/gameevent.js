@@ -1,4 +1,4 @@
-export default class CustomEvent {
+export default class GameEvent {
     constructor() {
         this.suscribed = [];
     }
@@ -18,4 +18,4 @@ export default class CustomEvent {
         }
     }
 }
-//# sourceMappingURL=customevent.js.map
+//# sourceMappingURL=gameevent.js.map
