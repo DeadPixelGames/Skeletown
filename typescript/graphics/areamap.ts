@@ -2,6 +2,7 @@ import FileLoader from "../fileloader.js";
 import GraphicEntity from "./graphicentity.js";
 import GraphicsRenderer from "./graphicsrenderer.js";
 import GameEvent from "../gameevent.js";
+import { ColliderLayer, Collider, BoxCollider } from "../collider.js";
 
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
@@ -26,6 +27,10 @@ export default class AreaMap {
      * El color de fondo del mapa.
      */
     private backgroundColor :string;
+    /**
+     * La capa de colliders asignada a este mapa.
+     */
+    private colliders :ColliderLayer;
 
     /**
      * Paleta de tiles a usar. Contiene prototipos definiendo todos los distintos tiles que puede usar el mapa, provenientes de todos
@@ -46,6 +51,7 @@ export default class AreaMap {
         this.backgroundColor = "#000000";
         this.palette = [null];
         this.onLoaded = new GameEvent();
+        this.colliders = new ColliderLayer();
     }
 
     /**
@@ -141,6 +147,13 @@ export default class AreaMap {
                 // Colocamos el tile en su ubicación en el mapa
                 tile.x = (count % mapWidth) * tileWidth;
                 tile.y = Math.floor(count / mapWidth) * tileHeight;
+
+                // Colocamos el collider también en el mismo lugar que el tile
+                tile.collider.centerX = tile.x + tileWidth * 0.5;
+                tile.collider.centerY = tile.y + tileHeight * 0.5;
+
+                // Añadimos el collider a los colliders del mapa
+                this.colliders.add(tile.collider);
             
                 // Se lo pasamos al `GraphicsRenderer` para que se encargue de renderizarlo
                 GraphicsRenderer.instance.addExistingEntity(tile);
@@ -278,10 +291,15 @@ class TileEntity extends GraphicEntity {
      * Indica si el tile se puede atravesar por otras entidades o no.
      */
     public solid :boolean;
+    /**
+     * El colisionador asignado a este tile.
+     */
+    public collider :Collider;
 
     public constructor(layer :number, proto :TilePrototype) {
         super(layer, proto.source, 0, 0, proto.sX, proto.sY, proto.sWidth, proto.sHeight);
         this.solid = proto.solid;
+        this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
     }
 }
 //#endregion

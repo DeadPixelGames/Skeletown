@@ -11,6 +11,7 @@ import FileLoader from "../fileloader.js";
 import GraphicEntity from "./graphicentity.js";
 import GraphicsRenderer from "./graphicsrenderer.js";
 import GameEvent from "../gameevent.js";
+import { ColliderLayer, BoxCollider } from "../collider.js";
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
  * añadir '/' al principio ni al final.
@@ -27,6 +28,7 @@ export default class AreaMap {
         this.backgroundColor = "#000000";
         this.palette = [null];
         this.onLoaded = new GameEvent();
+        this.colliders = new ColliderLayer();
     }
     /**
      * Inicia la generación de  un área cargando el archivo especificado. Sólo es necesario indicar el nombre del archivo.
@@ -109,6 +111,11 @@ export default class AreaMap {
                 // Colocamos el tile en su ubicación en el mapa
                 tile.x = (count % mapWidth) * tileWidth;
                 tile.y = Math.floor(count / mapWidth) * tileHeight;
+                // Colocamos el collider también en el mismo lugar que el tile
+                tile.collider.centerX = tile.x + tileWidth * 0.5;
+                tile.collider.centerY = tile.y + tileHeight * 0.5;
+                // Añadimos el collider a los colliders del mapa
+                this.colliders.add(tile.collider);
                 // Se lo pasamos al `GraphicsRenderer` para que se encargue de renderizarlo
                 GraphicsRenderer.instance.addExistingEntity(tile);
             }
@@ -213,6 +220,7 @@ class TileEntity extends GraphicEntity {
     constructor(layer, proto) {
         super(layer, proto.source, 0, 0, proto.sX, proto.sY, proto.sWidth, proto.sHeight);
         this.solid = proto.solid;
+        this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
     }
 }
 //#endregion
