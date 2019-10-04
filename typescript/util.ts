@@ -18,6 +18,11 @@ export function randomInt(min :number, max :number) {
 export function clamp(value :number, min :number, max :number) {
     return Math.min(max, Math.max(min, value));
 }
+
+/** Devuelve la distancia entre los puntos indicados por (`x1`, `y1`) y (`x2`, `y2`) */
+export function distance(x1 :number, y1 :number, x2 :number, y2 :number) {
+    return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
 //#endregion
 
 //#region Array
