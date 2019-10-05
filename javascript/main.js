@@ -1,25 +1,21 @@
-import CustomEvent from "./customevent.js";
-console.log("hello world");
-class Player {
-    constructor() {
-        this.hp = 0;
-        this.playerDead = new CustomEvent();
-    }
-    update() {
-        if (this.hp == 0) {
-            this.playerDead.dispatch("tried to swim in lava");
+import Player from "./player.js";
+console.log("Hello World");
+var player;
+var ctx;
+window.onload = function () {
+    var canvas = document.getElementById("gameCanvas");
+    ctx = canvas.getContext("2d");
+    //ctx.fillStyle = "#00FF88"
+    //ctx.fillRect(20, 20, 32, 32);
+    player = new Player(canvas, ctx, 32, 32);
+    //player.render();
+    setInterval(() => {
+        if (ctx) { }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (player) {
+            player.update();
+            player.render();
         }
-    }
-}
-class HUD {
-    constructor(player) {
-        player.playerDead.suscribe(this.onPlayerDead, this);
-    }
-    onPlayerDead(text) {
-        console.log("player is ded F");
-    }
-}
-var p = new Player();
-var h = new HUD(p);
-p.update();
+    }, 100);
+};
 //# sourceMappingURL=main.js.map
