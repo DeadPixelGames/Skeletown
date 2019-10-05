@@ -56,8 +56,8 @@ export default class GraphicsRenderer {
         this.entities.push(entity);
     }
     /** Genera una nueva entidad gráfica y la añade al `GraphicsManager`. */
-    addNewEntity(layer, source, pivotX, pivotY, sX, sY, sWidth, sHeight) {
-        this.entities.push(new GraphicEntity(layer, source, pivotX, pivotY, sX, sY, sWidth, sHeight));
+    addNewEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
+        this.entities.push(new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY));
     }
     /**
      * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.

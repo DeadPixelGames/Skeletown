@@ -42,7 +42,7 @@ export default class GraphicEntity {
      */
     public y :number;
 
-    constructor(layer :number, source :HTMLImageElement, pivotX? :number, pivotY? :number, sX? :number, sY? :number, sWidth? :number, sHeight? :number) {
+    constructor(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number) {
         this.sourceElement = source;
         this.section = {
             x: sX != null ? sX : 0,
@@ -64,8 +64,8 @@ export default class GraphicEntity {
      * cuenta el desplazamiento de la pantalla. Los valores de desplazamiento están invertidos.
      */
     public render(context :CanvasRenderingContext2D, offsetX? :number, offsetY? :number) {
-        var x = offsetX == null ? this.x : this.x - offsetX;
-        var y = offsetY == null ? this.y : this.y - offsetY;
+        var x = Math.floor(offsetX == null ? this.x : this.x - offsetX);
+        var y = Math.floor(offsetY == null ? this.y : this.y - offsetY);
         context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, x, y, this.section.w, this.section.h);
     };
 
@@ -110,6 +110,14 @@ export default class GraphicEntity {
             x: x,
             y: y
         }
+    }
+
+    public getWidth() {
+        return this.section.w;
+    }
+
+    public getHeight() {
+        return this.section.h;
     }
     //#endregion
 }

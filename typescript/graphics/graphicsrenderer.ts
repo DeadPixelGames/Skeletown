@@ -95,8 +95,8 @@ export default class GraphicsRenderer {
     }
 
     /** Genera una nueva entidad gráfica y la añade al `GraphicsManager`. */
-    public addNewEntity(layer :number, source :HTMLImageElement, pivotX? :number, pivotY? :number, sX? :number, sY? :number, sWidth? :number, sHeight? :number) {
-        this.entities.push(new GraphicEntity(layer, source, pivotX, pivotY, sX, sY, sWidth, sHeight));
+    public addNewEntity(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number, ) {
+        this.entities.push(new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY));
     }
 
     /**

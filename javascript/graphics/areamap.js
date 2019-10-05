@@ -60,6 +60,13 @@ export default class AreaMap {
         }
     }
     /**
+     * Devuelve la capa de colisiones del área.
+     */
+    getColliders() {
+        return this.colliders;
+    }
+    ;
+    /**
      * Permite realizar la mayor parte de la carga de manera asíncrona, agilizando el proceso, ya que depende de la carga
      * de varios archivos e iteraciones pesadas. Esta función es un suplemento de `AreaMap.load(jsonFile)`.
      */
@@ -111,11 +118,13 @@ export default class AreaMap {
                 // Colocamos el tile en su ubicación en el mapa
                 tile.x = (count % mapWidth) * tileWidth;
                 tile.y = Math.floor(count / mapWidth) * tileHeight;
-                // Colocamos el collider también en el mismo lugar que el tile
-                tile.collider.centerX = tile.x + tileWidth * 0.5;
-                tile.collider.centerY = tile.y + tileHeight * 0.5;
-                // Añadimos el collider a los colliders del mapa
-                this.colliders.add(tile.collider);
+                if (tile.collider) {
+                    // Colocamos el collider también en el mismo lugar que el tile
+                    tile.collider.centerX = tile.x + tileWidth * 0.5;
+                    tile.collider.centerY = tile.y + tileHeight * 0.5;
+                    // Añadimos el collider a los colliders del mapa
+                    this.colliders.add(tile.collider);
+                }
                 // Se lo pasamos al `GraphicsRenderer` para que se encargue de renderizarlo
                 GraphicsRenderer.instance.addExistingEntity(tile);
             }
@@ -218,9 +227,11 @@ export default class AreaMap {
  */
 class TileEntity extends GraphicEntity {
     constructor(layer, proto) {
-        super(layer, proto.source, 0, 0, proto.sX, proto.sY, proto.sWidth, proto.sHeight);
+        super(layer, proto.source, proto.sX, proto.sY, proto.sWidth, proto.sHeight, 0, 0);
         this.solid = proto.solid;
-        this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
+        if (this.solid) {
+            this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
+        }
     }
 }
 //#endregion

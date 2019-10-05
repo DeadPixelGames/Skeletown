@@ -2,7 +2,7 @@
  * renderizar todos los elementos gráficos del juego.
  */
 export default class GraphicEntity {
-    constructor(layer, source, pivotX, pivotY, sX, sY, sWidth, sHeight) {
+    constructor(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         this.sourceElement = source;
         this.section = {
             x: sX != null ? sX : 0,
@@ -23,8 +23,8 @@ export default class GraphicEntity {
      * cuenta el desplazamiento de la pantalla. Los valores de desplazamiento están invertidos.
      */
     render(context, offsetX, offsetY) {
-        var x = offsetX == null ? this.x : this.x - offsetX;
-        var y = offsetY == null ? this.y : this.y - offsetY;
+        var x = Math.floor(offsetX == null ? this.x : this.x - offsetX);
+        var y = Math.floor(offsetY == null ? this.y : this.y - offsetY);
         context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, x, y, this.section.w, this.section.h);
     }
     ;
@@ -66,6 +66,12 @@ export default class GraphicEntity {
             x: x,
             y: y
         };
+    }
+    getWidth() {
+        return this.section.w;
+    }
+    getHeight() {
+        return this.section.h;
     }
 }
 //# sourceMappingURL=graphicentity.js.map
