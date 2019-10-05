@@ -1,7 +1,5 @@
 import Entity from "./entity.js";
 export default class Player extends Entity {
-    //private walkRight :Animation;
-    //private idle :Animation;
     /**
      * Constructor
      * @param canvas Elemento Lienzo de HTML

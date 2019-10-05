@@ -1,5 +1,5 @@
 import Entity from "./entity.js";
-import Animation from "./animation.js"
+
 
 export default class Player extends Entity{
     private width :number;
@@ -7,8 +7,7 @@ export default class Player extends Entity{
     private mouse :boolean = false;
     private mouseEvent :MouseEvent; //Evento Actual de ratón
     private touchEvent :TouchEvent;
-    //private walkRight :Animation;
-    //private idle :Animation;
+
 
     /**
      * Constructor
