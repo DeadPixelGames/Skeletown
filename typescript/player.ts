@@ -130,7 +130,6 @@ export default class Player extends Entity{
      * Dibuja un rectángulo que representa al jugador en la posición del jugador
     */
     public render(){
-        console.log("render")
         this.ctx.fillStyle = "#00FF88"
         this.ctx.fillRect(this.x, this.y, this.width, this.height);
     }

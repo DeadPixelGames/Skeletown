@@ -64,6 +64,10 @@ export default class Player extends Entity {
         canvas.addEventListener('mousemove', function (e) {
             that.mouseEvent = e;
         });
+        /**
+         * Evento de mover el dedo por la pantalla
+         * Se guarda el evento para actualizar la posición del pulso
+         */
         canvas.addEventListener('touchmove', function (e) {
             that.touchEvent = e;
         });
@@ -84,6 +88,7 @@ export default class Player extends Entity {
     //#endregion
     /**
      * Coge el rectángulo del canvas y calcula la posición del ratón en el canvas
+     * Hace uso del MouseEvent
      */
     getCursorPosition() {
         const rect = this.canvas.getBoundingClientRect();
@@ -94,6 +99,10 @@ export default class Player extends Entity {
         console.log("x: " + x + " y: " + y);
         return { "x": x, "y": y };
     }
+    /**
+     * Coge el rectángulo del canvas y calcula la posición del dedo en el canvas
+     * Hace uso del TouchEvent
+     */
     getTouchPosition() {
         const rect = this.canvas.getBoundingClientRect();
         var x;
@@ -106,7 +115,6 @@ export default class Player extends Entity {
      * Dibuja un rectángulo que representa al jugador en la posición del jugador
     */
     render() {
-        console.log("render");
         this.ctx.fillStyle = "#00FF88";
         this.ctx.fillRect(this.x, this.y, this.width, this.height);
     }
@@ -135,6 +143,10 @@ export default class Player extends Entity {
             return;
         }
     }
+    /**
+     * Genera un bucle en el que se va comprobando la posición del dedo y se estipula como destino del movimiento.
+     * Después de 1 ms se vuelve a llamar al método si el ratón sigue pulsado.
+     */
     touchMove() {
         if (this.mouse) {
             this.dest = this.getTouchPosition();

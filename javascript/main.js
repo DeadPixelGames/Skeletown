@@ -5,17 +5,18 @@ var ctx;
 window.onload = function () {
     var canvas = document.getElementById("gameCanvas");
     ctx = canvas.getContext("2d");
-    //ctx.fillStyle = "#00FF88"
-    //ctx.fillRect(20, 20, 32, 32);
     player = new Player(canvas, ctx, 32, 32);
-    //player.render();
+    /**
+     * Main game loop
+     */
     setInterval(() => {
-        if (ctx) { }
+        //Vacío del canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        //Actualización y renderización del jugador
         if (player) {
             player.update();
             player.render();
         }
-    }, 100);
+    }, 50);
 };
 //# sourceMappingURL=main.js.map
