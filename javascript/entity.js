@@ -1,4 +1,9 @@
 export default class Entity {
+    /**
+     * Constructor
+     * @param canvas Elemento lienzo de HTML
+     * @param ctx Contexto del lienzo del HTML
+     */
     constructor(canvas, ctx) {
         this.dest = { "x": 0, "y": 0 };
         this.canvas = canvas;
@@ -9,6 +14,7 @@ export default class Entity {
         this.dest.x = this.x;
         this.dest.y = this.y;
     }
+    //#region GETTERS Y SETTERS
     getX() {
         return this.x;
     }

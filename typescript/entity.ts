@@ -11,6 +11,11 @@ export default class Entity{
 
     private image :string;
 
+    /**
+     * Constructor
+     * @param canvas Elemento lienzo de HTML
+     * @param ctx Contexto del lienzo del HTML
+     */
     constructor(canvas :HTMLCanvasElement, ctx :CanvasRenderingContext2D){
         this.canvas = canvas;
         this.ctx = ctx;
@@ -21,7 +26,7 @@ export default class Entity{
         this.dest.y = this.y;
     }
     
-
+    //#region GETTERS Y SETTERS
     public getX () {
         return this.x;
     }
@@ -53,7 +58,7 @@ export default class Entity{
     public setImage(image :string){
         this.image = image;
     }
-
+    //#endregion
     
 
 }
