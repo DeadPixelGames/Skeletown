@@ -9,6 +9,14 @@
          "offsetx":880,
          "offsety":1232,
          "opacity":1,
+         "properties":
+            {
+             "solid":true
+            },
+         "propertytypes":
+            {
+             "solid":"bool"
+            },
          "type":"tilelayer",
          "visible":true,
          "width":100,
@@ -25,7 +33,7 @@
          "offsety":1232,
          "opacity":1,
          "type":"tilelayer",
-         "visible":true,
+         "visible":false,
          "width":100,
          "x":0,
          "y":0
@@ -46,6 +54,20 @@
          "spacing":0,
          "tilecount":224,
          "tileheight":128,
+         "tileproperties":
+            {
+             "110":
+                {
+                 "solid":true
+                }
+            },
+         "tilepropertytypes":
+            {
+             "110":
+                {
+                 "solid":"bool"
+                }
+            },
          "tilewidth":128
         }],
  "tilewidth":128,
