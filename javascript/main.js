@@ -20,18 +20,18 @@ window.onload = function () {
     ctx = canvas.getContext("2d");
     GraphicsRenderer.initInstance(ctx);
     player = new Player(canvas, ctx);
-    player.x = 1700;
-    player.y = 1000;
+    player.x = 3328;
+    player.y = 2304;
     (function () {
         return __awaiter(this, void 0, void 0, function* () {
-            player.setImage(2, yield FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
+            player.setImage(0.5, yield FileLoader.loadImage("resources/sprites/front_sprite.png"));
             GraphicsRenderer.instance.addExistingEntity(player.getImage());
             var image = player.getImage();
             player.setCollider(new CircleCollider(0, 0, image.getWidth() * 0.8, true), {
                 x: image.getWidth() * 0.5,
                 y: image.getHeight() * 0.6
             });
-            var area = AreaMap.load("test_tilemap.json", () => {
+            var area = AreaMap.load("farmland.json", () => {
                 area.getColliders().add(player.getCollider());
                 mainGameLoop(area, canvas);
             });
