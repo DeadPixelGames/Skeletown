@@ -1,11 +1,26 @@
-{ "height":100,
+{ "height":37,
  "layers":[
         {
          "compression":"zlib",
-         "data":"eJztmktuFDEQhisRiYYVzyQKC5gFbFjABQiZA0QkBwjQm0hZ8LgAjwvAMZA4Jra6S13tsd3ungwC+fukX8NMnEb4m3LZTYsAAAAAAAAAwP\/IkyCfXF6afI6MmZrDieNrxs7DHZe7Ls9NXsjmXvBRzrnJL5elDH1oHrtcurx3eduN1\/ep+HH4mMZ5kG\/S1kmY7y4XLrdc3nRj\/fs9l12XR0F2u3FXkvZxlfi8ZkIfuXxwOXX5KL2P0ION95GrD1tv+GjRuR5be+wapL8T87En6z6eSuvkSIYuGunrCB8t6qKRfp3R+bx22Tfvd6Rfq7ReVjJeH7G+rmtdbFzN2O95rA\/E5tiuYbk1K+fDusRHT0kfsHknw\/WrGRnr17cDaV08k+G869+Lj56pPnJ5LW2\/X5nP\/FyH\/Vz3VfhYZ46P\/cTnOq\/aG7wfvxezPuy+oTFj8NES+vA92+6RUjUQ1oHv\/bqWNTKc51gf13NLWBv46H1cS9qD9nrt59qTTxOx3\/mwj6fG4WN4ziuJngVj5zvt22F8H8+dbzgP9sS+w7mztM5fbO5z895I+b64Zkp92BoKe3S4h7U9xmYl+BhD50DvaUxJyoef33su910edHkofZ\/y9yQX3Ss+hqTWpNz6HvOn96ZKfNx2ORbqI0b43Y7tdWN70jCH5hrhGT7sIYuR69dM6GPsHkmsVmy9+GssRnIs+EgR8+H78Uri5\/KxWplz7wUfPbG59PXQyLoLvd8+5mNHyjzofRd89MR85Obzpuvjd+SaNaNz4M93Jy6vMjnponspf59Wnw\/S50+mnPXteQYfLerC9+Kzwtj97VKGzwXdxLNbNTPVRehkKfHng9TRHCc1M8eFdZJ6Psg+J4SPcjb1MWWeD8yfjzLjamabPmL3gPVn4efWT81s04f\/+ReXrwWv9lo1s20fP1x+Frzio4X6+LfQ+4BzXITPU1Efm+P\/\/VOdlLigPuahc1DqpNQF9TEPO38l\/2db6qL0erHr1szUs\/PfCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAjfwBLbYFpw==",
+         "data":"eJzFl81OAjEQgAsRoif\/JXgQDnLxgC8gwgOYhQcQ5ELCQfQF\/HkBfQwTH9Np7MRhmM5OlwVNvqzrdttvZ6atbTnnWoQn4JrwzJ4X4WyNd\/eBA+CK0C3BLdVpSPA\/beaEXAD3wAMwDu3xPsa4BKcv4C3Ei\/MOjIAdIAvt\/X0NqALnjGpoN1OcZganPB6BPrAgTtyFkuXEicZdcsrLA80HviM51QSny+DVYD5TEk\/uhM8x5tjnHKiT+wrJG8ZtYIiTVOuYd6kd\/V6pLqRxaD61\/GlO9Hs0JwsTlstpTluf69Pg02Fj47jrOmncut85QPOZudUax\/lWplM98vfMLdeKd1wwJzqXpqSN5lRxy3MnFgsejznJKx9Lqm1c13iMuNNcccH6xxrHOu1HoN\/OazvWjjppfUtjDYV+PFjLnI7T1z++Zkrfoq252Ic0vjb2VMmBlD+LE40lr1s+v2nNUQaJTrj+pxBz8mMcAkfAceDE\/dWt38d3w1Vz4vnJyzf\/BtzLLE57QNMQJzpPrbGVcu\/74Gs9r6ndhP5jaycdIzZHMG6jMKZG06U7+RodCG51Q8yK7FMWp4lbnbvep5LzPvZRMbrgHmVx0vosO07fSp9+DewBNwq9AM4xv7\/j2QvPNSl7Al3vJB9fn3dG6Nxvu+UzVxlnw1Qf7oVOEt2CXkV8qFfs7EXPYNt2Ss0J\/t5Q2m3SSfrfgY4r7U2bdvLPX4BXw5X7btLpA\/g0XLfpVCROuHcW8eHntbLiVMTL4rNOnFK9rD7rxol7aVh9rP0V6fc\/+AF2MgVY",
          "encoding":"base64",
-         "height":100,
+         "height":37,
          "name":"bottom",
+         "offsetx":880,
+         "offsety":1232,
+         "opacity":1,
+         "type":"tilelayer",
+         "visible":true,
+         "width":37,
+         "x":0,
+         "y":0
+        }, 
+        {
+         "compression":"zlib",
+         "data":"eJztlUkOwjAMRXMV4ARlZskMe8Z7MO4Z94w34Jj8irJBIWoSp1HBT3qryK7l2okQL2ZwDheCjiIswbLkrAKrsKaI38At3BHW1IJt2JGcdWEP9hXxJ3iGF8KaBnAIR5KzMZzAqUa+OL1Nmji9TRqT3qYV1S76QrWLlOjcbapd\/MRmz1zcbSE2e+bibgv5pz1jmDdLuIJrg9hMZD6yTlTTHh7g0SA2B5uwAQswS1TTFd7gnSgfFQ+HuW1mQwbF+24zGzIo3nfq2dB53xmGYQLfBRiQxppdouqHr14FX77N\/+63eAL9BSWt",
+         "encoding":"base64",
+         "height":37,
+         "name":"top",
          "offsetx":880,
          "offsety":1232,
          "opacity":1,
@@ -19,22 +34,7 @@
             },
          "type":"tilelayer",
          "visible":true,
-         "width":100,
-         "x":0,
-         "y":0
-        }, 
-        {
-         "compression":"zlib",
-         "data":"eJzt2ElKxEAAhtFcRT1BO7t01r3jPRz3jnvHG3hMf6RRGppAd6on8x58q5CkSEhRlaoCAACAwVyky3Q16YHw4y7dp4eC11xOK2m1z7G1tJ42Ct7vP3lJr+mt4DV30m7a63NsPx2kw4L3o95ROk4nfY6dprN0PtYRzS7zyXQxn0wX80k71K25GL+6NRdlDLKXrFtz8afJemoUe8m2a7KeGsVesu2spwDgf7pON+l2iHPnui122yw4rrZ6TE\/peYhzF9J22kpLab7guNrqPX2kz0kPhF9fI7x2k\/mQXiX+0zaZD+lV4j+t+bAc\/2kBAKCqOpMeAAPxvqD+O\/CNjF+n6v\/cvQsAAAAAAAAAAAAAAAAAAAAAAAAAAACYLd+MOyWt",
-         "encoding":"base64",
-         "height":100,
-         "name":"top",
-         "offsetx":880,
-         "offsety":1232,
-         "opacity":1,
-         "type":"tilelayer",
-         "visible":false,
-         "width":100,
+         "width":37,
          "x":0,
          "y":0
         }],
@@ -46,7 +46,7 @@
         {
          "columns":16,
          "firstgid":1,
-         "image":"..\/Farmland_tiles.png",
+         "image":"..\/..\/..\/..\/..\/Desktop\/DEF\/Farmland_tiles.png",
          "imageheight":1792,
          "imagewidth":2048,
          "margin":0,
@@ -54,23 +54,9 @@
          "spacing":0,
          "tilecount":224,
          "tileheight":128,
-         "tileproperties":
-            {
-             "110":
-                {
-                 "solid":true
-                }
-            },
-         "tilepropertytypes":
-            {
-             "110":
-                {
-                 "solid":"bool"
-                }
-            },
          "tilewidth":128
         }],
  "tilewidth":128,
  "version":1,
- "width":100
+ "width":37
 }
