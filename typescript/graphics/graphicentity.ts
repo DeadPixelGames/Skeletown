@@ -1,3 +1,4 @@
+import Entity from "../entity";
 
 /** Clase que representa una entidad gráfica fundamental. Es la unidad básica utilizada por el `GraphicsRenderer` para
  * renderizar todos los elementos gráficos del juego. 

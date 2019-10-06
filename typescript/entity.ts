@@ -17,7 +17,10 @@ export default class Entity{
 
     public y :number;
 
-    protected speed :number;
+    protected speed :{
+        x :number,
+        y :number
+    };
 
     protected image :GraphicEntity;
 
@@ -28,6 +31,12 @@ export default class Entity{
         y :number,
     }
 
+    public isColliding :{
+        left :boolean,
+        right :boolean,
+        top :boolean,
+        bottom :boolean};
+
     /**
      * Constructor
      * @param canvas Elemento lienzo de HTML
@@ -36,9 +45,15 @@ export default class Entity{
     constructor(canvas :HTMLCanvasElement, ctx :CanvasRenderingContext2D){
         this.canvas = canvas;
         this.ctx = ctx;
-        this.speed = 20;
+        this.speed = {x: 20, y: 20};
         this.dest = null;
         
+        this.isColliding = {
+            left: false,
+            right: false,
+            top: false,
+            bottom: false
+        }
     }
     
     //#region GETTERS Y SETTERS
@@ -56,8 +71,10 @@ export default class Entity{
 
     public setCollider(collider :Collider, offset? :{x :number, y :number}) {
         this.collider = collider;
+        this.collider.entity = this;
         if(offset) {
             this.colliderOffset = offset;
+            this.syncCollider();
         } else {
             this.colliderOffset = {
                 x: 0,
@@ -66,12 +83,13 @@ export default class Entity{
         }
     }
 
-    public setSpeed(speed :number){
+    public setSpeed(speed :{x :number, y :number}){
         this.speed = speed;
     }
 
     public setImage(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number) {
         this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        this.syncImage();
     }
     //#endregion
 
@@ -94,5 +112,13 @@ export default class Entity{
     public update() {
         this.syncCollider();
         this.syncImage();
+    }
+
+    public updateCollision(overlap :{x :number, y :number}){
+        this.isColliding.left = overlap.x < 0;
+        this.isColliding.right = overlap.x > 0;
+        this.isColliding.top = overlap.y < 0;
+        this.isColliding.bottom = overlap.y > 0;
+        
     }
 }

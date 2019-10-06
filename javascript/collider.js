@@ -33,9 +33,20 @@ export class Collider {
         this.onHover = new GameEvent();
         this.onStopHover = new GameEvent();
         this.currentlyHovered = false;
+        this.entity = null;
         this.dynamic = dynamic;
         this.intersectingColliders = [];
     }
+    /**
+     * Devuelve si existe una intersección entre el área del collider `other` y la de este collider.
+     * El cálculo consiste en obtener el punto más cercano al otro collider que forma parte del área de este collider,
+     * y determinar si el otro collider contiene dicho punto.
+     */
+    intersects(other) {
+        var outermostPoint = this.findBorderPoint(other.centerX, other.centerY);
+        return other.containsPoint(outermostPoint.x, outermostPoint.y);
+    }
+    ;
     /**
      * Indica si este collider es dinámico, es decir, si las capas que lo contengan van a calcular sus colisiones. Un
      * collider debería ser dinámico sólo si va a moverse.
@@ -239,22 +250,27 @@ export class CircleCollider extends Collider {
         // Un círculo contiene un punto si ese punto su distancia desde el centro es menor que el radio
         return distance(this.centerX, this.centerY, x, y) - this.radius < RADIUS_TOLERANCE;
     }
-    intersects(other) {
-        // El punto más cercano al otro collider que pertenece a este collider lo podemos calcular obteniendo el punto
-        // que se encuentra justo a la distancia del radio y en la dirección del otro collider.
-        var dist = distance(this.centerX, this.centerY, other.centerX, other.centerY);
-        var outermostPoint = {
-            x: this.centerX + this.radius * (other.centerX - this.centerX) / dist,
-            y: this.centerY + this.radius * (other.centerY - this.centerY) / dist
-        };
-        return other.containsPoint(outermostPoint.x, outermostPoint.y);
-    }
     render(context, scrollX = 0, scrollY = 0) {
         context.beginPath();
         context.strokeStyle = this.isDynamic() ? COLLIDER_RENDER_DYNAMIC_COLOR : COLLIDER_RENDER_NONDYNAMIC_COLOR;
         context.moveTo(this.centerX + this.radius - scrollX, this.centerY - scrollY);
         context.arc(this.centerX - scrollX, this.centerY - scrollY, this.radius, 0, 2 * Math.PI);
         context.stroke();
+    }
+    getOverlapVector(other) {
+        var thisPoint = this.findBorderPoint(other.centerX, other.centerY);
+        var otherPoint = other.findBorderPoint(this.centerX, this.centerY);
+        return {
+            x: thisPoint.x - otherPoint.x,
+            y: thisPoint.y - otherPoint.y
+        };
+    }
+    findBorderPoint(x, y) {
+        var dist = Math.sqrt(Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2));
+        return {
+            x: this.centerX + this.radius * (x - this.centerX) / dist,
+            y: this.centerY + this.radius * (y - this.centerY) / dist
+        };
     }
 }
 /**
@@ -271,15 +287,6 @@ export class BoxCollider extends Collider {
         return (this.centerX - this.halfWidth) <= x && (this.centerX + this.halfWidth) > x
             && (this.centerY - this.halfHeight) <= y && (this.centerY + this.halfHeight) > y;
     }
-    intersects(other) {
-        // El punto más cercano al otro collider que pertenece a este collider se puede calcular alejando al punto desde el centro, pero
-        // limitándolo a las coordenadas de los bordes del rectángulo
-        var outermostPoint = {
-            x: clamp(this.centerX + (other.centerX - this.centerX), this.centerX - this.halfWidth, this.centerX + this.halfWidth),
-            y: clamp(this.centerY + (other.centerY - this.centerY), this.centerY - this.halfHeight, this.centerY + this.halfHeight)
-        };
-        return other.containsPoint(outermostPoint.x, outermostPoint.y);
-    }
     render(context, scrollX = 0, scrollY = 0) {
         context.beginPath();
         context.strokeStyle = this.isDynamic() ? COLLIDER_RENDER_DYNAMIC_COLOR : COLLIDER_RENDER_NONDYNAMIC_COLOR;
@@ -295,6 +302,25 @@ export class BoxCollider extends Collider {
             context.lineTo(corners[i].x, corners[i].y);
         }
         context.stroke();
+    }
+    getOverlapVector(other) {
+        var thisPoint = this.findBorderPoint(other.centerX, other.centerY);
+        var otherPoint = other.findBorderPoint(this.centerX, this.centerY);
+        var ret = {
+            x: thisPoint.x - otherPoint.x,
+            y: thisPoint.y - otherPoint.y
+        };
+        return ret;
+    }
+    findBorderPoint(x, y) {
+        var dist = Math.sqrt(Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2));
+        var ret = {
+            x: clamp(this.activationRadius * (x - this.centerX) / dist, -this.halfWidth, this.halfWidth),
+            y: clamp(this.activationRadius * (y - this.centerY) / dist, -this.halfHeight, this.halfHeight)
+        };
+        ret.x += this.centerX;
+        ret.y += this.centerY;
+        return ret;
     }
 }
 //# sourceMappingURL=collider.js.map

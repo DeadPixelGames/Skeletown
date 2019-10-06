@@ -1,5 +1,6 @@
 import Entity from "./entity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
+const PLAYER_SPEED = 20;
 /**
  * Clase que representa al jugador
  */
@@ -88,7 +89,7 @@ export default class Player extends Entity {
         var y;
         x = this.mouseEvent.clientX - rect.left + GraphicsRenderer.instance.scrollX;
         y = this.mouseEvent.clientY - rect.top + GraphicsRenderer.instance.scrollY;
-        console.log("x: " + x + " y: " + y);
+        //// console.log("x: " + x + " y: " + y);
         return { "x": x, "y": y };
     }
     /**
@@ -110,11 +111,23 @@ export default class Player extends Entity {
      */
     update() {
         super.update();
-        if (this.dest) {
+        if (this.dest && this.mouse) {
             var length = Math.sqrt(Math.pow(this.dest.x - this.x, 2) + Math.pow(this.dest.y - this.y, 2));
-            if (length > this.speed) {
-                this.x += (this.dest.x - this.x) / length * this.speed;
-                this.y += (this.dest.y - this.y) / length * this.speed;
+            if (this.isColliding.left || this.isColliding.right) {
+                this.speed.x = 0;
+            }
+            else {
+                this.speed.x = PLAYER_SPEED;
+            }
+            if (this.isColliding.top || this.isColliding.bottom) {
+                this.speed.y = 0;
+            }
+            else {
+                this.speed.y = PLAYER_SPEED;
+            }
+            if (length > this.speed.x) {
+                this.x += (this.dest.x - this.x) / length * this.speed.x;
+                this.y += (this.dest.y - this.y) / length * this.speed.y;
             }
         }
     }
