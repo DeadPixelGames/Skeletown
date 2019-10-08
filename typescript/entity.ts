@@ -1,6 +1,12 @@
 import GraphicEntity from "./graphics/graphicentity.js";
 import { Collider } from "./collider.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
+import GameLoop from "./gameloop.js";
+
+/**
+ * Distancia mínima a la que debe encontrarse el punto de destino para que la entidad se mueva hacia él
+ */
+const MIN_WALKABLE_DISTANCE = 20;
 
 export default class Entity{
 
@@ -9,7 +15,7 @@ export default class Entity{
         y :number
     } | null;
 
-    public canvas :HTMLCanvasElement;
+    protected canvas :HTMLCanvasElement;
     
     protected ctx :CanvasRenderingContext2D;
 
@@ -42,9 +48,9 @@ export default class Entity{
      * @param canvas Elemento lienzo de HTML
      * @param ctx Contexto del lienzo del HTML
      */
-    constructor(canvas :HTMLCanvasElement, ctx :CanvasRenderingContext2D){
-        this.canvas = canvas;
-        this.ctx = ctx;
+    constructor(){
+        this.canvas = GraphicsRenderer.instance.getCanvas();
+        this.ctx = GraphicsRenderer.instance.getCanvasContext();
         this.speed = {x: 20, y: 20};
         this.dest = null;
         
@@ -54,6 +60,8 @@ export default class Entity{
             top: false,
             bottom: false
         }
+
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
     
     //#region GETTERS Y SETTERS
@@ -107,18 +115,38 @@ export default class Entity{
     }
 
     //#endregion
-
     
-    public update() {
+    protected update(deltaTime :number) {
         this.syncCollider();
         this.syncImage();
+
+        if(this.dest) {
+            var length = Math.sqrt(Math.pow(this.dest.x-this.x,2)+Math.pow(this.dest.y-this.y,2));
+            
+            // He quitado esto temporalmente porque estas variables no se actualizan y eso interfiere con el movimiento
+            //// if(this.isColliding.left || this.isColliding.right){
+            ////     this.speed.x = 0;
+            //// }else{
+            ////     this.speed.x = PLAYER_SPEED;
+            //// }
+
+            //// if(this.isColliding.top || this.isColliding.bottom){
+            ////     this.speed.y = 0;
+            //// }else{
+            ////     this.speed.y = PLAYER_SPEED;
+            //// }
+
+            if(length > MIN_WALKABLE_DISTANCE) {
+                this.x += (this.dest.x-this.x)/length * this.speed.x * deltaTime;
+                this.y += (this.dest.y-this.y)/length * this.speed.y * deltaTime;
+            } 
+        }
     }
 
-    public updateCollision(overlap :{x :number, y :number}){
-        this.isColliding.left = overlap.x < 0;
-        this.isColliding.right = overlap.x > 0;
-        this.isColliding.top = overlap.y < 0;
-        this.isColliding.bottom = overlap.y > 0;
-        
-    }
+    //// public updateCollision(overlap :{x :number, y :number}){
+    ////     this.isColliding.left = overlap.x < 0;
+    ////     this.isColliding.right = overlap.x > 0;
+    ////     this.isColliding.top = overlap.y < 0;
+    ////     this.isColliding.bottom = overlap.y > 0;
+    //// }
 }

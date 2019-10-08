@@ -12,6 +12,7 @@ import GraphicEntity from "./graphicentity.js";
 import GraphicsRenderer from "./graphicsrenderer.js";
 import GameEvent from "../gameevent.js";
 import { ColliderLayer, BoxCollider } from "../collider.js";
+import GameLoop from "../gameloop.js";
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
  * añadir '/' al principio ni al final.
@@ -67,6 +68,12 @@ export default class AreaMap {
     }
     ;
     /**
+     * Actualiza las colisiones de la capa correspondiente al área.
+     */
+    onUpdate() {
+        this.colliders.checkCollisions();
+    }
+    /**
      * Permite realizar la mayor parte de la carga de manera asíncrona, agilizando el proceso, ya que depende de la carga
      * de varios archivos e iteraciones pesadas. Esta función es un suplemento de `AreaMap.load(jsonFile)`.
      */
@@ -96,6 +103,8 @@ export default class AreaMap {
             }
             // El mapa ya ha terminado de cargar, dispara el evento
             this.onLoaded.dispatch();
+            // Y comienza a recibir los eventos de actualización del GameLoop
+            GameLoop.instance.suscribe(this, null, this.onUpdate, null, null);
         });
     }
     /**

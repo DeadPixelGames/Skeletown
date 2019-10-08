@@ -251,7 +251,7 @@ export abstract class Collider {
      * * `onHover` - Se dispara cuando el usuario introduce el cursor dentro del área del collider.
      * * `onStopHover` - Se dispara cuando el usuario saca el cursor del área del collider.
      */
-    public addUserInteraction(instance :any, onClick :((x :number, y :number) => void) | null, onHover :((x :number, y :number) => void) | null, onStopHover :((x :number, y :number) => void)) {
+    public addUserInteraction(instance :any, onClick :((x :number, y :number) => void) | null, onHover :((x :number, y :number) => void) | null, onStopHover :((x :number, y :number) => void) | null) {
         if(onClick) {
             this.onClick.suscribe(onClick, instance);
         }

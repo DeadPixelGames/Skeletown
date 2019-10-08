@@ -1,5 +1,6 @@
 import GraphicEntity from "./graphicentity.js";
 import GameEvent from "../gameevent.js";
+import GameLoop from "../gameloop.js";
 /**
  * Clase singleton encargada de renderizar todos los gráficos del juego. Los métodos de esta clase se pueden
  * acceder mediante `GraphicsRenderer.instance`.
@@ -10,6 +11,7 @@ export default class GraphicsRenderer {
         this.entities = [];
         this.context = context;
         this.canvas = context.canvas;
+        this.following = null;
         this.scrollX = 0;
         this.scrollY = 0;
         this.onFrameUpdate = new GameEvent();
@@ -38,8 +40,12 @@ export default class GraphicsRenderer {
      * Inicializa la instancia Singleton de `GraphicsRenderer` del programa y la asocia al contexto de canvas especificado.
      */
     static initInstance(context) {
+        if (!GameLoop.instance) {
+            throw new Error("GameLoop no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
+        }
         var ret = new GraphicsRenderer(context);
         GraphicsRenderer.initSingleton(ret);
+        GameLoop.instance.suscribe(GraphicsRenderer.instance, null, GraphicsRenderer.instance.render, null, null);
         return ret;
     }
     /** Renderiza todas las entidades al canvas. */
@@ -49,8 +55,18 @@ export default class GraphicsRenderer {
         for (let entity of this.entities) {
             entity.render(this.context, this.scrollX, this.scrollY);
         }
+        this.updateScrollToFollow();
         this.onFrameUpdate.dispatch();
     }
+    /**
+     * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.
+     */
+    flush() {
+        this.entities = [];
+        this.following = null;
+        this.onFirstFrame.dispatch();
+    }
+    //#region Añadir entidad
     /** Añade la entidad especificada al `GraphicsManager` para que la renderice. */
     addExistingEntity(entity) {
         this.entities.push(entity);
@@ -59,13 +75,7 @@ export default class GraphicsRenderer {
     addNewEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         this.entities.push(new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY));
     }
-    /**
-     * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.
-     */
-    flush() {
-        this.entities = [];
-        this.onFirstFrame.dispatch();
-    }
+    //#endregion
     /**
      * Suscribe la instancia especificada a los distintos eventos del `GraphicsRenderer`:
      * * `onFirstFrame`: Se ejecuta en el primer fotograma y después de vaciar todas las entidades.
@@ -80,12 +90,6 @@ export default class GraphicsRenderer {
         }
     }
     /**
-     * Elimina todo lo que haya dibujado en el canvas
-     */
-    clearCanvas() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-    /**
      * Ordena las entidades para ordenarlas correctamente. Se ordenan primero por capa, luego por coordenada Y, y por
      * último por coordenada X. Lo hacemos así porque los tiles deberían renderizarse por filas, no por columnas.
      */
@@ -93,6 +97,36 @@ export default class GraphicsRenderer {
         this.entities.sort((e1, e2) => e1.renderLayer != e2.renderLayer ? e1.renderLayer - e2.renderLayer :
             e1.y != e2.y ? e1.y - e2.y :
                 e1.x - e2.x);
+    }
+    //#region Gestionar canvas
+    /**
+     * Devuelve el canvas en uso por el GraphicsRenderer.
+     */
+    getCanvas() {
+        return this.canvas;
+    }
+    /**
+     * Devuelve el contexto del canvas en uso por el GraphicsRenderer.
+     */
+    getCanvasContext() {
+        return this.context;
+    }
+    /**
+     * Elimina todo lo que haya dibujado en el canvas
+     */
+    clearCanvas() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    //#endregion
+    //#region Gestionar seguimiento
+    follow(entity) {
+        this.following = entity;
+    }
+    updateScrollToFollow() {
+        if (this.following) {
+            this.scrollX = this.following.x - this.canvas.width * 0.5;
+            this.scrollY = this.following.y - this.canvas.height * 0.5;
+        }
     }
 }
 //# sourceMappingURL=graphicsrenderer.js.map

@@ -1,5 +1,6 @@
 import GraphicEntity from "./graphicentity.js";
 import GameEvent from "../gameevent.js";
+import GameLoop from "../gameloop.js";
 
 /**
  * Clase singleton encargada de renderizar todos los gráficos del juego. Los métodos de esta clase se pueden
@@ -43,6 +44,10 @@ export default class GraphicsRenderer {
      */
     private context :CanvasRenderingContext2D;
     /**
+     * La entidad a la que sigue la cámara.
+     */
+    private following :GraphicEntity | null;
+    /**
      * Indica el desplazamiento horizontal de la pantalla.
      */
     public scrollX :number;
@@ -64,6 +69,7 @@ export default class GraphicsRenderer {
         this.entities = [];
         this.context = context;
         this.canvas = context.canvas;
+        this.following = null;
         this.scrollX = 0;
         this.scrollY = 0;
         this.onFrameUpdate = new GameEvent();
@@ -74,8 +80,12 @@ export default class GraphicsRenderer {
      * Inicializa la instancia Singleton de `GraphicsRenderer` del programa y la asocia al contexto de canvas especificado.
      */
     public static initInstance(context :CanvasRenderingContext2D) {
+        if(!GameLoop.instance) {
+            throw new Error("GameLoop no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
+        }
         var ret = new GraphicsRenderer(context);
         GraphicsRenderer.initSingleton(ret);
+        GameLoop.instance.suscribe(GraphicsRenderer.instance, null, GraphicsRenderer.instance.render, null, null);
         return ret;
     }
 
@@ -86,9 +96,20 @@ export default class GraphicsRenderer {
         for(let entity of this.entities) {
             entity.render(this.context, this.scrollX, this.scrollY);
         }
+        this.updateScrollToFollow();
         this.onFrameUpdate.dispatch();
     }
 
+    /**
+     * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.
+     */
+    public flush() {
+        this.entities = [];
+        this.following = null;
+        this.onFirstFrame.dispatch();
+    }
+
+    //#region Añadir entidad
     /** Añade la entidad especificada al `GraphicsManager` para que la renderice. */
     public addExistingEntity(entity :GraphicEntity) {
         this.entities.push(entity);
@@ -98,14 +119,7 @@ export default class GraphicsRenderer {
     public addNewEntity(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number, ) {
         this.entities.push(new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY));
     }
-
-    /**
-     * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.
-     */
-    public flush() {
-        this.entities = [];
-        this.onFirstFrame.dispatch();
-    }
+    //#endregion
 
     /**
      * Suscribe la instancia especificada a los distintos eventos del `GraphicsRenderer`:
@@ -122,13 +136,6 @@ export default class GraphicsRenderer {
     }
 
     /**
-     * Elimina todo lo que haya dibujado en el canvas
-     */
-    private clearCanvas() {
-        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    }
-    
-    /**
      * Ordena las entidades para ordenarlas correctamente. Se ordenan primero por capa, luego por coordenada Y, y por
      * último por coordenada X. Lo hacemos así porque los tiles deberían renderizarse por filas, no por columnas.
      */
@@ -139,4 +146,40 @@ export default class GraphicsRenderer {
             e1.x - e2.x
         );
     }
+
+    //#region Gestionar canvas
+    /**
+     * Devuelve el canvas en uso por el GraphicsRenderer.
+     */
+    public getCanvas() {
+        return this.canvas;
+    }
+
+    /**
+     * Devuelve el contexto del canvas en uso por el GraphicsRenderer.
+     */
+    public getCanvasContext() {
+        return this.context;
+    }
+
+    /**
+     * Elimina todo lo que haya dibujado en el canvas
+     */
+    private clearCanvas() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+    //#endregion
+    
+    //#region Gestionar seguimiento
+    public follow(entity :GraphicEntity | null) {
+        this.following = entity;
+    }
+
+    private updateScrollToFollow() {
+        if(this.following) {
+            this.scrollX = this.following.x - this.canvas.width * 0.5;
+            this.scrollY = this.following.y - this.canvas.height * 0.5;
+        }
+    }
+    //#endregion
 }
