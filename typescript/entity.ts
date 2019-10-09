@@ -104,8 +104,8 @@ export default class Entity{
     //#region Sincronizar componentes
     public syncCollider() {
         if(this.collider && this.colliderOffset) {
-            this.collider.centerX = this.image.x + this.colliderOffset.x;
-            this.collider.centerY = this.image.y + this.colliderOffset.y;
+            this.collider.centerX = this.x + this.colliderOffset.x;
+            this.collider.centerY = this.y + this.colliderOffset.y;
         }
     }
 
@@ -117,8 +117,6 @@ export default class Entity{
     //#endregion
     
     protected update(deltaTime :number) {
-        this.syncCollider();
-        this.syncImage();
 
         if(this.dest) {
             var length = Math.sqrt(Math.pow(this.dest.x-this.x,2)+Math.pow(this.dest.y-this.y,2));
@@ -140,6 +138,35 @@ export default class Entity{
                 this.x += (this.dest.x-this.x)/length * this.speed.x * deltaTime;
                 this.y += (this.dest.y-this.y)/length * this.speed.y * deltaTime;
             } 
+        }
+
+        this.syncCollider();
+        this.syncImage();
+    }
+
+    /**
+     * Elimina las suscripciones a eventos y otras referencias que puedan impedir que la entidad, al
+     * descartarse, pueda ser recogida por el recolector de basura.
+     */
+    public dispose() {
+        GameLoop.instance.unsuscribe(this, null, this.update, null, null);
+    }
+
+    /**
+     * Dibuja información adicional sobre la entidad, útil para depurar el programa.
+     */
+    public renderDebug(context: CanvasRenderingContext2D, scrollX :number, scrollY :number) {
+        /** Tamaño de la cruz que representa el punto de destino. */
+        const DEST_CROSS_SIZE = 5;
+        
+        if(this.dest) {
+            context.beginPath();
+            context.strokeStyle = "#FFFFFF";
+            context.moveTo(this.dest.x - scrollX, this.dest.y - scrollY - DEST_CROSS_SIZE);
+            context.lineTo(this.dest.x - scrollX, this.dest.y - scrollY + DEST_CROSS_SIZE);
+            context.moveTo(this.dest.x - scrollX - DEST_CROSS_SIZE, this.dest.y - scrollY);
+            context.lineTo(this.dest.x - scrollX + DEST_CROSS_SIZE, this.dest.y - scrollY);
+            context.stroke();
         }
     }
 

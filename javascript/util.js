@@ -1,3 +1,4 @@
+import AreaMap from "./graphics/areamap.js";
 //#region Random
 /** Devuelve un número aleatorio entre `min` (inclusivo) y `max` (exclusivo) */
 export function random(min, max) {
@@ -18,6 +19,22 @@ export function clamp(value, min, max) {
 /** Devuelve la distancia entre los puntos indicados por (`x1`, `y1`) y (`x2`, `y2`) */
 export function distance(x1, y1, x2, y2) {
     return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+/** Devuelve el tile al que pertenece el punto (`x`, `y`)  */
+export function pixelToTilePosition(x, y) {
+    var tile = AreaMap.getCurrent().getTileSize();
+    return {
+        x: Math.floor(x / tile.width),
+        y: Math.floor(y / tile.height)
+    };
+}
+/** Devuelve el punto del centro del tile (`x`, `y`) */
+export function tileToPixelPosition(x, y) {
+    var tile = AreaMap.getCurrent().getTileSize();
+    return {
+        x: tile.width * (x + 0.5),
+        y: tile.height * (y + 0.5)
+    };
 }
 //#endregion
 //#region Array

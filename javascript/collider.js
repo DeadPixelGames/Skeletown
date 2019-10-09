@@ -230,6 +230,21 @@ export class ColliderLayer {
         }
     }
     /**
+     * Devuelve si esta capa contiene una colisión no dinámica en el punto (`x`, `y`) especificado.
+     */
+    nondynamicCollisionAtPosition(x, y) {
+        var ret = false;
+        for (let collider of this.colliders) {
+            if (collider.isDynamic()) {
+                continue;
+            }
+            if (collider.containsPoint(x, y)) {
+                ret = true;
+            }
+        }
+        return ret;
+    }
+    /**
      * Dibuja todos los colliders de la capa. Sólo usar para debug.
      */
     render(context, scrollX = 0, scrollY = 0) {

@@ -3,6 +3,12 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 /** Velocidad de desplazamiento del jugador. */
 const PLAYER_SPEED = 500;
 /**
+ * Factor que indica cómo afecta la distancia desde el toque hasta la posición del personaje a la velocidad del
+ * movimiento. Cuanto más alto el valor, más grande será la diferencia de velocidad entre el centro y los
+ * márgenes de la pantalla.
+ */
+const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
+/**
  * Clase que representa al jugador
  */
 export default class Player extends Entity {
@@ -70,6 +76,10 @@ export default class Player extends Entity {
         this.dest = this.getCursorPosition();
         if (!this.mouse) {
             return null;
+        }
+        if (this.dest) {
+            this.speed.x = Math.abs(this.dest.x - this.x) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
+            this.speed.y = Math.abs(this.dest.y - this.y) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
         }
         super.update(deltaTime);
     }

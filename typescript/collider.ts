@@ -124,6 +124,9 @@ export abstract class Collider {
      */
     public abstract render(context :CanvasRenderingContext2D, scrollX? :number, scrollY? :number) :void;
 
+    /**
+     * Devuelve un vector que va desde el punto más externo de este collider al más externo del otro collider.
+     */
     public abstract getOverlapVector(other :Collider) :{x :number, y :number};
     
     /**
@@ -351,6 +354,22 @@ export class ColliderLayer {
         for(let collider of this.colliders) {
             collider.sendUserHover(x, y);
         }
+    }
+
+    /**
+     * Devuelve si esta capa contiene una colisión no dinámica en el punto (`x`, `y`) especificado.
+     */
+    public nondynamicCollisionAtPosition(x :number, y :number) {
+        var ret = false;
+        for(let collider of this.colliders) {
+            if(collider.isDynamic()) {
+                continue;
+            }
+            if(collider.containsPoint(x, y)) {
+                ret = true;
+            }
+        }
+        return ret;
     }
 
     /**

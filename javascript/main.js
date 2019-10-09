@@ -12,32 +12,53 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
+import Enemy from "./enemy.js";
 import { CircleCollider } from "./collider.js";
 var player;
+var enemy;
+var area;
 var ctx;
 window.onload = function () {
-    var canvas = document.getElementById("gameCanvas");
-    ctx = canvas.getContext("2d");
-    GameLoop.initInstance();
-    GraphicsRenderer.initInstance(ctx);
-    player = new Player();
-    player.x = 3328;
-    player.y = 2304;
-    (function () {
-        return __awaiter(this, void 0, void 0, function* () {
-            player.setImage(0.5, yield FileLoader.loadImage("resources/sprites/front_sprite.png"));
-            GraphicsRenderer.instance.addExistingEntity(player.getImage());
-            var image = player.getImage();
-            player.setCollider(new CircleCollider(0, 0, image.getWidth() * 0.8, true), {
-                x: image.getWidth() * 0.5,
-                y: image.getHeight() * 0.6
-            });
-            GraphicsRenderer.instance.follow(player.getImage());
-            var area = AreaMap.load("farmland.json", () => {
-                area.getColliders().add(player.getCollider());
-                GameLoop.instance.start();
-            });
+    return __awaiter(this, void 0, void 0, function* () {
+        var canvas = document.getElementById("gameCanvas");
+        ctx = canvas.getContext("2d");
+        GameLoop.initInstance();
+        GraphicsRenderer.initInstance(ctx);
+        player = new Player();
+        enemy = new Enemy();
+        player.x = 3328;
+        player.y = 2304;
+        enemy.x = 3528;
+        enemy.y = 2304;
+        player.setImage(0.5, yield FileLoader.loadImage("resources/sprites/front_sprite.png"));
+        GraphicsRenderer.instance.addExistingEntity(player.getImage());
+        var image = player.getImage();
+        player.setCollider(new CircleCollider(0, 0, image.getWidth() * 0.6, true), {
+            x: image.getWidth() * 0.5,
+            y: image.getHeight() * 0.6
         });
-    })();
+        GraphicsRenderer.instance.follow(player.getImage());
+        enemy.setImage(0.5, yield FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
+        GraphicsRenderer.instance.addExistingEntity(enemy.getImage());
+        image = enemy.getImage();
+        enemy.setCollider(new CircleCollider(0, 0, image.getWidth() * 0.6, true), {
+            x: image.getWidth() * 0.5,
+            y: image.getHeight() * 0.6
+        });
+        area = AreaMap.load("farmland.json", () => {
+            area.getColliders().add(player.getCollider());
+            area.getColliders().add(enemy.getCollider());
+            enemy.setColliderLayer(area.getColliders());
+            GameLoop.instance.start();
+        });
+        GameLoop.instance.suscribe(null, null, renderDebug, null, null);
+    });
 };
+function renderDebug() {
+    var scrollX = GraphicsRenderer.instance.scrollX;
+    var scrollY = GraphicsRenderer.instance.scrollY;
+    area.getColliders().render(ctx, scrollX, scrollY);
+    player.renderDebug(ctx, scrollX, scrollY);
+    enemy.renderDebug(ctx, scrollX, scrollY);
+}
 //# sourceMappingURL=main.js.map

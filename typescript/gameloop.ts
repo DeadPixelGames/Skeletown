@@ -160,6 +160,24 @@ export default class GameLoop {
     }
 
     /**
+     * Desuscribe la instancia de todos sus eventos del GameLoop.
+     */
+    public unsuscribe(instance :any, onStart :(() => void) | null, onUpdate :((deltaTime :number) => void) | null, onPause :(() => void) | null, onResume :(() => void) | null) {
+        if(onStart) {
+            this.onStart.unsuscribe(onStart, instance);
+        }
+        if(onUpdate) {
+            this.onUpdate.unsuscribe(onUpdate, instance);
+        }
+        if(onPause) {
+            this.onPause.unsuscribe(onPause, instance);
+        }
+        if(onResume) {
+            this.onResume.unsuscribe(onResume, instance);
+        }
+    }
+
+    /**
      * Configura el intervalo de actualización por primera vez.
      */
     private init() {

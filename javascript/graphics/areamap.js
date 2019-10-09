@@ -48,6 +48,8 @@ export default class AreaMap {
         // Iniciamos la carga asíncrona del área. Esta es la razón por la que devolvemos el área sin cargar y
         // el callback es necesario
         ret.asyncLoadAuxiliar(jsonFile);
+        // El área actual es ahora esta
+        AreaMap.current = ret;
         return ret;
     }
     /**
@@ -66,7 +68,30 @@ export default class AreaMap {
     getColliders() {
         return this.colliders;
     }
-    ;
+    /**
+     * Devuelve las dimensiones en tiles del mapa.
+     */
+    getSize() {
+        return {
+            width: this.width,
+            height: this.height
+        };
+    }
+    /**
+     * Devuelve las dimensiones en píxeles de los tiles de este mapa.
+     */
+    getTileSize() {
+        return {
+            width: this.tileWidth,
+            height: this.tileHeight
+        };
+    }
+    /**
+     * Devuelve el área cargada actualmente.
+     */
+    static getCurrent() {
+        return AreaMap.current;
+    }
     /**
      * Actualiza las colisiones de la capa correspondiente al área.
      */
@@ -81,6 +106,12 @@ export default class AreaMap {
         return __awaiter(this, void 0, void 0, function* () {
             // En primer lugar cargamos los datos del mapa del archivo indicado
             var mapData = yield FileLoader.loadJSON(MAPS_JSON_FOLDER + "/" + jsonFile);
+            // Asignamos las propiedades del mapa
+            this.width = mapData.width;
+            this.height = mapData.height;
+            this.backgroundColor = mapData.backgroundcolor;
+            this.tileWidth = mapData.tilewidth;
+            this.tileHeight = mapData.tileheight;
             // Extraemos toda la información sobre todos los tiles disponibles y los añadimos a la paleta
             yield this.generateTilePalette(mapData.tilesets);
             // Contamos la capa para añadirla al orden de renderizado
