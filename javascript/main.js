@@ -11,7 +11,7 @@ import Player from "./player.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
-import { CircleCollider } from "./collider.js";
+import { BoxCollider } from "./collider.js";
 var player;
 var ctx;
 window.onload = function () {
@@ -21,18 +21,19 @@ window.onload = function () {
     GraphicsRenderer.initInstance(ctx);
     player = new Player(canvas, ctx);
     player.x = 1700;
-    player.y = 1000;
+    player.y = 1100;
     (function () {
         return __awaiter(this, void 0, void 0, function* () {
             player.setImage(2, yield FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
             GraphicsRenderer.instance.addExistingEntity(player.getImage());
             var image = player.getImage();
-            player.setCollider(new CircleCollider(0, 0, image.getWidth() * 0.8, true), {
+            player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.5, image.getWidth() * 0.5, true), {
                 x: image.getWidth() * 0.5,
                 y: image.getHeight() * 0.6
             });
             var area = AreaMap.load("test_tilemap.json", () => {
                 area.getColliders().add(player.getCollider());
+                player.setColliderLayer(area.getColliders());
                 mainGameLoop(area, canvas);
             });
         });

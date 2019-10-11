@@ -123,23 +123,26 @@ export abstract class Collider {
      * Dibuja el área de este collider. Usar sólo para debug.
      */
     public abstract render(context :CanvasRenderingContext2D, scrollX? :number, scrollY? :number) :void;
-
-    public abstract getOverlapVector(other :Collider) :{x :number, y :number};
     
     /**
      * Devuelve el punto en el que se cortan el borde del collider y la recta que se puede trazar desde el centro del collider hasta
      * el punto inidicado. El punto devuelto podría estar o no situado entre el centro y el punto dado.
      */
-    public abstract findBorderPoint(x :number, y :number) :{x :number, y :number}
+    public abstract findBorderPoint(otherX :number, otherY :number, thisX? :number, thisY? :number) :{x :number, y :number}
 
     /**
      * Devuelve si existe una intersección entre el área del collider `other` y la de este collider.
      * El cálculo consiste en obtener el punto más cercano al otro collider que forma parte del área de este collider,
-     * y determinar si el otro collider contiene dicho punto.
+     * y determinar si el otro collider contiene dicho punto. Si se especifican coordenadas adicionales, se
+     * calculará la intersección como si el centro de este collider estuviera en dichas coordenadas.
      */
-    protected intersects(other :Collider) {
-        var outermostPoint = this.findBorderPoint(other.centerX, other.centerY);
-        return other.containsPoint(outermostPoint.x, outermostPoint.y);
+    protected intersects(other :Collider, x? :number, y? :number) {
+        var thisX = x == null ? this.centerX : x;
+        var thisY = y == null ? this.centerY : y;
+        
+        var selfOutermostPoint = this.findBorderPoint(other.centerX, other.centerY, thisX, thisY);
+        var otherOutermostPoint = other.findBorderPoint(thisX, thisY, other.centerX, other.centerY);
+        return other.containsPoint(selfOutermostPoint.x, selfOutermostPoint.y) || this.containsPoint(otherOutermostPoint.x, otherOutermostPoint.y);
     };
 
     /**
@@ -261,6 +264,26 @@ export abstract class Collider {
         if(onStopHover) {
             this.onStopHover.suscribe(onStopHover, instance);
         }
+    }
+
+    /**
+     * Devuelve si el collider, de estar en el punto indicado y la capa indicada, colisionaría.
+     */
+    public wouldCollideAt(layer :ColliderLayer, x :number, y :number) {
+        
+        var ret = false;
+        
+        for(let collider of layer) {
+            
+            // Si es el collider para el que estamos usando esta función, nos lo saltamos
+            if(collider == this) {
+                continue;
+            }
+            if(this.intersects(collider, x, y)) {
+                ret = true;
+            }
+        }
+        return ret;
     }
 }
 
@@ -388,23 +411,16 @@ export class CircleCollider extends Collider {
         context.arc(this.centerX - scrollX, this.centerY - scrollY, this.radius, 0, 2 * Math.PI);
         context.stroke();
     }
-
-    public getOverlapVector(other :Collider) {
-        var thisPoint = this.findBorderPoint(other.centerX, other.centerY);
-        var otherPoint = other.findBorderPoint(this.centerX, this.centerY);
-
-        return {
-            x: thisPoint.x - otherPoint.x,
-            y: thisPoint.y - otherPoint.y
-        };
-    }
     
-    public findBorderPoint(x :number, y :number) {
-        var dist = Math.sqrt(Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2));
+    public findBorderPoint(otherX :number, otherY :number, thisX? :number, thisY? :number) {
+        var thisCenterX = thisX == null ? this.centerX : thisX;
+        var thisCenterY = thisY == null ? this.centerY : thisY;
+
+        var dist = Math.sqrt(Math.pow(otherX - thisCenterX, 2) + Math.pow(otherY - thisCenterY, 2));
         
         return {
-            x: this.centerX + this.radius * (x - this.centerX) / dist,
-            y: this.centerY + this.radius * (y - this.centerY) / dist
+            x: thisCenterX + this.radius * (otherX - thisCenterX) / dist,
+            y: thisCenterY + this.radius * (otherY - thisCenterY) / dist
         };
     }
 }
@@ -455,31 +471,32 @@ export class BoxCollider extends Collider {
         context.stroke();
     }
 
-    public getOverlapVector(other :Collider) {
-           
-        var thisPoint = this.findBorderPoint(other.centerX, other.centerY);
-        var otherPoint = other.findBorderPoint(this.centerX, this.centerY);
+    public findBorderPoint(otherX :number, otherY :number, thisX? :number, thisY? :number) {
+        
+        // El punto del borde de un rectángulo, es un punto que se encuentra a la misma altura que el punto objetivo
+        // en el eje de menor distancia, y en el borde más cercano en el eje de mayor distancia, limitándose por
+        // supuesto a las esquinas del rectángulo
 
-        var ret = {
-            x: thisPoint.x - otherPoint.x,
-            y: thisPoint.y - otherPoint.y
+        var thisCenterX = thisX == null ? this.centerX : thisX;
+        var thisCenterY = thisY == null ? this.centerY : thisY;
+
+        var borderPointX = thisCenterX;
+        var borderPointY = thisCenterY;
+
+        if(Math.abs(otherX - thisCenterX) > Math.abs(otherY - thisCenterY)) {
+            borderPointX = otherX > thisCenterX ? thisCenterX + this.halfWidth : thisCenterX - this.halfWidth;
+            borderPointY = clamp(otherY, thisCenterY - this.halfHeight, thisCenterY + this.halfHeight);
+        } else if(Math.abs(otherY - thisCenterY) > Math.abs(otherX - thisCenterX)) {
+            borderPointX = clamp(otherX, thisCenterX - this.halfWidth, thisCenterX + this.halfWidth);
+            borderPointY = otherY > thisCenterY ? thisCenterY + this.halfWidth : thisCenterY - this.halfWidth;
+        } else {
+            borderPointX = otherX > thisCenterX ? thisCenterX + this.halfWidth : thisCenterX - this.halfWidth;
+            borderPointY = otherY > thisCenterY ? thisCenterY + this.halfWidth : thisCenterY - this.halfWidth;
+        }
+        
+        return {
+            x: borderPointX,
+            y: borderPointY
         };
-
-        return ret;
-    }
-
-    public findBorderPoint(x :number, y :number) {
-        
-        var dist = Math.sqrt(Math.pow(x - this.centerX, 2) + Math.pow(y - this.centerY, 2));
-        
-        var ret = {
-            x: clamp(this.activationRadius * (x - this.centerX) / dist, -this.halfWidth, this.halfWidth),
-            y: clamp(this.activationRadius * (y - this.centerY) / dist, -this.halfHeight, this.halfHeight)
-        };
-
-        ret.x += this.centerX;
-        ret.y += this.centerY;
-        
-        return ret;
     }
 }

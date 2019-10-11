@@ -110,26 +110,12 @@ export default class Player extends Entity {
      * la velocidad del jugador y se mueve la posición en esa cantidad.
      */
     update() {
-        super.update();
-        if (this.dest && this.mouse) {
-            var length = Math.sqrt(Math.pow(this.dest.x - this.x, 2) + Math.pow(this.dest.y - this.y, 2));
-            if (this.isColliding.left || this.isColliding.right) {
-                this.speed.x = 0;
-            }
-            else {
-                this.speed.x = PLAYER_SPEED;
-            }
-            if (this.isColliding.top || this.isColliding.bottom) {
-                this.speed.y = 0;
-            }
-            else {
-                this.speed.y = PLAYER_SPEED;
-            }
-            if (length > this.speed.x) {
-                this.x += (this.dest.x - this.x) / length * this.speed.x;
-                this.y += (this.dest.y - this.y) / length * this.speed.y;
-            }
+        if (!this.mouse) {
+            this.dest = null;
         }
+        this.speed.x = PLAYER_SPEED;
+        this.speed.y = PLAYER_SPEED;
+        super.update();
     }
     // TODO Revisar esto cuando se implemente el Game loop
     /**

@@ -20,13 +20,13 @@ window.onload = function(){
     player = new Player(canvas, ctx);
 
     player.x = 1700;
-    player.y = 1000;
+    player.y = 1100;
 
     (async function() {
         player.setImage(2, await FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
         GraphicsRenderer.instance.addExistingEntity(player.getImage());
         var image = player.getImage();
-        player.setCollider(new CircleCollider(0, 0, image.getWidth() * 0.8, true),
+        player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.5, image.getWidth() * 0.5, true),
         {
             x: image.getWidth() * 0.5,
             y: image.getHeight() * 0.6
@@ -34,6 +34,7 @@ window.onload = function(){
 
         var area = AreaMap.load("test_tilemap.json", () => {
             area.getColliders().add(player.getCollider() as BoxCollider);
+            player.setColliderLayer(area.getColliders());
             mainGameLoop(area, canvas);
         });
     })();
