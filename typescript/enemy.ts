@@ -5,14 +5,27 @@ import Player from "./player.js";
 import AIPath from "./aipath.js";
 
 /**
+ * Alcance del ataque. Si el enemigo está a menos de esta distancia de su objetivo, le atacará.
+ */
+const ATTACK_RADIUS = 200;
+/**
+ * Tiempo en segundos que debe pasar entre ataque y ataque.
+ */
+const ATTACK_COOLDOWN = 2;
+/**
  * Velocidad de movimiento del enemigo.
  */
-const ENEMY_SPEED = 200;
+const ENEMY_SPEED = 300;
+/**
+ * Factor que multiplica la velocidad a la que se moverá el punto de destino entre un punto
+ * y otro de la ruta. A más lento, más redondeada será la trayectoria de la entidad.
+ */
+const DEST_SMOOTH_FACTOR = 300;
 /**
  * Distancia máxima a la que puede estar el enemigo de su punto de destino para
  * considerar que ha llegado y, por tanto, ir al siguiente punto en su ruta.
  */
-const DIST_TO_NEXT_POINT = 90;
+const DIST_TO_NEXT_POINT = 30;
 /**
  * Radio dentro del cual el enemigo podrá detectar a su objetivo inmediatamente.
  */
@@ -55,6 +68,14 @@ export default class Enemy extends Entity {
      * Ruta que la entidad está siguiendo.
      */
     private path :AIPath | null;
+    /**
+     * Tiempo en segundos a esperar entre ataque y ataque.
+     */
+    private cooldown :number;
+    /**
+     * Callback que ejecuta el enemigo sobre su objetivo al atacar.
+     */
+    private attack :(target :Entity) => void;
 
     constructor() {
         super();
@@ -68,6 +89,8 @@ export default class Enemy extends Entity {
         this.speed.y = ENEMY_SPEED;
 
         this.path = null;
+
+        this.cooldown = 0;
     }
 
     /**
@@ -87,7 +110,6 @@ export default class Enemy extends Entity {
             }
             if(distance(this.x, this.y, collider.centerX, collider.centerY) < ENEMY_VISION_RADIUS && collider.entity && collider.entity instanceof Player) {
                 this.target = collider.entity;
-                console.log("Te encontré");
                 this.path = new AIPath(this, Enemy.entityOrCollider(this.target));
             }
         }
@@ -100,11 +122,24 @@ export default class Enemy extends Entity {
     public setColliderLayer(colliders :ColliderLayer) {
         this.colliders = colliders;
     }
+    /**
+     * Asigna un ataque al enemigo.
+     */
+    public setAttack(attack :(target :Entity) => void) {
+        this.attack = attack;
+    }
 
     protected update(deltaTime :number) {
 
         // Si tenemos un objetivo
         if(this.target && this.target.getCollider()) {
+
+            if(distance(this.x, this.y, this.target.x, this.target.y) < ATTACK_RADIUS && this.cooldown <= 0) {
+                this.attack.call(this, this.target);
+                this.cooldown = ATTACK_COOLDOWN;
+            } else {
+                this.cooldown -= deltaTime;
+            }
 
             // Si está fuera del radio de visión, sumamos tiempo al contador correspondiente
             let targetCollider = this.target.getCollider() as Collider;
@@ -121,7 +156,7 @@ export default class Enemy extends Entity {
                 // Dejamos de seguirlo y cancelamos la ruta
                 this.target = null;
                 this.timeNotSeeingTarget = 0;
-                console.log("Te he perdido :(");
+                this.dest = null;
                 this.path = null;
 
             // Si el objetivo sigue siendo detectable y es hora de recalcular la ruta
@@ -167,12 +202,12 @@ export default class Enemy extends Entity {
         // la entidad siga una trayectoria redondeada
         var secondNext = this.path.secondNext();
         if(this.dest && secondNext) {
-            var dist = Math.min(distance(this.dest.x, this.dest.y, secondNext.x, secondNext.y), 0.1);
+            var dist = Math.max(distance(this.dest.x, this.dest.y, secondNext.x, secondNext.y), 0.1);
             // Restringimos que la distancia tenga un valor mínimo para que al dividirla por las coordenadas
             // no obtengamos valores inútiles.
     
-            this.dest.x += (secondNext.x - this.dest.x) * deltaTime / dist;
-            this.dest.y += (secondNext.y - this.dest.y) * deltaTime / dist;
+            this.dest.x += (secondNext.x - this.dest.x) * deltaTime / dist * DEST_SMOOTH_FACTOR;
+            this.dest.y += (secondNext.y - this.dest.y) * deltaTime / dist * DEST_SMOOTH_FACTOR;
         }
     }
 

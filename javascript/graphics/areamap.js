@@ -271,19 +271,7 @@ class TileEntity extends GraphicEntity {
         this.solid = proto.solid;
         if (this.solid) {
             this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
-            this.collider.suscribe(this, null, this.pushAway, null);
         }
-    }
-    pushAway(other) {
-        if (!other.entity) {
-            return;
-        }
-        var otherPoint = other.findBorderPoint(this.collider.centerX, this.collider.centerY);
-        var entityOffsetX = other.entity.x - otherPoint.x;
-        var entityOffsetY = other.entity.y - otherPoint.y;
-        var overlap = this.collider.getOverlapVector(other);
-        other.entity.x += overlap.x * 0.5;
-        other.entity.y += overlap.y * 0.5;
     }
 }
 //#endregion

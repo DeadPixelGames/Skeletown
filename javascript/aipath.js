@@ -288,7 +288,7 @@ export default class AIPath {
      * de igualdad predeterminado.
      */
     tilesAreEqual(tile1, tile2) {
-        return tile1.x == tile2.x && tile1.y == tile2.y;
+        return tile1 && tile2 && tile1.x == tile2.x && tile1.y == tile2.y;
     }
     /**
      * Devuelve en string las coordenadas enteras del tile. Para usar como clave en un mapa.

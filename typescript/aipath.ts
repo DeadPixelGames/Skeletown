@@ -360,7 +360,7 @@ export default class AIPath {
      * de igualdad predeterminado.
      */
     private tilesAreEqual(tile1 :{x :number, y :number}, tile2: {x :number, y :number}) {
-        return tile1.x == tile2.x && tile1.y == tile2.y;
+        return tile1 && tile2 && tile1.x == tile2.x && tile1.y == tile2.y;
     }
 
     /**
