@@ -17,6 +17,7 @@ export default class GraphicEntity {
         };
         this.x = 0;
         this.y = 0;
+        this.visible = true;
     }
     /**
      * Dibuja la entidad en sus coordenadas usando el contexto indicado. Se puede indicar un desplazamiento adicional para tener en

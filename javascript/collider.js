@@ -104,6 +104,8 @@ export class Collider {
      */
     sendUserClick(x, y) {
         if (this.containsPoint(x, y)) {
+            console.log(x, y);
+            console.log(this.centerX, this.centerY);
             this.onClick.dispatch(x, y);
         }
     }
@@ -281,6 +283,8 @@ export class BoxCollider extends Collider {
         super(left + width * 0.5, top + height * 0.5, distance(left, top, left + width * 0.5, top + height * 0.5), dynamic);
         this.halfWidth = width * 0.5;
         this.halfHeight = height * 0.5;
+        console.log(left, top);
+        console.log(this.centerX, this.centerY);
     }
     containsPoint(x, y) {
         // Un punto está contenido en este collider si sus coordenadas se encuentran entre las coordenadas de las esquinas del rectángulo

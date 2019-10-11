@@ -13,6 +13,8 @@ export default class Player extends Entity{
     /** Evento actual del ratón o de la pulsación */
     private event :MouseEvent | TouchEvent;
 
+    private Inventory :{};
+
 
     /**
      * Constructor

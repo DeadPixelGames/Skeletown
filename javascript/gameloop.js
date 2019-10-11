@@ -8,7 +8,7 @@ const FRAMERATE = 30;
  */
 const DELTATIME_FACTOR = 0.001;
 /**
- * Clase singleton que gestiona de manera general los eventos de progreso del juego. Se pueden acceder a los eventos y métodos
+ * Clase singleton que gestiona de manera general los eventos de progreso del juego. Se puede acceder a los eventos y métodos
  * mediante `GameLoop.instance`.
  */
 export default class GameLoop {
