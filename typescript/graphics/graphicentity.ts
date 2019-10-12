@@ -116,6 +116,15 @@ export default class GraphicEntity {
         }
     }
 
+    public setSection(x :number, y :number, w :number, h :number){
+        this.section = {
+            x: x,
+            y: y,
+            w: w,
+            h: h
+        }
+    }
+
     public getWidth() {
         return this.section.w;
     }
