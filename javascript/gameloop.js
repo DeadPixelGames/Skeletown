@@ -103,6 +103,23 @@ export default class GameLoop {
         }
     }
     /**
+     * Desuscribe la instancia de todos sus eventos del GameLoop.
+     */
+    unsuscribe(instance, onStart, onUpdate, onPause, onResume) {
+        if (onStart) {
+            this.onStart.unsuscribe(onStart, instance);
+        }
+        if (onUpdate) {
+            this.onUpdate.unsuscribe(onUpdate, instance);
+        }
+        if (onPause) {
+            this.onPause.unsuscribe(onPause, instance);
+        }
+        if (onResume) {
+            this.onResume.unsuscribe(onResume, instance);
+        }
+    }
+    /**
      * Configura el intervalo de actualización por primera vez.
      */
     init() {

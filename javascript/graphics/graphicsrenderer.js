@@ -52,12 +52,12 @@ export default class GraphicsRenderer {
     render() {
         this.clearCanvas();
         this.sortEntities();
+        this.updateScrollToFollow();
         for (let entity of this.entities) {
             if (!entity.visible)
                 break;
             entity.render(this.context, this.scrollX, this.scrollY);
         }
-        this.updateScrollToFollow();
         this.onFrameUpdate.dispatch();
     }
     /**
