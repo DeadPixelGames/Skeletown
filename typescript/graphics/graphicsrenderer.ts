@@ -93,10 +93,10 @@ export default class GraphicsRenderer {
     public render() {
         this.clearCanvas();
         this.sortEntities();
+        this.updateScrollToFollow();
         for(let entity of this.entities) {
             entity.render(this.context, this.scrollX, this.scrollY);
         }
-        this.updateScrollToFollow();
         this.onFrameUpdate.dispatch();
     }
 

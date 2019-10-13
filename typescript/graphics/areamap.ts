@@ -17,6 +17,11 @@ const MAPS_JSON_FOLDER = "resources/tilemaps";
 export default class AreaMap {
 
     /**
+     * El área cargada actualmente.
+     */
+    private static current :AreaMap;
+
+    /**
      * La anchura del mapa.
      */
     private width :number;
@@ -32,6 +37,14 @@ export default class AreaMap {
      * La capa de colliders asignada a este mapa.
      */
     private colliders :ColliderLayer;
+    /**
+     * Anchura en píxeles de un tile.
+     */
+    private tileWidth :number;
+    /**
+     * Altura en píxeles en un tile.
+     */
+    private tileHeight :number;
 
     /**
      * Paleta de tiles a usar. Contiene prototipos definiendo todos los distintos tiles que puede usar el mapa, provenientes de todos
@@ -75,6 +88,9 @@ export default class AreaMap {
         // el callback es necesario
         ret.asyncLoadAuxiliar(jsonFile);
 
+        // El área actual es ahora esta
+        AreaMap.current = ret;
+
         return ret;
     }
 
@@ -94,7 +110,34 @@ export default class AreaMap {
      */
     public getColliders() {
         return this.colliders;
-    };
+    }
+
+    /**
+     * Devuelve las dimensiones en tiles del mapa.
+     */
+    public getSize() {
+        return {
+            width: this.width,
+            height: this.height
+        };
+    }
+
+    /**
+     * Devuelve las dimensiones en píxeles de los tiles de este mapa.
+     */
+    public getTileSize() {
+        return {
+            width: this.tileWidth,
+            height: this.tileHeight
+        };
+    }
+
+    /**
+     * Devuelve el área cargada actualmente.
+     */
+    public static getCurrent() {
+        return AreaMap.current;
+    }
 
     /**
      * Actualiza las colisiones de la capa correspondiente al área.
@@ -110,6 +153,13 @@ export default class AreaMap {
     private async asyncLoadAuxiliar(jsonFile :string) {
         // En primer lugar cargamos los datos del mapa del archivo indicado
         var mapData = await FileLoader.loadJSON(MAPS_JSON_FOLDER + "/" + jsonFile) as MapData;
+
+        // Asignamos las propiedades del mapa
+        this.width = mapData.width;
+        this.height = mapData.height;
+        this.backgroundColor = mapData.backgroundcolor;
+        this.tileWidth = mapData.tilewidth;
+        this.tileHeight = mapData.tileheight;
 
         // Extraemos toda la información sobre todos los tiles disponibles y los añadimos a la paleta
         await this.generateTilePalette(mapData.tilesets);
@@ -322,25 +372,9 @@ class TileEntity extends GraphicEntity {
         this.solid = proto.solid;
         if(this.solid) {
             this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
-            this.collider.suscribe(this, null, this.pushAway, null);
         }
     }
 
-    private pushAway(other :Collider) {
-        if(!other.entity) {
-            return;
-        }
-
-        var otherPoint = other.findBorderPoint(this.collider.centerX, this.collider.centerY);
-        
-        var entityOffsetX = other.entity.x - otherPoint.x;
-        var entityOffsetY = other.entity.y - otherPoint.y;
-        var overlap = this.collider.getOverlapVector(other);
-
-
-        other.entity.x += overlap.x * 0.5;
-        other.entity.y += overlap.y * 0.5;
-    }
 }
 //#endregion
 

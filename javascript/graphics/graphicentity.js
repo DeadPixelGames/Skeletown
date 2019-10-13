@@ -25,7 +25,7 @@ export default class GraphicEntity {
     render(context, offsetX, offsetY) {
         var x = Math.floor(offsetX == null ? this.x : this.x - offsetX);
         var y = Math.floor(offsetY == null ? this.y : this.y - offsetY);
-        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, x, y, this.section.w, this.section.h);
+        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, x - this.pivot.x, y - this.pivot.y, this.section.w, this.section.h);
     }
     ;
     //#region Getters y setters

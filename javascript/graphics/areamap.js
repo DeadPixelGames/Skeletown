@@ -48,6 +48,8 @@ export default class AreaMap {
         // Iniciamos la carga asíncrona del área. Esta es la razón por la que devolvemos el área sin cargar y
         // el callback es necesario
         ret.asyncLoadAuxiliar(jsonFile);
+        // El área actual es ahora esta
+        AreaMap.current = ret;
         return ret;
     }
     /**
@@ -66,7 +68,30 @@ export default class AreaMap {
     getColliders() {
         return this.colliders;
     }
-    ;
+    /**
+     * Devuelve las dimensiones en tiles del mapa.
+     */
+    getSize() {
+        return {
+            width: this.width,
+            height: this.height
+        };
+    }
+    /**
+     * Devuelve las dimensiones en píxeles de los tiles de este mapa.
+     */
+    getTileSize() {
+        return {
+            width: this.tileWidth,
+            height: this.tileHeight
+        };
+    }
+    /**
+     * Devuelve el área cargada actualmente.
+     */
+    static getCurrent() {
+        return AreaMap.current;
+    }
     /**
      * Actualiza las colisiones de la capa correspondiente al área.
      */
@@ -81,6 +106,12 @@ export default class AreaMap {
         return __awaiter(this, void 0, void 0, function* () {
             // En primer lugar cargamos los datos del mapa del archivo indicado
             var mapData = yield FileLoader.loadJSON(MAPS_JSON_FOLDER + "/" + jsonFile);
+            // Asignamos las propiedades del mapa
+            this.width = mapData.width;
+            this.height = mapData.height;
+            this.backgroundColor = mapData.backgroundcolor;
+            this.tileWidth = mapData.tilewidth;
+            this.tileHeight = mapData.tileheight;
             // Extraemos toda la información sobre todos los tiles disponibles y los añadimos a la paleta
             yield this.generateTilePalette(mapData.tilesets);
             // Contamos la capa para añadirla al orden de renderizado
@@ -240,19 +271,7 @@ class TileEntity extends GraphicEntity {
         this.solid = proto.solid;
         if (this.solid) {
             this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
-            this.collider.suscribe(this, null, this.pushAway, null);
         }
-    }
-    pushAway(other) {
-        if (!other.entity) {
-            return;
-        }
-        var otherPoint = other.findBorderPoint(this.collider.centerX, this.collider.centerY);
-        var entityOffsetX = other.entity.x - otherPoint.x;
-        var entityOffsetY = other.entity.y - otherPoint.y;
-        var overlap = this.collider.getOverlapVector(other);
-        other.entity.x += overlap.x * 0.5;
-        other.entity.y += overlap.y * 0.5;
     }
 }
 //#endregion
