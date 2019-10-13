@@ -12,7 +12,7 @@
          "opacity":1,
          "type":"tilelayer",
          "visible":true,
-         "width":100,
+         "width":37,
          "x":0,
          "y":0
         }, 
@@ -25,6 +25,14 @@
          "offsetx":880,
          "offsety":1232,
          "opacity":1,
+         "properties":
+            {
+             "solid":true
+            },
+         "propertytypes":
+            {
+             "solid":"bool"
+            },
          "type":"tilelayer",
          "visible":true,
          "width":100,
