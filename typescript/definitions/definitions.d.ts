@@ -40,3 +40,8 @@ declare interface Map<K, V> {
     getValueSet() :V[];
 }
 //#endregion
+
+type ClickEvent = {
+    clientX :number,
+    clientY :number
+}

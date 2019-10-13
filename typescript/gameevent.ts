@@ -1,8 +1,8 @@
-export default class CustomEvent<F extends Function> {
+export default class GameEvent<F extends Function> {
 
-    /** Lista de suscriptores, indicados por tuplas que contienen la función a llamar y el sujeto 
-     * List of suscribers, indicated by tuples containing the function to call and the subject
-     * que las recibe */
+    /** Lista de suscriptores, indicados por tuplas que contienen la función a llamar y el sujeto que las recibe
+     * List of suscribers, indicated by tuples containing the function to call and the subject who receives it
+     *  */
     private suscribed :[F, any][];
 
     constructor() {
