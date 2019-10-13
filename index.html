@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test</title>
+    <meta name="viewport" content ="width=device-width">
+    <title>Skeletown</title>
+
+    <style>
+        @import url('./resources/fonts/ARCO.ttf');
+
+        @font-face {
+            font-family: 'Arco';
+            src: url('./resources/fonts/ARCO.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        * {font-family: Arco;}
+        
+        html {height: 100%; width: 100%;}
+        body {min-height: 100%; width: 100%;}
+    </style>
     <script src="javascript/main.js" type=module></script>
+
 
 </head>
 <body>
-    <p> TEST</p>
-    <canvas id="gameCanvas" width="1280" height="1280" style="border:1px solid #000000;"></canvas>
+    <p style="font-family: Arco;">hola</p>
+    <canvas id="gameCanvas" width="1920" height="1280" style="border:1px solid #000000;" style="font-family: 'Arco';">Hola</canvas>
 
 </body>
 

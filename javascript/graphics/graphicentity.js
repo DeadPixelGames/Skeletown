@@ -17,6 +17,7 @@ export default class GraphicEntity {
         };
         this.x = 0;
         this.y = 0;
+        this.visible = true;
     }
     /**
      * Dibuja la entidad en sus coordenadas usando el contexto indicado. Se puede indicar un desplazamiento adicional para tener en
@@ -65,6 +66,17 @@ export default class GraphicEntity {
         this.pivot = {
             x: x,
             y: y
+        };
+    }
+    /**
+     * Modifica la sección de imagen que se renderiza
+     */
+    setSection(x, y, w, h) {
+        this.section = {
+            x: x,
+            y: y,
+            w: w,
+            h: h
         };
     }
     getWidth() {

@@ -104,8 +104,10 @@ export default class Entity{
 
     public setImage(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number) {
         this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
-        this.syncImage();
+        
+        
     }
+
     //#endregion
 
     //#region Sincronizar componentes

@@ -12,14 +12,27 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
+
 import Enemy from "./enemy.js";
 import { BoxCollider } from "./collider.js";
 import { distance } from "./util.js";
+
 var player;
 var enemy;
 var area;
 var ctx;
+var hud_InGame;
+var lifeBar;
+var moneyCounter;
+var time;
+var inventory;
+var resize = function () {
+    ctx.canvas.width = document.documentElement.clientWidth * 0.95;
+    ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+};
+window.addEventListener("resize", resize);
 window.onload = function () {
+
     return __awaiter(this, void 0, void 0, function* () {
         var canvas = document.getElementById("gameCanvas");
         ctx = canvas.getContext("2d");
@@ -37,6 +50,7 @@ window.onload = function () {
         player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.9, image.getWidth() * 0.9, true), {
             x: 0,
             y: image.getHeight() * 0.3
+
         });
         GraphicsRenderer.instance.follow(player.getImage());
         enemy.setImage(0.5, yield FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);

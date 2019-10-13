@@ -1,5 +1,3 @@
-import Entity from "../entity";
-
 /** Clase que representa una entidad gráfica fundamental. Es la unidad básica utilizada por el `GraphicsRenderer` para
  * renderizar todos los elementos gráficos del juego. 
  */
@@ -35,6 +33,10 @@ export default class GraphicEntity {
      */
     public renderLayer :number;
     /**
+     * Si es visible la entidad gráfica
+     */
+    public visible :boolean;
+    /**
      * Posición puntual en X de esta entidad, en coordenadas del mundo en píxeles.
      */
     public x :number;
@@ -58,6 +60,7 @@ export default class GraphicEntity {
         }
         this.x = 0;
         this.y = 0;
+        this.visible = true;
     }
 
     /**
@@ -110,6 +113,18 @@ export default class GraphicEntity {
         this.pivot = {
             x: x,
             y: y
+        }
+    }
+    
+    /**
+     * Modifica la sección de imagen que se renderiza 
+     */
+    public setSection(x :number, y :number, w :number, h :number){
+        this.section = {
+            x: x,
+            y: y,
+            w: w,
+            h: h
         }
     }
 

@@ -54,6 +54,8 @@ export default class GraphicsRenderer {
         this.sortEntities();
         this.updateScrollToFollow();
         for (let entity of this.entities) {
+            if (!entity.visible)
+                break;
             entity.render(this.context, this.scrollX, this.scrollY);
         }
         this.onFrameUpdate.dispatch();
@@ -94,9 +96,10 @@ export default class GraphicsRenderer {
      * último por coordenada X. Lo hacemos así porque los tiles deberían renderizarse por filas, no por columnas.
      */
     sortEntities() {
-        this.entities.sort((e1, e2) => e1.renderLayer != e2.renderLayer ? e1.renderLayer - e2.renderLayer :
-            e1.y != e2.y ? e1.y - e2.y :
-                e1.x - e2.x);
+        this.entities.sort((e1, e2) => e1.visible != e2.visible ? (e1.visible ? -1 : 1) :
+            e1.renderLayer != e2.renderLayer ? e1.renderLayer - e2.renderLayer :
+                e1.y != e2.y ? e1.y - e2.y :
+                    e1.x - e2.x);
     }
     //#region Gestionar canvas
     /**

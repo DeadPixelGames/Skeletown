@@ -362,6 +362,7 @@ export class ColliderLayer {
      */
     public sendUserClick(x :number, y :number) {
         for(let collider of this.colliders) {
+            
             collider.sendUserClick(x, y);
         }
     }
