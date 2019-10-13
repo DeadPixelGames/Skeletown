@@ -115,7 +115,10 @@ export default class GraphicEntity {
             y: y
         }
     }
-
+    
+    /**
+     * Modifica la sección de imagen que se renderiza 
+     */
     public setSection(x :number, y :number, w :number, h :number){
         this.section = {
             x: x,

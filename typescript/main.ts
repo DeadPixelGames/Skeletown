@@ -4,15 +4,15 @@ import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import { BoxCollider, CircleCollider } from "./collider.js";
-import { UILayout, UIEntity } from "./ui/uiEntity.js";
+import { UILayout, UISquareEntity, UICircleEntity } from "./ui/uiEntity.js";
 import Interface from "./ui/interface.js";
 
 var player :Player;
 var ctx :CanvasRenderingContext2D;
 
 var uiLayout :UILayout;
-var uiElement :UIEntity;
-var uiElement2 :UIEntity;
+var uiElement :UISquareEntity;
+var uiElement2 :UISquareEntity;
 var interf :Interface;
 
 window.onload = function(){
@@ -32,8 +32,8 @@ window.onload = function(){
     player.x = 3328;
     player.y = 2304;
 
-    uiElement2 = new UIEntity(128, 0, 128, 128, false);
-    uiElement = new UIEntity(0, 0, 128, 128, true, (x :number, y :number)=>{
+    uiElement2 = new UISquareEntity(128, 0, 128, 128, false);
+    uiElement = new UISquareEntity(0, 0, 128, 128, true, (x :number, y :number)=>{
         
         uiElement2.getImage().visible = !uiElement2.getImage().visible;
     });

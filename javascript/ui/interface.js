@@ -1,13 +1,14 @@
 import { ColliderLayer } from "../collider.js";
+/**Controlador de los colliders de la interfaz gráfica */
 export default class Interface {
     constructor(width, height) {
         this.width = width;
         this.height = height;
         this.colliders = new ColliderLayer();
         var that = this;
+        /**Añadir a los colliders un evento de escucha de clicks */
         var listenerCallback = (e) => {
             if (e instanceof MouseEvent) {
-                console.log("CLICK");
                 that.colliders.sendUserClick(e.clientX, e.clientY);
             }
             else if (e instanceof TouchEvent) {
@@ -24,6 +25,7 @@ export default class Interface {
     setWidth(width) { this.width = width; }
     setHeight(height) { this.height = height; }
     //#endregion
+    /**Añade un collider a la interfaz */
     addCollider(collider) {
         this.colliders.add(collider);
     }
