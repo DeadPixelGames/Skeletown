@@ -4,20 +4,30 @@ import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import { BoxCollider, CircleCollider } from "./collider.js";
-import { UILayout, UISquareEntity, UICircleEntity } from "./ui/uiEntity.js";
+import { UILayout, UISquareEntity, UICircleEntity, ProgressBar } from "./ui/uiEntity.js";
 import Interface from "./ui/interface.js";
 
 var player :Player;
 var ctx :CanvasRenderingContext2D;
 
-var uiLayout :UILayout;
-var uiElement :UISquareEntity;
-var uiElement2 :UISquareEntity;
-var interf :Interface;
+var hud_InGame :UILayout;
+var lifeBar :ProgressBar;
+var moneyCounter :UISquareEntity;
+var time :UISquareEntity;
+var inventory :UICircleEntity;
+
+
+var resize = function(){
+    ctx.canvas.width = document.documentElement.clientWidth * 0.95;
+    ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+}
+
+window.addEventListener("resize", resize);
+
 
 window.onload = function(){
 
-    // TODO Adecentar todo esto cuando esté hecho el Game loop
+    // TODO Adecentar todo esto 
 
     var canvas  :HTMLCanvasElement =  document.getElementById("gameCanvas") as HTMLCanvasElement;
 
@@ -32,25 +42,42 @@ window.onload = function(){
     player.x = 3328;
     player.y = 2304;
 
-    uiElement2 = new UISquareEntity(128, 0, 128, 128, false);
-    uiElement = new UISquareEntity(0, 0, 128, 128, true, (x :number, y :number)=>{
-        
-        uiElement2.getImage().visible = !uiElement2.getImage().visible;
+    moneyCounter = new UISquareEntity(0.09, 0.03, 320, 91, true, (x :number, y :number)=>{
+
     });
-    interf = new Interface(canvas.width, canvas.height);
-    interf.addCollider(uiElement.getCollider() as BoxCollider);
-    interf.addCollider(uiElement2.getCollider() as BoxCollider);
+    lifeBar = new ProgressBar(0.5, 0.03, 703, 128, true, (x :number, y :number)=>{
+        lifeBar.setProgress(lifeBar.getProgress()-10);
+    });
+    time = new UISquareEntity(0.95, 0.03, 362, 128, false);
+    inventory = new UICircleEntity(0.9, 0.8, 122, true, (x :number, y :number)=>{
+        lifeBar.setProgress(lifeBar.getProgress()+10);
+    })
+    var interf = new Interface(canvas.width, canvas.height);
+    interf.addCollider(lifeBar.getCollider() as BoxCollider);
+    interf.addCollider(moneyCounter.getCollider() as BoxCollider);
+    interf.addCollider(time.getCollider() as BoxCollider);
+    interf.addCollider(inventory.getCollider() as CircleCollider);
     
-    uiLayout = new UILayout(0, 0, 256, 128);
+    hud_InGame = new UILayout(0, 0, canvas.width, canvas.height);
     
-    uiLayout.addUIEntity(uiElement);
-    uiLayout.addUIEntity(uiElement2);
+    hud_InGame.addUIEntity(lifeBar);
+    hud_InGame.addUIEntity(moneyCounter);
+    hud_InGame.addUIEntity(time);
+    hud_InGame.addUIEntity(inventory);
+
+    moneyCounter.setText("1283902", {x: 30, y: 65});
+    time.setText("10:21", {x: 30, y: 65});
+
 
     (async function() {
 
-        uiElement.setImage(100, await FileLoader.loadImage("resources/sprites/interface/uiPlaceHolder.png"));
-        uiElement2.setImage(100, await FileLoader.loadImage("resources/sprites/interface/uiPlaceHolder2.png"));
-        uiLayout.addEntitiesToRenderer();
+        lifeBar.setImage(99, await FileLoader.loadImage("resources/interface/HUD_life3.png"));
+        lifeBar.setIcon(100, await FileLoader.loadImage("resources/interface/HUD_life1.png"));
+        lifeBar.setProgressBar(100, await FileLoader.loadImage("resources/interface/HUD_life2.png"));
+        moneyCounter.setImage(100, await FileLoader.loadImage("resources/interface/HUD_money.png"));
+        time.setImage(100, await FileLoader.loadImage("resources/interface/HUD_time.png"));
+        inventory.setImage(100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
+        hud_InGame.addEntitiesToRenderer();
         player.setImage(0.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"));
         GraphicsRenderer.instance.addExistingEntity(player.getImage());
         

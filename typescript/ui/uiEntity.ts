@@ -11,12 +11,20 @@ export class UIEntity extends Entity {
     /**Posición relativa al layout en el que se encuentra */
     protected relativePos :{x :number, y:number};
 
-    protected text :string;
+    public dimension :{w :number, h :number};
+
+    protected text? :string;
+    /**Posición del texto en coordenadas locales de la interfaz */
+    protected textPos? :{x :number, y :number};
+
 
     constructor(clickable :boolean){
         super();
         this.clickable = clickable;
+        GraphicsRenderer.instance.suscribe(this, null, this.drawText);
     }
+
+    
     //#region GETTERS Y SETTERS
     public getRelativePos() :{x :number, y:number}{ return this.relativePos;}
     public getText() {return this.text;}
@@ -24,21 +32,31 @@ export class UIEntity extends Entity {
     public setRealtivePos(relativePos :{x :number, y:number}){
         this.relativePos = relativePos;
     }
-    public setText(text :string){this.text = text;}
+    public setText(text :string, textPos :{x :number, y :number}){this.text = text; this.textPos = textPos;}
     
     //#endregion
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     public setImage(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
-        this.syncImage();
+        
     }
     
+    public addToGraphicRenderer(){
+        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+    }
+
+    protected drawText() {
+        if(this.text && this.textPos) {
+            this.ctx.font = "45px Arco Black";
+            this.ctx.fillStyle = "#000000";
+            this.ctx.fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
+        }
+    }
 }
 
 
 export class UISquareEntity extends UIEntity {
 
-    protected dimension :{w :number, h :number};
 
     constructor (left :number, top :number, w :number, h :number, clickable :boolean, onClick ?:((x :number, y :number)=>void)){
         super(clickable);
@@ -63,6 +81,7 @@ export class UICircleEntity extends UIEntity {
         if(collider && this.clickable && onClick){
             collider.addUserInteraction(this, onClick, null, null);
         }
+        this.dimension = {w: radius, h: radius};
     }
 }
 
@@ -86,11 +105,11 @@ export class ProgressBar extends UISquareEntity{
 
     public setProgressBar(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         this.progressBar = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
-        this.syncImage();
+        
     }
     public setIcon(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
-        this.syncImage();
+        
     }
     public setProgress(progress :number){
         this.progress = progress;
@@ -98,6 +117,20 @@ export class ProgressBar extends UISquareEntity{
     }
     //#endregion
 
+    public addToGraphicRenderer(){
+        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        GraphicsRenderer.instance.addExistingEntity(this.getProgressBar());
+        GraphicsRenderer.instance.addExistingEntity(this.getIcon());
+    }
+
+    public syncImage(){
+        this.image.x = this.x;
+        this.image.y = this.y;
+        this.progressBar.x = this.x;
+        this.progressBar.y = this.y;
+        this.icon.x = this.x;
+        this.icon.y = this.y;
+    }
 }
 
 /**Contenedor de entidades de layout */
@@ -120,14 +153,14 @@ export class UILayout {
      * Cambia las coordenadas de la entidad según las coordenadas del layout
      */
     public addUIEntity(uiEntity :UIEntity){
-        uiEntity.x = this.position.x + uiEntity.getRelativePos().x;
-        uiEntity.y = this.position.y + uiEntity.getRelativePos().y;
+        uiEntity.x = this.position.x + uiEntity.getRelativePos().x * this.dimension.w - uiEntity.dimension.w * 0.5;
+        uiEntity.y = this.position.y + uiEntity.getRelativePos().y * this.dimension.h;
         this.uiEntities.push(uiEntity);
     }
     /**Añade al GraphicsRenderer todas las imágenes de las entidades de interfaz */
     public addEntitiesToRenderer(){
         for(let ent of this.uiEntities){
-            GraphicsRenderer.instance.addExistingEntity(ent.getImage());
+            ent.addToGraphicRenderer();
         }
     }
 }

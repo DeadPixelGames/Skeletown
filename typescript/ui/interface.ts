@@ -1,4 +1,6 @@
 import { ColliderLayer, Collider } from "../collider.js";
+import GameLoop from "../gameloop.js";
+import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 
 /**Controlador de los colliders de la interfaz gráfica */
 export default class Interface{
@@ -25,6 +27,8 @@ export default class Interface{
 
         document.addEventListener("mousedown", e => listenerCallback(e));
         document.addEventListener("touchstart", e => listenerCallback(e));
+
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
 
     //#region GETTERS Y SETTERS
@@ -39,5 +43,9 @@ export default class Interface{
     /**Añade un collider a la interfaz */
     public addCollider(collider :Collider){
         this.colliders.add(collider);
+    }
+
+    public update(deltaTime :number){
+        this.colliders.render(GraphicsRenderer.instance.getCanvasContext());
     }
 }

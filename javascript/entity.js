@@ -53,7 +53,6 @@ export default class Entity {
     }
     setImage(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
-        this.syncImage();
     }
     //#endregion
     //#region Sincronizar componentes
