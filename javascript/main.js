@@ -14,6 +14,7 @@ import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import Enemy from "./enemy.js";
 import { BoxCollider } from "./collider.js";
+import { distance } from "./util.js";
 var player;
 var enemy;
 var area;
@@ -46,6 +47,7 @@ window.onload = function () {
             y: image.getHeight() * 0.3
         });
         enemy.setAttack(target => console.log(target.constructor.name + ": \"ouch\""));
+        enemy.getCollider().addUserInteraction(null, attackEnemy, null, null);
         area = AreaMap.load("farmland.json", () => {
             area.getColliders().add(player.getCollider());
             area.getColliders().add(enemy.getCollider());
@@ -55,6 +57,31 @@ window.onload = function () {
         GameLoop.instance.suscribe(null, null, renderDebug, null, null);
     });
 };
+//#region Atacar enemigo
+document.addEventListener("mousedown", dispatchClickEventToColliders);
+document.addEventListener("touchstart", dispatchClickEventToColliders);
+function dispatchClickEventToColliders(event) {
+    var coordX;
+    var coordY;
+    if (event instanceof TouchEvent && event.touches[0]) {
+        coordX = event.touches[0].clientX;
+        coordY = event.touches[0].clientY;
+    }
+    else {
+        coordX = event.clientX;
+        coordY = event.clientY;
+    }
+    if (area) {
+        area.getColliders().sendUserClick(coordX + GraphicsRenderer.instance.scrollX, coordY + GraphicsRenderer.instance.scrollY);
+    }
+}
+function attackEnemy() {
+    const ATTACK_RADIUS = 200;
+    if (distance(player.x, player.y, enemy.x, enemy.y) < ATTACK_RADIUS) {
+        console.log("Enemy: ouch");
+    }
+}
+//#endregion
 //#region Render Debug
 var enableRenderDebug = false;
 document.addEventListener("keydown", (event) => {

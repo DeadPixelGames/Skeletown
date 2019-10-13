@@ -319,18 +319,7 @@ export class BoxCollider extends Collider {
     render(context, scrollX = 0, scrollY = 0) {
         context.beginPath();
         context.strokeStyle = this.isDynamic() ? COLLIDER_RENDER_DYNAMIC_COLOR : COLLIDER_RENDER_NONDYNAMIC_COLOR;
-        var corners = [
-            { x: this.centerX - this.halfWidth - scrollX, y: this.centerY - this.halfHeight - scrollY },
-            { x: this.centerX + this.halfWidth - scrollX, y: this.centerY - this.halfHeight - scrollY },
-            { x: this.centerX + this.halfWidth - scrollX, y: this.centerY + this.halfHeight - scrollY },
-            { x: this.centerX - this.halfWidth - scrollX, y: this.centerY + this.halfHeight - scrollY },
-            { x: this.centerX - this.halfWidth - scrollX, y: this.centerY - this.halfHeight - scrollY }
-        ];
-        context.moveTo(corners[0].x, corners[0].y);
-        for (let i = 1; i < corners.length; i++) {
-            context.lineTo(corners[i].x, corners[i].y);
-        }
-        context.stroke();
+        context.strokeRect(this.centerX - this.halfWidth - scrollX, this.centerY - this.halfHeight - scrollY, this.halfWidth * 2, this.halfHeight * 2);
     }
     findBorderPoint(otherX, otherY, thisX, thisY) {
         // El punto del borde de un rectángulo, es un punto que se encuentra a la misma altura que el punto objetivo

@@ -2,7 +2,13 @@ import Entity from "./entity.js";
 import { distance } from "./util.js";
 import Player from "./player.js";
 import AIPath from "./aipath.js";
+/**
+ * Alcance del ataque. Si el enemigo está a menos de esta distancia de su objetivo, le atacará.
+ */
 const ATTACK_RADIUS = 200;
+/**
+ * Tiempo en segundos que debe pasar entre ataque y ataque.
+ */
 const ATTACK_COOLDOWN = 2;
 /**
  * Velocidad de movimiento del enemigo.
@@ -75,6 +81,9 @@ export default class Enemy extends Entity {
     setColliderLayer(colliders) {
         this.colliders = colliders;
     }
+    /**
+     * Asigna un ataque al enemigo.
+     */
     setAttack(attack) {
         this.attack = attack;
     }
