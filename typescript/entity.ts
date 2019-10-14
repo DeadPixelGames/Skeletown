@@ -3,6 +3,8 @@ import { Collider, ColliderLayer } from "./collider.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import GameLoop from "./gameloop.js";
 import AreaMap from "./graphics/areamap.js";
+import GameEvent from "./gameevent.js";
+import { clamp } from "./util.js";
 
 /**
  * Distancia mínima a la que debe encontrarse el punto de destino para que la entidad se mueva hacia él.
@@ -35,14 +37,22 @@ export default class Entity{
         y :number
     };
 
-    protected image :GraphicEntity;
+    protected image :GraphicEntity | null;
 
-    private collider? :Collider;
+    private collider :Collider | null;
     
     private colliderOffset? :{
         x :number,
         y :number,
     }
+
+    private maxHealth :number;
+    
+    private health :number;
+
+    private onHealthChanged :GameEvent<(health :number, maxHealth :number) => void>;
+
+    private onDead :GameEvent<() => void>;
 
     public isColliding :{
         left :boolean,
@@ -61,6 +71,14 @@ export default class Entity{
         this.speed = {x: 20, y: 20};
         this.dest = null;
 
+        this.image = null;
+        this.collider = null;
+
+        this.maxHealth = 100;
+        this.health = this.maxHealth;
+        this.onHealthChanged = new GameEvent();
+        this.onDead = new GameEvent();
+
         this.isColliding = {
             left: false,
             right: false,
@@ -78,6 +96,14 @@ export default class Entity{
 
     public getCollider() {
         return this.collider;
+    }
+
+    public getMaxHealth() {
+        return this.maxHealth;
+    }
+
+    public getHealth() {
+        return this.health;
     }
 
     public getImage() {
@@ -104,10 +130,17 @@ export default class Entity{
 
     public setImage(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number) {
         this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
-        
-        
+        this.syncImage();
     }
 
+    public setHealth(health :number) {
+        health = clamp(health, 0, this.maxHealth);
+        this.health = health;
+        this.onHealthChanged.dispatch(health, this.maxHealth);
+        if(health == 0) {
+            this.onDead.dispatch();
+        }
+    }
     //#endregion
 
     //#region Sincronizar componentes
@@ -119,8 +152,10 @@ export default class Entity{
     }
 
     public syncImage() {
-        this.image.x = this.x;
-        this.image.y = this.y;
+        if(this.image) {
+            this.image.x = this.x;
+            this.image.y = this.y;
+        }
     }
 
     //#endregion
@@ -140,12 +175,27 @@ export default class Entity{
         this.syncImage();
     }
 
+    public suscribe(instance :any, onHealthChanged :((health :number, maxHealth :number) => void) | null, onDead :(() => void) | null) {
+        if(onHealthChanged) {
+            this.onHealthChanged.suscribe(onHealthChanged, instance);
+        }
+        if(onDead) {
+            this.onDead.suscribe(onDead, instance);
+        }
+    }
+
     /**
      * Elimina las suscripciones a eventos y otras referencias que puedan impedir que la entidad, al
      * descartarse, pueda ser recogida por el recolector de basura.
      */
     public dispose() {
         GameLoop.instance.unsuscribe(this, null, this.update, null, null);
+        GraphicsRenderer.instance.removeEntity(this.image);
+        if(this.collider) {
+            this.collider.discarded = true;
+        }
+        this.collider = null;
+        this.image = null;
     }
 
     /**

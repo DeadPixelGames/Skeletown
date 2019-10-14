@@ -35,6 +35,7 @@ export class Collider {
         this.currentlyHovered = false;
         this.entity = null;
         this.dynamic = dynamic;
+        this.discarded = false;
         this.intersectingColliders = [];
     }
     /**
@@ -67,6 +68,10 @@ export class Collider {
             // eventos en esta situación
             if (this == other) {
                 continue;
+            }
+            // Si el collider está descartado, lo marcamos eliminarlo de la capa
+            if (other.discarded) {
+                layer.markForDeletion(other);
             }
             // Si el otro collider no es dinámico, la capa no va a disparar sus eventos de colisión, en cuyo caso  este collider debe
             // encargarse de disparar sus eventos también
@@ -184,6 +189,7 @@ export class Collider {
 export class ColliderLayer {
     constructor() {
         this.colliders = [];
+        this.markedForDeletion = [];
     }
     /**
      * Añade el collider indicado a la capa.
@@ -207,6 +213,12 @@ export class ColliderLayer {
         return this.colliders.contains(collider);
     }
     /**
+     * Marca el collider para eliminarlo de esta capa cuando sea posible.
+     */
+    markForDeletion(collider) {
+        this.markedForDeletion.push(collider);
+    }
+    /**
      * Permite iterar por los colliders de la capa sin exponer la referencia a la lista de colliders.
      * Es importante garantizar que todos los colliders se añadan a través de `add(collider)` para garantizar
      * que los colliders dinámicos están al principio en todo momento.
@@ -228,8 +240,14 @@ export class ColliderLayer {
                 // podemos abandonar el bucle.
                 break;
             }
+            if (collider.discarded) {
+                // Si el collider está descartado, no hacer nada con él.
+                continue;
+            }
             collider.checkCollisions(this);
         }
+        // Después de revisar todas las colisiones, eliminamos los colliders marcados para ello
+        this.markedForDeletion.forEach(c => this.colliders.remove(c));
     }
     /**
      * Envía un evento de click para que lo capture el collider que se encuentra en el punto indicado. Si hay varios colliders
