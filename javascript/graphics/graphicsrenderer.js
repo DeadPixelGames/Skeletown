@@ -69,15 +69,21 @@ export default class GraphicsRenderer {
         this.onFirstFrame.dispatch();
     }
     //#region Añadir entidad
-    /** Añade la entidad especificada al `GraphicsManager` para que la renderice. */
+    /** Añade la entidad especificada al `GraphicsRenderer` para que la renderice. */
     addExistingEntity(entity) {
         this.entities.push(entity);
     }
-    /** Genera una nueva entidad gráfica y la añade al `GraphicsManager`. */
+    /** Genera una nueva entidad gráfica y la añade al `GraphicsRenderer`. */
     addNewEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         this.entities.push(new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY));
     }
     //#endregion
+    /** Elimina la entidad del `GraphicsRenderer` */
+    removeEntity(entity) {
+        if (entity) {
+            this.entities.remove(entity);
+        }
+    }
     /**
      * Suscribe la instancia especificada a los distintos eventos del `GraphicsRenderer`:
      * * `onFirstFrame`: Se ejecuta en el primer fotograma y después de vaciar todas las entidades.

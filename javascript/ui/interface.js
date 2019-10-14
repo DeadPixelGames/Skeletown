@@ -1,6 +1,4 @@
 import { ColliderLayer } from "../collider.js";
-import GameLoop from "../gameloop.js";
-import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 /**Controlador de los colliders de la interfaz gráfica */
 export default class Interface {
     constructor(width, height) {
@@ -13,13 +11,12 @@ export default class Interface {
             if (e instanceof MouseEvent) {
                 that.colliders.sendUserClick(e.clientX, e.clientY);
             }
-            else if (e instanceof TouchEvent) {
+            else if (window.TouchEvent && e instanceof TouchEvent) {
                 that.colliders.sendUserClick(e.touches[0].clientX, e.touches[0].clientY);
             }
         };
         document.addEventListener("mousedown", e => listenerCallback(e));
         document.addEventListener("touchstart", e => listenerCallback(e));
-        GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
     //#region GETTERS Y SETTERS
     getWidth() { return this.width; }
@@ -31,9 +28,6 @@ export default class Interface {
     /**Añade un collider a la interfaz */
     addCollider(collider) {
         this.colliders.add(collider);
-    }
-    update(deltaTime) {
-        this.colliders.render(GraphicsRenderer.instance.getCanvasContext());
     }
 }
 //# sourceMappingURL=interface.js.map

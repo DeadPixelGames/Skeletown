@@ -2,6 +2,7 @@ import Entity from "../entity.js"
 import { BoxCollider, CircleCollider } from "../collider.js";
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import GraphicEntity from "../graphics/graphicentity.js";
+import { clamp } from "../util.js";
 /**
  * Unidad mínima de interfaz de usuario Cuadrada
  */
@@ -42,7 +43,9 @@ export class UIEntity extends Entity {
     }
     
     public addToGraphicRenderer(){
-        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        var img = this.getImage();
+        if(img)
+        GraphicsRenderer.instance.addExistingEntity(img);
     }
 
     protected drawText() {
@@ -111,21 +114,26 @@ export class ProgressBar extends UISquareEntity{
         this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
         
     }
+
     public setProgress(progress :number){
         this.progress = progress;
-        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, (progress * this.dimension.w) * 0.01, this.dimension.h);
+        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, Math.max(1,(progress * this.dimension.w) * 0.01), this.dimension.h);
     }
     //#endregion
 
     public addToGraphicRenderer(){
-        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        var img = this.getImage()
+        if(img)
+        GraphicsRenderer.instance.addExistingEntity(img);
         GraphicsRenderer.instance.addExistingEntity(this.getProgressBar());
         GraphicsRenderer.instance.addExistingEntity(this.getIcon());
     }
 
     public syncImage(){
-        this.image.x = this.x;
-        this.image.y = this.y;
+        if(this.image){
+            this.image.x = this.x;
+            this.image.y = this.y;
+        }
         this.progressBar.x = this.x;
         this.progressBar.y = this.y;
         this.icon.x = this.x;
@@ -163,6 +171,16 @@ export class UILayout {
             ent.addToGraphicRenderer();
         }
     }
+    
+
+    public resize(w :number, h :number){
+        this.dimension = {w: w, h: h};
+
+        for(let ent of this.uiEntities){
+            ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
+            ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+        }
+    }
 }
 
 /**Hereda de GraphicEntity cambia el método render */
@@ -173,6 +191,7 @@ class UIGraphicEntity extends GraphicEntity{
     }
     /**Deja las coordenadas de la cámara (no tiene en cuenta el scroll) */
     public render(context :CanvasRenderingContext2D){
-        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, this.x, this.y, this.section.w, this.section.h);
+        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h,
+        this.x, this.y, this.section.w, this.section.h);
     }
 }

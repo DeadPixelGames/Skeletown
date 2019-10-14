@@ -24,7 +24,9 @@ export class UIEntity extends Entity {
         this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
     }
     addToGraphicRenderer() {
-        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        var img = this.getImage();
+        if (img)
+            GraphicsRenderer.instance.addExistingEntity(img);
     }
     drawText() {
         if (this.text && this.textPos) {
@@ -76,17 +78,21 @@ export class ProgressBar extends UISquareEntity {
     }
     setProgress(progress) {
         this.progress = progress;
-        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, (progress * this.dimension.w) * 0.01, this.dimension.h);
+        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, Math.max(1, (progress * this.dimension.w) * 0.01), this.dimension.h);
     }
     //#endregion
     addToGraphicRenderer() {
-        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        var img = this.getImage();
+        if (img)
+            GraphicsRenderer.instance.addExistingEntity(img);
         GraphicsRenderer.instance.addExistingEntity(this.getProgressBar());
         GraphicsRenderer.instance.addExistingEntity(this.getIcon());
     }
     syncImage() {
-        this.image.x = this.x;
-        this.image.y = this.y;
+        if (this.image) {
+            this.image.x = this.x;
+            this.image.y = this.y;
+        }
         this.progressBar.x = this.x;
         this.progressBar.y = this.y;
         this.icon.x = this.x;
@@ -112,6 +118,13 @@ export class UILayout {
     addEntitiesToRenderer() {
         for (let ent of this.uiEntities) {
             ent.addToGraphicRenderer();
+        }
+    }
+    resize(w, h) {
+        this.dimension = { w: w, h: h };
+        for (let ent of this.uiEntities) {
+            ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
+            ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
         }
     }
 }

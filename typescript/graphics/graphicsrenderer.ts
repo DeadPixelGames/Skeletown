@@ -112,16 +112,23 @@ export default class GraphicsRenderer {
     }
 
     //#region Añadir entidad
-    /** Añade la entidad especificada al `GraphicsManager` para que la renderice. */
+    /** Añade la entidad especificada al `GraphicsRenderer` para que la renderice. */
     public addExistingEntity(entity :GraphicEntity) {
         this.entities.push(entity);
     }
 
-    /** Genera una nueva entidad gráfica y la añade al `GraphicsManager`. */
+    /** Genera una nueva entidad gráfica y la añade al `GraphicsRenderer`. */
     public addNewEntity(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number, ) {
         this.entities.push(new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY));
     }
     //#endregion
+
+    /** Elimina la entidad del `GraphicsRenderer` */
+    public removeEntity(entity :GraphicEntity | null) {
+        if(entity) {
+            this.entities.remove(entity);
+        }
+    }
 
     /**
      * Suscribe la instancia especificada a los distintos eventos del `GraphicsRenderer`:
