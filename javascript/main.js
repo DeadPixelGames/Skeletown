@@ -114,7 +114,7 @@ function generateEnemy(onDead) {
         var enemy = new Enemy();
         enemy.x = 2176;
         enemy.y = 1280;
-        enemy.setImage(2.5, yield FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
+        enemy.setImage(2.5, yield FileLoader.loadImage("animation/Enemy_Placeholder/FRONT_Enemy.png"), 0, 0, 256, 256, 128, 128);
         var image = enemy.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
