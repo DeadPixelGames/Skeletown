@@ -111,7 +111,7 @@ export class ProgressBar extends UISquareEntity {
     }
     setProgress(progress) {
         this.progress = progress;
-        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, (progress * this.dimension.w) * 0.01, this.dimension.h);
+        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, Math.max(1, (progress * this.dimension.w) * 0.01), this.dimension.h);
     }
     //#endregion
     addToGraphicRenderer() {
@@ -121,8 +121,10 @@ export class ProgressBar extends UISquareEntity {
         GraphicsRenderer.instance.addExistingEntity(this.getIcon());
     }
     syncImage() {
-        this.image.x = this.x;
-        this.image.y = this.y;
+        if (this.image) {
+            this.image.x = this.x;
+            this.image.y = this.y;
+        }
         this.progressBar.x = this.x;
         this.progressBar.y = this.y;
         this.icon.x = this.x;

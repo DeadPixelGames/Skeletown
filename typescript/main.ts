@@ -39,7 +39,7 @@ window.addEventListener("resize", resize);
 window.onload = async function() {
 
   //TODO Adecentar esto
-    var canvas  :HTMLCanvasElement =  document.getElementById("gameCanvas") as HTMLCanvasElement;
+    var canvas :HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
 
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     

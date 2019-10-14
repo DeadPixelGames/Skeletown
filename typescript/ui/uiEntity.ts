@@ -167,9 +167,10 @@ export class ProgressBar extends UISquareEntity{
         this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
         
     }
+
     public setProgress(progress :number){
         this.progress = progress;
-        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, (progress * this.dimension.w) * 0.01, this.dimension.h);
+        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, Math.max(1,(progress * this.dimension.w) * 0.01), this.dimension.h);
     }
     //#endregion
 
@@ -181,8 +182,10 @@ export class ProgressBar extends UISquareEntity{
     }
 
     public syncImage(){
-        this.image.x = this.x;
-        this.image.y = this.y;
+        if(this.image){
+            this.image.x = this.x;
+            this.image.y = this.y;
+        }
         this.progressBar.x = this.x;
         this.progressBar.y = this.y;
         this.icon.x = this.x;
@@ -272,6 +275,7 @@ class UIGraphicEntity extends GraphicEntity{
     }
     /**Deja las coordenadas de la cámara (no tiene en cuenta el scroll) */
     public render(context :CanvasRenderingContext2D){
-        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, this.x, this.y, this.section.w, this.section.h);
+        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h,
+        this.x, this.y, this.section.w, this.section.h);
     }
 }

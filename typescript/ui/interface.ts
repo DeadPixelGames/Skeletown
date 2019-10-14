@@ -20,7 +20,7 @@ export default class Interface{
         var listenerCallback = (e :MouseEvent | TouchEvent)=>{
             if(e instanceof MouseEvent){
                 that.colliders.sendUserClick(e.clientX, e.clientY);
-            }else if(e instanceof TouchEvent){
+            }else if(window.TouchEvent && e instanceof TouchEvent){
                 that.colliders.sendUserClick(e.touches[0].clientX, e.touches[0].clientY);
             }
         };
@@ -28,7 +28,7 @@ export default class Interface{
         document.addEventListener("mousedown", e => listenerCallback(e));
         document.addEventListener("touchstart", e => listenerCallback(e));
 
-        GameLoop.instance.suscribe(this, null, this.update, null, null);
+       
     }
 
     //#region GETTERS Y SETTERS
@@ -45,7 +45,5 @@ export default class Interface{
         this.colliders.add(collider);
     }
 
-    public update(deltaTime :number){
-        this.colliders.render(GraphicsRenderer.instance.getCanvasContext());
-    }
+
 }
