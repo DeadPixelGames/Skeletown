@@ -11,6 +11,7 @@ import Interface from "./ui/interface.js";
 import Enemy from "./enemy.js";
 
 import { distance } from "./util.js";
+import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 
 //#region Declaración de variables
 var player :Player;
@@ -27,7 +28,7 @@ var interf :Interface;
 //#endregion
 
 
-var resize = function(){
+var resize = function() {
     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
     hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
@@ -35,8 +36,9 @@ var resize = function(){
 
 window.addEventListener("resize", resize);
 
-
 window.onload = async function() {
+
+    
 
   //TODO Adecentar esto
     var canvas :HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
@@ -46,6 +48,17 @@ window.onload = async function() {
     GameLoop.initInstance();
 
     GraphicsRenderer.initInstance(ctx);
+
+    //#region Animación de prueba del esqueleto
+    var anim = await AnimatedGraphicEntity.load("skeleton.json");
+
+    anim.renderLayer = 2.5;
+    anim.x = 1200;
+    anim.y = 1280;
+    anim.play("walkright");
+
+    GraphicsRenderer.instance.addExistingEntity(anim);
+    //#endregion
 
     //#region Interfaz
     moneyCounter = new UISquareEntity(0.09, 0.03, 320, 91, true, (x :number, y :number)=>{
@@ -107,19 +120,16 @@ window.onload = async function() {
     }, () => console.log("Game Over :("));
     //#endregion
 
-    
-
     //#region Área
     area = AreaMap.load("farmland2.json", () => {
         if(enemy){
             area.getColliders().add(player.getCollider() as BoxCollider);
-
-            
             GameLoop.instance.start();
         }
         
     });
     //#endregion
+    
     enemy = await generateEnemy(() => {
         if(enemy) {
             enemy.dispose();

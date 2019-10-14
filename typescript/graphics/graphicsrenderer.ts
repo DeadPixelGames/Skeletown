@@ -106,6 +106,7 @@ export default class GraphicsRenderer {
      * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.
      */
     public flush() {
+        this.entities.forEach(e => e.dispose());
         this.entities = [];
         this.following = null;
         this.onFirstFrame.dispatch();

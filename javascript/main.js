@@ -17,6 +17,7 @@ import { UILayout, UISquareEntity, UICircleEntity, ProgressBar } from "./ui/uiEn
 import Interface from "./ui/interface.js";
 import Enemy from "./enemy.js";
 import { distance } from "./util.js";
+import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 //#region Declaración de variables
 var player;
 var enemy;
@@ -42,6 +43,14 @@ window.onload = function () {
         ctx = canvas.getContext("2d");
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
+        //#region Animación de prueba del esqueleto
+        var anim = yield AnimatedGraphicEntity.load("skeleton.json");
+        anim.renderLayer = 2.5;
+        anim.x = 1200;
+        anim.y = 1280;
+        anim.play("walkright");
+        GraphicsRenderer.instance.addExistingEntity(anim);
+        //#endregion
         //#region Interfaz
         moneyCounter = new UISquareEntity(0.09, 0.03, 320, 91, true, (x, y) => {
         });

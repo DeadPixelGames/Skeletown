@@ -1,0 +1,51 @@
+{
+    "source": "../SpriteSheets/SpriteSheet_Skeleto.png",
+    "framerate": 10,
+    "framewidth": 107,
+    "frameheight": 235,
+    "pivotX": 53,
+    "pivotY": 117,
+    "clips": [
+        {
+            "id": "walkdown",
+            "frames": [
+                [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7]
+            ],
+            "pause": 2,
+            "after": {
+                "goto": "walkleft"
+            }
+        },
+        {
+            "id": "walkup",
+            "frames": [
+                [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]
+            ],
+            "pause": 2,
+            "after": {
+                "goto": "walkright"
+            }
+        },
+        {
+            "id": "walkleft",
+            "frames": [
+                [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7]
+            ],
+            "pause": 2,
+            "after": {
+                "goto": "walkup"
+            }
+        },
+        {
+            "id": "walkright",
+            "frames": [
+                [2, 0], [2, 1], [2, 2], [2, 3], [2, 4], [2, 5], [2, 6], [2, 7]
+            ],
+            "pause": 2,
+            "flip": true,
+            "after": {
+                "goto": "walkdown"
+            }
+        }
+    ]
+}
