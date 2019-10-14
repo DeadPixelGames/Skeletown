@@ -92,6 +92,11 @@ export abstract class Collider {
     public entity :Entity | null;
 
     /**
+     * Indica si el collider debe ser eliminado.
+     */
+    public discarded :boolean;
+
+    /**
      * El constructor básico para `Collider` está protegido ya que es una clase abstracta. Utiliza una clase derivada.
      */
     protected constructor(x :number, y :number, activationRadius :number, dynamic :boolean) {
@@ -111,6 +116,7 @@ export abstract class Collider {
         this.entity = null;
 
         this.dynamic = dynamic;
+        this.discarded = false;
 
         this.intersectingColliders = [];
     }
@@ -157,12 +163,18 @@ export abstract class Collider {
      * Comprueba las colisiones con todos los demás colliders de la capa indicada y dispara los eventos pertinentes.
      */
     public checkCollisions(layer :ColliderLayer) {
+        
         for(let other of layer) {
             
             // Si estamos comparando este collider consigo mismo, ignoramos esta iteración porque no queremos disparar
             // eventos en esta situación
             if(this == other) {
                 continue;
+            }
+
+            // Si el collider está descartado, lo marcamos eliminarlo de la capa
+            if(other.discarded) {
+                layer.markForDeletion(other);
             }
 
             // Si el otro collider no es dinámico, la capa no va a disparar sus eventos de colisión, en cuyo caso  este collider debe
@@ -297,9 +309,14 @@ export class ColliderLayer {
      * Los colliders que forman parte de esta capa.
      */
     private colliders :Collider[];
+    /**
+     * Colliders que hay que eliminar de la capa.
+     */
+    private markedForDeletion :Collider[];
 
     constructor() {
         this.colliders = [];
+        this.markedForDeletion = [];
     }
 
     /**
@@ -328,6 +345,13 @@ export class ColliderLayer {
     }
 
     /**
+     * Marca el collider para eliminarlo de esta capa cuando sea posible.
+     */
+    public markForDeletion(collider :Collider) {
+        this.markedForDeletion.push(collider);
+    }
+
+    /**
      * Permite iterar por los colliders de la capa sin exponer la referencia a la lista de colliders.
      * Es importante garantizar que todos los colliders se añadan a través de `add(collider)` para garantizar
      * que los colliders dinámicos están al principio en todo momento.
@@ -352,8 +376,16 @@ export class ColliderLayer {
                 break;
             }
 
+            if(collider.discarded) {
+                // Si el collider está descartado, no hacer nada con él.
+                continue;
+            }
+
             collider.checkCollisions(this);
         }
+
+        // Después de revisar todas las colisiones, eliminamos los colliders marcados para ello
+        this.markedForDeletion.forEach(c => this.colliders.remove(c));
     }
 
     /**

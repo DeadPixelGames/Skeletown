@@ -1,30 +1,37 @@
-import Entity from "../entity.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import GraphicEntity from "../graphics/graphicentity.js";
+import GameLoop from "../gameloop.js";
 /**
  * Unidad mínima de interfaz de usuario Cuadrada
  */
-export class UIEntity extends Entity {
+export class UIEntity {
     constructor(clickable) {
-        super();
         this.clickable = clickable;
+        this.ctx = GraphicsRenderer.instance.getCanvasContext();
         GraphicsRenderer.instance.suscribe(this, null, this.drawText);
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
+        this.colliderOffset = { x: 0, y: 0 };
     }
     //#region GETTERS Y SETTERS
     getRelativePos() { return this.relativePos; }
     getText() { return this.text; }
+    getCollider() { return this.collider; }
     setRealtivePos(relativePos) {
         this.relativePos = relativePos;
     }
     setText(text, textPos) { this.text = text; this.textPos = textPos; }
+    setCollider(collider) {
+        this.collider = collider;
+    }
     //#endregion
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     setImage(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
     }
     addToGraphicRenderer() {
-        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        if (this.image)
+            GraphicsRenderer.instance.addExistingEntity(this.image);
     }
     drawText() {
         if (this.text && this.textPos) {
@@ -33,6 +40,30 @@ export class UIEntity extends Entity {
             this.ctx.fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
         }
     }
+    hide() {
+        if (this.image)
+            this.image.visible = false;
+    }
+    show() {
+        if (this.image)
+            this.image.visible = true;
+    }
+    syncCollider() {
+        if (this.collider && this.colliderOffset) {
+            this.collider.centerX = this.x + this.colliderOffset.x;
+            this.collider.centerY = this.y + this.colliderOffset.y;
+        }
+    }
+    syncImage() {
+        if (this.image) {
+            this.image.x = this.x;
+            this.image.y = this.y;
+        }
+    }
+    update(deltaTime) {
+        this.syncCollider();
+        this.syncImage();
+    }
 }
 export class UISquareEntity extends UIEntity {
     constructor(left, top, w, h, clickable, onClick) {
@@ -40,6 +71,8 @@ export class UISquareEntity extends UIEntity {
         this.relativePos = { x: left, y: top };
         this.dimension = { w: w, h: h };
         this.setCollider(new BoxCollider(left, top, w, h, false));
+        if (this.colliderOffset)
+            this.colliderOffset = { x: w * 0.5, y: h * 0.5 };
         var collider = this.getCollider();
         /**Añadir al collider de la entidad la función que se activará con el evento onClick */
         if (collider && this.clickable && onClick) {
@@ -52,11 +85,13 @@ export class UICircleEntity extends UIEntity {
         super(clickable);
         this.relativePos = { x: centerX, y: centerY };
         this.setCollider(new CircleCollider(centerX, centerY, radius, false));
+        if (this.colliderOffset)
+            this.colliderOffset = { x: radius, y: radius };
         var collider = this.getCollider();
         if (collider && this.clickable && onClick) {
             collider.addUserInteraction(this, onClick, null, null);
         }
-        this.dimension = { w: radius, h: radius };
+        this.dimension = { w: radius * 2, h: radius * 2 };
     }
 }
 export class ProgressBar extends UISquareEntity {
@@ -80,7 +115,8 @@ export class ProgressBar extends UISquareEntity {
     }
     //#endregion
     addToGraphicRenderer() {
-        GraphicsRenderer.instance.addExistingEntity(this.getImage());
+        if (this.image)
+            GraphicsRenderer.instance.addExistingEntity(this.image);
         GraphicsRenderer.instance.addExistingEntity(this.getProgressBar());
         GraphicsRenderer.instance.addExistingEntity(this.getIcon());
     }
@@ -91,6 +127,18 @@ export class ProgressBar extends UISquareEntity {
         this.progressBar.y = this.y;
         this.icon.x = this.x;
         this.icon.y = this.y;
+    }
+    hide() {
+        if (this.image)
+            this.image.visible = false;
+        this.progressBar.visible = false;
+        this.icon.visible = false;
+    }
+    show() {
+        if (this.image)
+            this.image.visible = true;
+        this.progressBar.visible = true;
+        this.icon.visible = true;
     }
 }
 /**Contenedor de entidades de layout */
@@ -112,6 +160,23 @@ export class UILayout {
     addEntitiesToRenderer() {
         for (let ent of this.uiEntities) {
             ent.addToGraphicRenderer();
+        }
+    }
+    resize(w, h) {
+        this.dimension = { w: w, h: h };
+        for (let ent of this.uiEntities) {
+            ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
+            ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+        }
+    }
+    hide() {
+        for (let ent of this.uiEntities) {
+            ent.hide();
+        }
+    }
+    show() {
+        for (let ent of this.uiEntities) {
+            ent.show();
         }
     }
 }
