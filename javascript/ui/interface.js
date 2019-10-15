@@ -1,6 +1,6 @@
 import { ColliderLayer } from "../collider.js";
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
-/**Controlador de los colliders de la interfaz gráfica */
+/**Controlador de los colliders de la interfaz gráfica en coordenadas del canvas*/
 export default class Interface {
     constructor() {
         this.colliders = new ColliderLayer();
@@ -25,7 +25,9 @@ export default class Interface {
         this.colliders.add(collider);
     }
 }
+/**Instancia de la interfaz. SINGLETON */
 Interface.instance = new Interface();
+/**Controlador de los colliders de la interfaz gráfica en coordenadas del mundo */
 export class InterfaceInWorld {
     constructor() {
         this.colliders = new ColliderLayer();
@@ -50,5 +52,6 @@ export class InterfaceInWorld {
         this.colliders.add(collider);
     }
 }
+/**Instancia de la interfaz. SINGLETON */
 InterfaceInWorld.instance = new InterfaceInWorld();
 //# sourceMappingURL=interface.js.map

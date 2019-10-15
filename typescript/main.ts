@@ -138,7 +138,7 @@ async function generateEnemy(onDead :() => void) {
     enemy.x = 2176;
     enemy.y = 1280;
     
-    enemy.setImage(2.5, await FileLoader.loadImage("animation/Enemy_Placeholder/FRONT_Enemy.png"), 0, 0, 256, 256, 128, 128);
+    enemy.setImage(2.5, await FileLoader.loadImage("animation/Enemy_Placeholder/enemy0.png"), 0, 0, 133, 128, 66, 54);
     
     var image = enemy.getImage();
     if(image) {

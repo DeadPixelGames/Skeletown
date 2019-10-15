@@ -297,7 +297,6 @@ class TileEntity extends GraphicEntity {
     initLayout() {
         return __awaiter(this, void 0, void 0, function* () {
             var that = this;
-            console.log(this.x, this.y);
             this.planted = false;
             this.plant = new UIEntity(true);
             this.harvest = new UIEntity(true);
@@ -319,9 +318,9 @@ class TileEntity extends GraphicEntity {
                 if (that.fertilizer.image.visible)
                     console.log("ABONAR");
             });
-            this.plant.setImage(false, 100, yield FileLoader.loadImage("resources/interface/HUD_plant_placeHolder.png"), 0, 0, 86, 86);
-            this.harvest.setImage(false, 100, yield FileLoader.loadImage("resources/interface/HUD_recolect_placeHolder.png"), 0, 0, 86, 86);
-            this.fertilizer.setImage(false, 100, yield FileLoader.loadImage("resources/interface/HUD_fertilize_placeHolder.png"), 0, 0, 86, 86);
+            this.plant.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_plantar.png"), 0, 0, 86, 86);
+            this.harvest.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_recolectar.png"), 0, 0, 86, 86);
+            this.fertilizer.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_abono.png"), 0, 0, 86, 86);
             this.uiLayout.addUIEntity(this.plant);
             this.uiLayout.addUIEntity(this.harvest);
             this.uiLayout.addUIEntity(this.fertilizer);
