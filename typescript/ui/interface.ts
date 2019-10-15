@@ -2,18 +2,16 @@ import { ColliderLayer, Collider } from "../collider.js";
 import GameLoop from "../gameloop.js";
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 
-/**Controlador de los colliders de la interfaz gráfica */
+/**Controlador de los colliders de la interfaz gráfica en coordenadas del canvas*/
 export default class Interface{
-    private width :number;
-
-    private height :number;
+    /**Instancia de la interfaz. SINGLETON */
+    public static instance  = new Interface();
 
     private colliders :ColliderLayer;
 
 
-    constructor(width :number, height :number){
-        this.width = width;
-        this.height = height;
+    private constructor(){
+
         this.colliders = new ColliderLayer();
         var that = this;
         /**Añadir a los colliders un evento de escucha de clicks */
@@ -31,13 +29,10 @@ export default class Interface{
        
     }
 
+
     //#region GETTERS Y SETTERS
-    public getWidth(){return this.width;}
-    public getHeight(){return this.height;}
     public getColliders(){return this.colliders;}
 
-    public setWidth(width :number){this.width = width;}
-    public setHeight(height :number){this.height = height;}
     //#endregion
 
     /**Añade un collider a la interfaz */
@@ -46,4 +41,38 @@ export default class Interface{
     }
 
 
+}
+
+/**Controlador de los colliders de la interfaz gráfica en coordenadas del mundo */
+export class InterfaceInWorld{
+    /**Instancia de la interfaz. SINGLETON */
+    public static instance = new InterfaceInWorld();
+
+    private colliders :ColliderLayer;
+
+    private constructor(){
+        this.colliders = new ColliderLayer();
+        var that = this;
+        /**Añadir a los colliders un evento de escucha de clicks */
+        var listenerCallback = (e :MouseEvent | TouchEvent)=>{
+            if(e instanceof MouseEvent){
+                that.colliders.sendUserClick(e.clientX + GraphicsRenderer.instance.scrollX, e.clientY + GraphicsRenderer.instance.scrollY);
+            }else if(window.TouchEvent && e instanceof TouchEvent){
+                that.colliders.sendUserClick(e.touches[0].clientX + GraphicsRenderer.instance.scrollX, e.touches[0].clientY + GraphicsRenderer.instance.scrollY);
+            }
+        };
+
+        document.addEventListener("mousedown", e => listenerCallback(e));
+        document.addEventListener("touchstart", e => listenerCallback(e));       
+    }
+
+    //#region GETTERS Y SETTERS
+    public getColliders(){return this.colliders;}
+
+    //#endregion
+
+    /**Añade un collider a la interfaz */
+    public addCollider(collider :Collider){
+        this.colliders.add(collider);
+    }
 }

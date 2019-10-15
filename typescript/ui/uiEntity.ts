@@ -15,7 +15,7 @@ export class UIEntity{
 
     public dimension :{w :number, h :number};
 
-    protected image :UIGraphicEntity;
+    public image :GraphicEntity;
 
     protected text? :string;
     /**Posición del texto en coordenadas locales de la interfaz */
@@ -53,13 +53,14 @@ export class UIEntity{
         this.relativePos = relativePos;
     }
     public setText(text :string, textPos :{x :number, y :number}){this.text = text; this.textPos = textPos;}
-    public setCollider(collider :Collider){
-        this.collider = collider;
-    }
     //#endregion
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
-    public setImage(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
-        this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+    public setImage(useCanvasCoords :boolean, layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
+        if(useCanvasCoords){
+            this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }else{
+            this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
         
     }
     
@@ -70,8 +71,13 @@ export class UIEntity{
     }
 
     protected drawText() {
+        
         if(this.text && this.textPos) {
-            this.ctx.font = "45px Arco Black";
+            this.ctx.font = "45px yumaro";
+            this.ctx.textAlign = "end";
+            this.ctx.strokeStyle = 'white';
+            this.ctx.lineWidth = 5;
+            this.ctx.strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
             this.ctx.fillStyle = "#000000";
             this.ctx.fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
         }
@@ -104,44 +110,27 @@ export class UIEntity{
         this.syncCollider();
         this.syncImage();
     }
-}
 
-
-export class UISquareEntity extends UIEntity {
-
-
-    constructor (left :number, top :number, w :number, h :number, clickable :boolean, onClick ?:((x :number, y :number)=>void)){
-        super(clickable);
+    public setCollider(square :boolean, left :number, top :number, w :number, h :number, onClick ?:((x :number, y :number)=>void)){
         this.relativePos = {x: left, y: top};
         this.dimension = {w: w, h: h};
-        this.setCollider(new BoxCollider(left, top, w, h, false));
-        if(this.colliderOffset)
-            this.colliderOffset = {x: w * 0.5, y: h * 0.5};
-        var collider = this.getCollider();
-        /**Añadir al collider de la entidad la función que se activará con el evento onClick */
-        if(collider && this.clickable && onClick){
-            collider.addUserInteraction(this, onClick, null, null);
+        if(square){
+            this.collider = new BoxCollider(left, top, w, h, false);
+        }else{
+            this.collider = new CircleCollider(left, top, w * 0.5, false);
+        }
+        this.colliderOffset = {x: w * 0.5, y: h * 0.5};
+
+        if(this.clickable && onClick){
+            this.collider.addUserInteraction(this, onClick, null, null);
         }
     }
 }
 
-export class UICircleEntity extends UIEntity {
-    constructor (centerX :number, centerY :number, radius :number, clickable :boolean, onClick ?:((x :number, y :number)=>void)){
-        super(clickable);
-        this.relativePos = {x: centerX, y: centerY};
-        this.setCollider(new CircleCollider(centerX, centerY, radius, false));
-        if(this.colliderOffset)
-            this.colliderOffset = {x: radius, y: radius};
-        var collider = this.getCollider();
 
-        if(collider && this.clickable && onClick){
-            collider.addUserInteraction(this, onClick, null, null);
-        }
-        this.dimension = {w: radius * 2, h: radius * 2};
-    }
-}
 
-export class ProgressBar extends UISquareEntity{
+
+export class ProgressBar extends UIEntity{
 
     private progressBar :UIGraphicEntity;
     private icon :UIGraphicEntity;
@@ -149,7 +138,8 @@ export class ProgressBar extends UISquareEntity{
     private progress :number;
 
     constructor(left :number, top :number, w :number, h :number, clickable :boolean, onClick ?:((x :number, y :number)=>void)){
-        super(left, top, w, h, clickable, onClick);
+        super(clickable);
+        this.setCollider(true, left, top, w, h, onClick);
         this.progress = 100;
     }
 
@@ -159,12 +149,20 @@ export class ProgressBar extends UISquareEntity{
     public getIcon(){return this.icon;}
     public getProgress(){return this.progress;}
 
-    public setProgressBar(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
-        this.progressBar = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+    public setProgressBar(useCanvasCoords :boolean, layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
+        if(useCanvasCoords){
+            this.progressBar = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }else{
+            this.progressBar = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
         
     }
-    public setIcon(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
-        this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+    public setIcon(useCanvasCoords :boolean, layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
+        if(useCanvasCoords){
+            this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }else{
+            this.icon = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
         
     }
 
@@ -221,11 +219,13 @@ export class UILayout {
     /**Dimensión del layout */
     private dimension :{w :number, h :number};
     
+    public visible :boolean;
 
     constructor(x :number, y :number, w :number, h :number){
         this.uiEntities = [];
         this.position = {x: x, y: y};
         this.dimension = {w: w, h: h};
+        this.visible = true;
     }
 
     /**Añade una entidad de interfaz al layout
@@ -255,12 +255,14 @@ export class UILayout {
     }
 
     public hide(){
+        this.visible = false;
         for(let ent of this.uiEntities){
             ent.hide();
         }
     }
 
     public show(){
+        this.visible = true;
         for(let ent of this.uiEntities){
             ent.show();
         }
@@ -268,7 +270,7 @@ export class UILayout {
 }
 
 /**Hereda de GraphicEntity cambia el método render */
-class UIGraphicEntity extends GraphicEntity{
+export class UIGraphicEntity extends GraphicEntity{
     constructor(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         super(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
 

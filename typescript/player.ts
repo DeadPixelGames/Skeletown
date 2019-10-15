@@ -1,5 +1,6 @@
 import Entity from "./entity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
+import { UIGraphicEntity } from "./ui/uiEntity.js";
 
 /** Velocidad de desplazamiento del jugador. */
 const PLAYER_SPEED = 500;
@@ -10,6 +11,9 @@ const PLAYER_SPEED = 500;
  */
 const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
 
+/**Capacidad máxima del inventario */
+const INVENTORY_MAX_SPACES = 10;
+
 /**
  * Clase que representa al jugador
  */
@@ -19,7 +23,9 @@ export default class Player extends Entity{
     /** Evento actual del ratón o de la pulsación */
     private event :MouseEvent | TouchEvent;
 
-    private Inventory :{};
+    private inventory :[null, ... Item[]];
+
+    private xp :number;
 
 
     /**
@@ -48,6 +54,8 @@ export default class Player extends Entity{
 
         this.speed.x = PLAYER_SPEED;
         this.speed.y = PLAYER_SPEED;
+
+        this.inventory = [null];
     }
 
     /**
@@ -105,4 +113,13 @@ export default class Player extends Entity{
         
     }
 
+}
+
+
+type Item = {
+    id :number,
+    name :string,
+    description :string,
+    image :UIGraphicEntity,
+    count :number
 }

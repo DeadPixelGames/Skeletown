@@ -21,13 +21,15 @@ export class UIEntity {
         this.relativePos = relativePos;
     }
     setText(text, textPos) { this.text = text; this.textPos = textPos; }
-    setCollider(collider) {
-        this.collider = collider;
-    }
     //#endregion
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
-    setImage(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
-        this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+    setImage(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
+        if (useCanvasCoords) {
+            this.image = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
+        else {
+            this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
     }
     addToGraphicRenderer() {
         if (this.image)
@@ -35,7 +37,11 @@ export class UIEntity {
     }
     drawText() {
         if (this.text && this.textPos) {
-            this.ctx.font = "45px Arco Black";
+            this.ctx.font = "45px yumaro";
+            this.ctx.textAlign = "end";
+            this.ctx.strokeStyle = 'white';
+            this.ctx.lineWidth = 5;
+            this.ctx.strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
             this.ctx.fillStyle = "#000000";
             this.ctx.fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
         }
@@ -64,50 +70,46 @@ export class UIEntity {
         this.syncCollider();
         this.syncImage();
     }
-}
-export class UISquareEntity extends UIEntity {
-    constructor(left, top, w, h, clickable, onClick) {
-        super(clickable);
+    setCollider(square, left, top, w, h, onClick) {
         this.relativePos = { x: left, y: top };
         this.dimension = { w: w, h: h };
-        this.setCollider(new BoxCollider(left, top, w, h, false));
-        if (this.colliderOffset)
-            this.colliderOffset = { x: w * 0.5, y: h * 0.5 };
-        var collider = this.getCollider();
-        /**Añadir al collider de la entidad la función que se activará con el evento onClick */
-        if (collider && this.clickable && onClick) {
-            collider.addUserInteraction(this, onClick, null, null);
+        if (square) {
+            this.collider = new BoxCollider(left, top, w, h, false);
+        }
+        else {
+            this.collider = new CircleCollider(left, top, w * 0.5, false);
+        }
+        this.colliderOffset = { x: w * 0.5, y: h * 0.5 };
+        if (this.clickable && onClick) {
+            this.collider.addUserInteraction(this, onClick, null, null);
         }
     }
 }
-export class UICircleEntity extends UIEntity {
-    constructor(centerX, centerY, radius, clickable, onClick) {
-        super(clickable);
-        this.relativePos = { x: centerX, y: centerY };
-        this.setCollider(new CircleCollider(centerX, centerY, radius, false));
-        if (this.colliderOffset)
-            this.colliderOffset = { x: radius, y: radius };
-        var collider = this.getCollider();
-        if (collider && this.clickable && onClick) {
-            collider.addUserInteraction(this, onClick, null, null);
-        }
-        this.dimension = { w: radius * 2, h: radius * 2 };
-    }
-}
-export class ProgressBar extends UISquareEntity {
+export class ProgressBar extends UIEntity {
     constructor(left, top, w, h, clickable, onClick) {
-        super(left, top, w, h, clickable, onClick);
+        super(clickable);
+        this.setCollider(true, left, top, w, h, onClick);
         this.progress = 100;
     }
     //#region GETTERS Y SETTERS
     getProgressBar() { return this.progressBar; }
     getIcon() { return this.icon; }
     getProgress() { return this.progress; }
-    setProgressBar(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
-        this.progressBar = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+    setProgressBar(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
+        if (useCanvasCoords) {
+            this.progressBar = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
+        else {
+            this.progressBar = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
     }
-    setIcon(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
-        this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+    setIcon(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
+        if (useCanvasCoords) {
+            this.icon = new UIGraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
+        else {
+            this.icon = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
+        }
     }
     setProgress(progress) {
         this.progress = progress;
@@ -149,6 +151,7 @@ export class UILayout {
         this.uiEntities = [];
         this.position = { x: x, y: y };
         this.dimension = { w: w, h: h };
+        this.visible = true;
     }
     /**Añade una entidad de interfaz al layout
      * Cambia las coordenadas de la entidad según las coordenadas del layout
@@ -172,18 +175,20 @@ export class UILayout {
         }
     }
     hide() {
+        this.visible = false;
         for (let ent of this.uiEntities) {
             ent.hide();
         }
     }
     show() {
+        this.visible = true;
         for (let ent of this.uiEntities) {
             ent.show();
         }
     }
 }
 /**Hereda de GraphicEntity cambia el método render */
-class UIGraphicEntity extends GraphicEntity {
+export class UIGraphicEntity extends GraphicEntity {
     constructor(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         super(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
     }

@@ -2,8 +2,10 @@ import FileLoader from "../fileloader.js";
 import GraphicEntity from "./graphicentity.js";
 import GraphicsRenderer from "./graphicsrenderer.js";
 import GameEvent from "../gameevent.js";
-import { ColliderLayer, Collider, BoxCollider } from "../collider.js";
+import { ColliderLayer, Collider, BoxCollider, CircleCollider } from "../collider.js";
 import GameLoop from "../gameloop.js";
+import { UILayout, UIEntity } from "../ui/uiEntity.js";
+import Interface, { InterfaceInWorld } from "../ui/interface.js";
 
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
@@ -217,6 +219,9 @@ export default class AreaMap {
                 tile.x = (count % mapWidth) * tileWidth;
                 tile.y = Math.floor(count / mapWidth) * tileHeight;
 
+                if(tileProto.farmable)
+                    tile.initLayout();
+
                 if(tile.collider) {
                     // Colocamos el collider también en el mismo lugar que el tile
                     tile.collider.centerX = tile.x + tileWidth * 0.5;
@@ -262,6 +267,11 @@ export default class AreaMap {
                         solid = false;
                     }
 
+                    let farmable = AreaMap.findCustomPropertyValue<boolean>("farmable", y*tileset.columns + x, tileset.tiles)
+                    if(farmable == null){
+                        farmable = false;
+                    }
+
                     // Añadimos el prototipo a la paleta
                     this.palette.push({
                         source: image,
@@ -269,7 +279,8 @@ export default class AreaMap {
                         sY: y * tileset.tileheight,
                         sWidth: tileset.tilewidth,
                         sHeight: tileset.tileheight,
-                        solid: solid
+                        solid: solid,
+                        farmable: farmable
                     });
                 }
             }
@@ -351,6 +362,7 @@ type TilePrototype = {
     sWidth :number,
     sHeight :number
     solid :boolean,
+    farmable :boolean
 };
 
 /**
@@ -362,19 +374,104 @@ class TileEntity extends GraphicEntity {
      * Indica si el tile se puede atravesar por otras entidades o no.
      */
     public solid :boolean;
+
+    /**
+     * Indica si el tile es interactuable y disponible para plantar 
+    */
+    public farmable :boolean;
     /**
      * El colisionador asignado a este tile.
      */
     public collider :Collider;
+    /**Botones asociados al tile */
+    private uiLayout :UILayout;
 
     public constructor(layer :number, proto :TilePrototype) {
         super(layer, proto.source, proto.sX, proto.sY, proto.sWidth, proto.sHeight, 0, 0);
         this.solid = proto.solid;
+        this.farmable = proto.farmable;
         if(this.solid) {
             this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
         }
+        if(this.farmable){
+            this.collider.addUserInteraction(this, this.onClick, null, null);
+            Interface.instance.addCollider(this.collider);
+            GameLoop.instance.suscribe(this, null, this.update, null, null);
+        }
     }
 
+    public plant :UIEntity;
+    public harvest :UIEntity;
+    public fertilizer :UIEntity;
+
+    public planted :boolean;
+
+    /**Inicializa el HUD asociado a un terreno plantable.
+     * BOTONES: 
+     * plant: para plantar
+     * harvest: para recolectar
+     * fertilizer: para abonar
+     */
+    public async initLayout(){
+        var that = this;
+        this.planted = false;
+        this.plant = new UIEntity(true);
+        this.harvest = new UIEntity(true);
+        this.fertilizer = new UIEntity(true);
+        this.uiLayout = new UILayout(this.x, this.y - 128, this.getWidth(), this.getHeight());
+        this.plant.setCollider(false, 0.5, 0, 86, 86, (x,y)=>{
+            if(that.plant.image.visible){
+                console.log("PLANTAR");
+                that.planted = true;
+            }
+        })
+        this.harvest.setCollider(false, 0.15, 0, 86, 86, (x,y)=>{
+            if(that.harvest.image.visible){
+                console.log("RECOGER")
+                that.planted = false;
+            }
+        })
+        this.fertilizer.setCollider(false, 0.85, 0, 86, 86, (x,y)=>{
+            if(that.fertilizer.image.visible)
+                console.log("ABONAR")
+        })
+        this.plant.setImage(false, 100, await FileLoader.loadImage("resources/interface/HUD_plant_placeHolder.png"),0,0,86,86)
+        this.harvest.setImage(false, 100, await FileLoader.loadImage("resources/interface/HUD_recolect_placeHolder.png"),0,0,86,86);
+        this.fertilizer.setImage(false, 100, await FileLoader.loadImage("resources/interface/HUD_fertilize_placeHolder.png"),0,0,86,86);
+        this.uiLayout.addUIEntity(this.plant);
+        this.uiLayout.addUIEntity(this.harvest);
+        this.uiLayout.addUIEntity(this.fertilizer);
+        this.uiLayout.addEntitiesToRenderer();
+        this.uiLayout.hide();
+
+        InterfaceInWorld.instance.addCollider(this.plant.getCollider() as CircleCollider);
+        InterfaceInWorld.instance.addCollider(this.harvest.getCollider() as CircleCollider);
+        InterfaceInWorld.instance.addCollider(this.fertilizer.getCollider() as CircleCollider);
+
+    }
+
+    public onClick(){
+        this.uiLayout.visible = !this.uiLayout.visible;
+    }
+
+    public update(deltaTime :number){
+        
+            if(this.uiLayout.visible){
+                if(this.planted){
+                    this.plant.hide();
+                    this.harvest.show()
+                    this.fertilizer.show();
+                }else{
+                    this.plant.show();
+                    this.harvest.hide();
+                    this.fertilizer.hide();
+                }
+            }else{
+                this.uiLayout.hide();
+            }  
+        
+        
+    }
 }
 //#endregion
 

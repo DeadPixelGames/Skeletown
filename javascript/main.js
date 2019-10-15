@@ -13,8 +13,8 @@ import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import { BoxCollider } from "./collider.js";
-import { UILayout, UISquareEntity, UICircleEntity, ProgressBar } from "./ui/uiEntity.js";
-import Interface from "./ui/interface.js";
+import { UILayout, UIEntity, ProgressBar } from "./ui/uiEntity.js";
+import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import Enemy from "./enemy.js";
 import { distance } from "./util.js";
 //#region Declaración de variables
@@ -27,7 +27,6 @@ var lifeBar;
 var moneyCounter;
 var time;
 var inventory;
-var interf;
 //#endregion
 var resize = function () {
     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
@@ -43,33 +42,35 @@ window.onload = function () {
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
         //#region Interfaz
-        moneyCounter = new UISquareEntity(0.12, 0.03, 320, 91, true, (x, y) => {
+        moneyCounter = new UIEntity(true);
+        moneyCounter.setCollider(true, 0.12, 0.03, 320, 91, (x, y) => {
         });
         lifeBar = new ProgressBar(0.5, 0.03, 703, 128, true, (x, y) => {
             lifeBar.setProgress(lifeBar.getProgress() - 10);
         });
-        time = new UISquareEntity(0.95, 0.03, 362, 128, false);
-        inventory = new UICircleEntity(0.87, 0.7, 122, true, (x, y) => {
+        time = new UIEntity(false);
+        time.setCollider(true, 0.95, 0.03, 362, 128);
+        inventory = new UIEntity(true);
+        inventory.setCollider(false, 0.87, 0.7, 245, 245, (x, y) => {
             lifeBar.setProgress(lifeBar.getProgress() + 10);
         });
-        interf = new Interface(canvas.width, canvas.height);
-        interf.addCollider(lifeBar.getCollider());
-        interf.addCollider(moneyCounter.getCollider());
-        interf.addCollider(time.getCollider());
-        interf.addCollider(inventory.getCollider());
+        Interface.instance.addCollider(lifeBar.getCollider());
+        Interface.instance.addCollider(moneyCounter.getCollider());
+        Interface.instance.addCollider(time.getCollider());
+        Interface.instance.addCollider(inventory.getCollider());
         hud_InGame = new UILayout(0, 0, canvas.width, canvas.height);
         hud_InGame.addUIEntity(lifeBar);
         hud_InGame.addUIEntity(moneyCounter);
         hud_InGame.addUIEntity(time);
         hud_InGame.addUIEntity(inventory);
-        moneyCounter.setText("1283902", { x: 30, y: 65 });
-        time.setText("10:21", { x: 30, y: 65 });
-        lifeBar.setImage(99, yield FileLoader.loadImage("resources/interface/HUD_life3.png"), 0, 0, 768, 91, 768, 91);
-        lifeBar.setIcon(100, yield FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
-        lifeBar.setProgressBar(100, yield FileLoader.loadImage("resources/interface/HUD_life2.png"), 0, 0, 768, 91, 768, 91);
-        moneyCounter.setImage(100, yield FileLoader.loadImage("resources/interface/HUD_money.png"));
-        time.setImage(100, yield FileLoader.loadImage("resources/interface/HUD_time.png"));
-        inventory.setImage(100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
+        moneyCounter.setText("1283902", { x: 250, y: 65 });
+        time.setText("10:21", { x: 145, y: 80 });
+        lifeBar.setImage(true, 99, yield FileLoader.loadImage("resources/interface/HUD_life3.png"), 0, 0, 768, 91, 768, 91);
+        lifeBar.setIcon(true, 100, yield FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
+        lifeBar.setProgressBar(true, 100, yield FileLoader.loadImage("resources/interface/HUD_life2.png"), 0, 0, 768, 91, 768, 91);
+        moneyCounter.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_money.png"));
+        time.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_time.png"));
+        inventory.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
         hud_InGame.addEntitiesToRenderer();
         //#endregion
         //#region Jugador
@@ -189,12 +190,14 @@ function renderDebug() {
     }
     var scrollX = GraphicsRenderer.instance.scrollX;
     var scrollY = GraphicsRenderer.instance.scrollY;
+    ctx.lineWidth = 1;
     area.getColliders().render(ctx, scrollX, scrollY);
     player.renderDebug(ctx, scrollX, scrollY);
     if (enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
-    interf.getColliders().render(ctx);
+    Interface.instance.getColliders().render(ctx);
+    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
 }
 //#endregion
 //# sourceMappingURL=main.js.map

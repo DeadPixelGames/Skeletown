@@ -8,6 +8,8 @@ const PLAYER_SPEED = 500;
  * márgenes de la pantalla.
  */
 const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
+/**Capacidad máxima del inventario */
+const INVENTORY_MAX_SPACES = 10;
 /**
  * Clase que representa al jugador
  */
@@ -37,6 +39,7 @@ export default class Player extends Entity {
         document.addEventListener("touchmove", e => listenerCallback(e, null));
         this.speed.x = PLAYER_SPEED;
         this.speed.y = PLAYER_SPEED;
+        this.inventory = [null];
     }
     /**
      * Coge el rectángulo del canvas y calcula la posición del ratón o la pulsación del dedo en el canvas
