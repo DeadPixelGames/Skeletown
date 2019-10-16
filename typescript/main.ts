@@ -50,14 +50,16 @@ window.onload = async function() {
     GraphicsRenderer.initInstance(ctx);
 
     //#region Animación de prueba del esqueleto
-    var anim = await AnimatedGraphicEntity.load("skeleton.json");
-
-    anim.renderLayer = 2.5;
-    anim.x = 1200;
-    anim.y = 1280;
-    anim.play("walkright");
-
-    GraphicsRenderer.instance.addExistingEntity(anim);
+    //// var anim = await AnimatedGraphicEntity.load("skeleton.json");
+    //// 
+    //// anim.renderLayer = 2.5;
+    //// anim.x = 1200;
+    //// anim.y = 1280;
+    //// anim.play("walkright");
+    //// 
+    //// (window as any)["anim"] = anim;
+    //// 
+    //// GraphicsRenderer.instance.addExistingEntity(anim);
     //#endregion
 
     //#region Interfaz
@@ -97,12 +99,13 @@ window.onload = async function() {
     //#endregion
  
     //#region Jugador
-    player = new Player();
+    player = new Player();   
 
     player.x = 1200;
-    player.y = 1280;    
-
-    player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+    player.y = 1280; 
+    
+    //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+    await player.setAnimation(2.5, "skeleton.json");
     var image = player.getImage();
     if(image){
         GraphicsRenderer.instance.addExistingEntity(image);

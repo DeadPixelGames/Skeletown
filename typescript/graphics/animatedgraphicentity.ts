@@ -14,11 +14,15 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
     /**
      * Lista de clips de la entidad.
      */
-    private clips :Map<string, ClipData>;
+    private clips :Map<string, ClipData | DirectionalClipData>;
     /**
      * Duración en segundos del fotograma.
      */
     private frameduration :number;
+    /**
+     * Factor que afecta a la duración del fotograma para cambiar la velocidad de la animación.
+     */
+    private durationfactor :number;
     /**
      * Fotograma actual del clip actual.
      */
@@ -35,6 +39,15 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
      * Si la animación está en pausa o no.
      */
     private paused :boolean;
+    /**
+     * Factor que escala la velocidad de algunas animaciones para coincidir con la velocidad de
+     * movimiento de la entidad.
+     */
+    private walkAnimFactor :number;
+    /**
+     * Dirección a la que apunta esta entidad.
+     */
+    private direction :"up" | "down" | "left" | "right";
 
     /**
      * El constructor de esta clase es privado. Utiliza `AnimatedGraphicEntity.load(jsonFile)` en su lugar.
@@ -43,10 +56,13 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         super(0, source);
         this.clips = new Map();
         this.frameduration = 0;
+        this.durationfactor = 1;
         this.currentclip = "";
         this.currentframe = 0;
         this.currentframetime = 0;
+        this.walkAnimFactor = 1;
         this.paused = false;
+        this.direction = "down";
     }
 
     /**
@@ -61,12 +77,28 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         // en el archivo
         var ret = new AnimatedGraphicEntity(await FileLoader.loadImage(ANIMATIONS_JSON_FOLDER + "/" + animData.source));
         ret.setPivot(animData.pivotX, animData.pivotY);
+        if(animData.walkAnimFactor) {
+            ret.walkAnimFactor = animData.walkAnimFactor;
+        } else {
+            ret.walkAnimFactor = 1;
+        }
 
         // En el archivo leído, la duración de los fotogramas viene especificada indirectamente a través del framerate
         ret.frameduration = 1 / animData.framerate;
 
-        // Ya podemos cargar los clips y devolver la entidad animada
+        // Ya podemos cargar los clips
         ret.loadClips(animData);
+
+        // Información predeterminada
+        ret.currentclip = animData.clips[0].id.toLowerCase();
+        var defaultclip = (ret.clips.get(ret.currentclip) as ClipData | DirectionalClipData);
+        if(defaultclip.isDirectional) {
+            ret.currentframe = defaultclip.down.pause ? defaultclip.down.pause : 0;
+            ret.section = defaultclip.down.frames[ret.currentframe];
+        } else {
+            ret.currentframe = defaultclip.pause ? defaultclip.pause : 0;
+            ret.section = defaultclip.frames[ret.currentframe];
+        }
         return ret;
     }
 
@@ -78,6 +110,12 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         var lowercaseclip = clip.toLowerCase();
         if(!this.clips.has(lowercaseclip)) {
             throw new Error("La animación no tiene ningún clip llamado " + clip + ".");
+        }
+
+        // También podemos tener en cuenta el caso en el que se le ordena reproducir el clip que ya está
+        // reproduciendo, en cuyo caso no hacemos nada.
+        if(lowercaseclip == this.currentclip) {
+            return;
         }
 
         // Y si sí existe, preparamos el estado de la entidad para reproducir la animación
@@ -101,34 +139,99 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         this.paused = false;
     }
 
+    /**
+     * La velocidad a la que se reproduce la animación.
+     */
+    public getSpeed() {
+        return 1 / this.durationfactor;
+    }
+
+    /**
+     * Cambia la velocidad a la que se reproduce la animación. La velocidad predeterminada es 1.
+     */
+    public setSpeed(speed :number) {
+        var newfactor = 1 / speed;
+        // this.currentframetime = this.currentframe *  newfactor / this.durationfactor;
+        this.durationfactor = newfactor;
+    }
+
+    /**
+     * Determina el factor con el que la velocidad de la animación se verá afectada por la
+     * velocidad de movimiento de la entidad.
+     */
+    public getWalkAnimFactor() {
+        return this.walkAnimFactor;
+    }
+
+    /**
+     * Dado un punto en coordenadas locales a la entidad, asigna la dirección correcta para
+     * los clips direccionales de esta animación.
+     */
+    public setDirection(x :number, y :number) {
+        var ret :"up" | "down" | "left" | "right";
+
+        if(Math.abs(x) > Math.abs(y)) {
+            if(x < 0) {
+                ret = "left";
+            } else {
+                ret = "right";
+            }
+        } else {
+            if(y < 0) {
+                ret = "up";
+            } else {
+                ret = "down";
+            }
+        }
+
+        this.direction = ret;
+    }
+
     protected update(deltaTime :number) {
         // Cogemos del mapa la información del clip para no tener que leer el mapa constantemente.
-        var playingClip = this.clips.get(this.currentclip) as ClipData;
+        var playingClip = this.clips.get(this.currentclip) as ClipData | (DirectionalClipData & Indexable<PartialClipData>);
+        
+        var frames :Section[];
+        var flip :boolean;
+        var pause :number | null;
+        var transition :AnimationTransition;
+
+        if(!playingClip.isDirectional) {
+            frames = playingClip.frames;
+            flip = playingClip.flip;
+            pause = playingClip.pause;
+            transition = playingClip.transition
+        } else {
+            frames = playingClip[this.direction].frames;
+            flip = playingClip[this.direction].flip;
+            pause = playingClip[this.direction].pause;
+            transition = playingClip.transition;
+        }
 
         // Si estamos en pausa, no actualizamos los fotogramas, y ponemos el fotograma de pausa si existe.
         if(this.paused) {
-            if(playingClip.pause != null) {
-                this.currentframe = playingClip.pause;
+            if(pause != null) {
+                this.currentframe = pause;
             }
 
         // Si no estamos en pausa, contamos el tiempo que llevamos en el actual fotograma, pasamos al
         // siguiente fotograma si es necesario, o ejecutamos la transición del final del clip si es necesario.
         } else {
-            if(this.currentframetime > this.frameduration) {
-                if(this.currentframe >= playingClip.frames.length - 1) {
-                    this.executeTransition(playingClip.transition);
+            if(this.currentframetime > this.frameduration * this.durationfactor) {
+                if(this.currentframe >= frames.length - 1) {
+                    this.executeTransition(transition);
                 } else {
                     this.currentframe += 1;
                 }
-                this.currentframetime -= this.frameduration;
+                this.currentframetime -= this.frameduration * this.durationfactor;
             }
             
             this.currentframetime += deltaTime;
         }
 
         // Marcamos el fotograma actual como sección a dibujar de la entidad gráfica
-        this.section = playingClip.frames[this.currentframe];
-        this.flipped = playingClip.flip;
+        this.section = frames[this.currentframe];
+        this.flipped = flip;
 
         super.update(deltaTime);
     }
@@ -137,40 +240,76 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
      * Genera los datos de clips que podemos utilizar en el programa a raíz de un archivo leído.
      */
     private loadClips(animData :AnimationData) {
-
+        
         // Para cada clip, calculamos la sección equivalente a cada fotograma especificado en el archivo, y lo
         // añadimos a la colección de secciones asociadas a este clip. Estas secciones las iremos alternando
         // periódicamente para que la entidad gráfica renderice los fotogramas correctos para la animación
         for(let clip of animData.clips) {
-            let sections = [];
+            
+            // Si el clip que estamos leyendo es direccional
+            if(AnimatedGraphicEntity.clipIsDirectional(clip)) {
+                
+                let directional = clip as DirectionalClip & Indexable<PartialAnimationClip>;
 
-            for(let frame of clip.frames) {
-                sections.push({
-                    x: frame[1] * animData.framewidth,
-                    y: frame[0] * animData.frameheight,
-                    w: animData.framewidth,
-                    h: animData.frameheight
-                });
-            }
+                // Asignamos las propiedades independientemente de las direcciones
+                // Es necesario tener el ibjeto ya preparado para añadirle los clips parciales
+                // de cada una de las direcciones
+                let clipdata = {
+                    transition: clip.after ? clip.after : "stop",
+                    isDirectional: true
+                } as DirectionalClipData & Indexable<PartialClipData>;
 
-            // Rellenamos datos predeterminados en caso de que el archivo no los especifique
-            if(!clip.after) {
-                clip.after = "stop";
-            }
-            if(!clip.flip) {
-                clip.flip = false;
-            }
-            if(clip.pause == null) {
-                clip.pause = null;
-            }
+                // Para cada dirección, asignamos sus fotogramas al clip
+                for(let dir of ["up", "down", "left", "right"]) {
+                    let sections = [];
 
-            // Almacenamos todos los datos leídos en el mapa, asociados al id de la animación
-            this.clips.set(clip.id.toLowerCase(), {
-                frames: sections,
-                transition: clip.after,
-                pause: clip.pause,
-                flip: clip.flip
-            });
+                    for(let frame of directional[dir].frames) {
+                        sections.push({
+                            x: frame[1] * animData.framewidth,
+                            y: frame[0] * animData.frameheight,
+                            w: animData.framewidth,
+                            h: animData.frameheight
+                        });
+                    }
+                    
+                    // Con los frames de esta dirección ya calculados, procedemos a introducir los
+                    // datos que sí dependen de la animación
+                    clipdata[dir] = {
+                        frames: sections,
+                        pause: directional[dir].pause != null ? directional[dir].pause : null,
+                        flip: directional[dir].flip != null ? directional[dir].flip : false,
+                    };
+                }
+
+                // El clip ya está cargado, lo añadimos al mapa
+                this.clips.set(directional.id, clipdata);
+            
+            } else {
+
+                // En este caso, el clip no es direccional, por lo que podemos cargar los fotogramas
+                // directamente al mapa, sin iterar por direcciones
+
+                let anim = clip as AnimationClip;
+                
+                let sections = [];
+
+                for(let frame of anim.frames) {
+                    sections.push({
+                        x: frame[1] * animData.framewidth,
+                        y: frame[0] * animData.frameheight,
+                        w: animData.framewidth,
+                        h: animData.frameheight
+                    });
+                }
+
+                this.clips.set(anim.id, {
+                    frames: sections,
+                    transition: anim.after ? anim.after : "stop",
+                    pause: anim.pause != null ? anim.pause : null,
+                    flip: anim.flip != null ? anim.flip : false,
+                    isDirectional: false,
+                });                
+            }
         }
     }
 
@@ -201,6 +340,28 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
             this.currentframe = 0;
         }
     }
+
+    /**
+     * Devuelve si un clip leído del archivo es direccional o no. Para que un clip sea direccional, debe tener
+     * las propiedades `up`, `down`, `left` y `right` definidas. Si no tiene ninguna de las cuatro, entonces no
+     * es direccional. No está permitido que estén definidas algunas direcciones pero no otras.
+     */
+    private static clipIsDirectional(clip :AnimationClip | DirectionalClip) {
+        var ret = false;
+        var directional = clip as DirectionalClip;
+
+        if(directional.up || directional.down || directional.left || directional.right) {
+            ret = true;
+        }
+
+        if(ret) {
+            if(!directional.up || !directional.down || !directional.left || !directional.right) {
+                throw new Error("Se ha detectado que este clip es direccional, pero no tiene todas las direcciones.");
+            }
+        }
+
+        return ret;
+    }
 }
 
 /**
@@ -220,5 +381,32 @@ type ClipData = {
     frames :Section[],
     transition :AnimationTransition,
     pause :number | null,
-    flip :boolean
+    flip :boolean,
+    isDirectional :false
 };
+
+/**
+ * Datos procesados de una animación direccional.
+ */
+type DirectionalClipData = {
+    up :PartialClipData,
+    down :PartialClipData,
+    left :PartialClipData,
+    right :PartialClipData,
+    transition :AnimationTransition,
+    isDirectional :true
+};
+
+/**
+ * Datos procesados de una animación pensados para usarse en otra estructura.
+ */
+type PartialClipData = {
+    frames :Section[],
+    pause :number | null,
+    flip :boolean,
+};
+
+/**
+ * Permite acceder a las propiedades de un objeto mediante el accesor de corchetes.
+ */
+type Indexable<T> = {[key :string] :T};
