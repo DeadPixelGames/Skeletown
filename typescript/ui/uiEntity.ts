@@ -34,6 +34,8 @@ export class UIEntity{
         y :number,
     }
 
+    private percentRelPos :boolean;
+
     constructor(clickable :boolean){
         this.clickable = clickable;
         this.ctx = GraphicsRenderer.instance.getCanvasContext();
@@ -41,6 +43,8 @@ export class UIEntity{
 
         GameLoop.instance.suscribe(this, null, this.update, null, null);
         this.colliderOffset = {x: 0, y: 0};
+
+        this.percentRelPos = true;
     }
 
     
@@ -48,12 +52,12 @@ export class UIEntity{
     public getRelativePos() :{x :number, y:number}{ return this.relativePos;}
     public getText() {return this.text;}
     public getCollider(){return this.collider;}
-    
+    public getPercentRelPos(){return this.percentRelPos;}
+
     public setRealtivePos(relativePos :{x :number, y:number}){
         this.relativePos = relativePos;
     }
     public setText(text :string, textPos :{x :number, y :number}){this.text = text; this.textPos = textPos;}
-    //#endregion
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     public setImage(useCanvasCoords :boolean, layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         if(useCanvasCoords){
@@ -63,6 +67,11 @@ export class UIEntity{
         }
         
     }
+    public setPercentRelPos(percentRelPos :boolean){
+        this.percentRelPos = percentRelPos;
+    }
+    //#endregion
+    
     
     public addToGraphicRenderer(){
         
@@ -232,8 +241,13 @@ export class UILayout {
      * Cambia las coordenadas de la entidad según las coordenadas del layout
      */
     public addUIEntity(uiEntity :UIEntity){
-        uiEntity.x = this.position.x + uiEntity.getRelativePos().x * this.dimension.w - uiEntity.dimension.w * 0.5;
-        uiEntity.y = this.position.y + uiEntity.getRelativePos().y * this.dimension.h;
+        if(uiEntity.getPercentRelPos()){
+            uiEntity.x = this.position.x + uiEntity.getRelativePos().x * this.dimension.w - uiEntity.dimension.w * 0.5;
+            uiEntity.y = this.position.y + uiEntity.getRelativePos().y * this.dimension.h;
+        }else{
+            uiEntity.x = this.position.x + uiEntity.getRelativePos().x;
+            uiEntity.y = this.position.y + uiEntity.getRelativePos().y;
+        }
         
         this.uiEntities.push(uiEntity);
     }
