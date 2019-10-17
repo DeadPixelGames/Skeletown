@@ -16,7 +16,7 @@ import { BoxCollider } from "./collider.js";
 import { UILayout, UISquareEntity, UICircleEntity, ProgressBar } from "./ui/uiEntity.js";
 import Interface from "./ui/interface.js";
 import Enemy from "./enemy.js";
-import { distance } from "./util.js";
+import { distance, sleep } from "./util.js";
 //#region Declaración de variables
 var player;
 var enemy;
@@ -42,6 +42,20 @@ window.onload = function () {
         ctx = canvas.getContext("2d");
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
+        window.gr = GraphicsRenderer.instance;
+        window.sleep = sleep;
+        //#region Animación de prueba del esqueleto
+        //// var anim = await AnimatedGraphicEntity.load("skeleton.json");
+        //// 
+        //// anim.renderLayer = 2.5;
+        //// anim.x = 1200;
+        //// anim.y = 1280;
+        //// anim.play("walkright");
+        //// 
+        //// (window as any)["anim"] = anim;
+        //// 
+        //// GraphicsRenderer.instance.addExistingEntity(anim);
+        //#endregion
         //#region Interfaz
         moneyCounter = new UISquareEntity(0.09, 0.03, 320, 91, true, (x, y) => {
         });
@@ -76,7 +90,8 @@ window.onload = function () {
         player = new Player();
         player.x = 1200;
         player.y = 1280;
-        player.setImage(2.5, yield FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+        //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+        yield player.setAnimation(2.5, "skeleton.json");
         var image = player.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);

@@ -4,7 +4,8 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import GameLoop from "./gameloop.js";
 import AreaMap from "./graphics/areamap.js";
 import GameEvent from "./gameevent.js";
-import { clamp } from "./util.js";
+import { clamp, distance } from "./util.js";
+import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 
 /**
  * Distancia mínima a la que debe encontrarse el punto de destino para que la entidad se mueva hacia él.
@@ -39,6 +40,12 @@ export default class Entity{
 
     protected image :GraphicEntity | null;
 
+    /**
+     * Si la clase derivada está determinando qué clip usar con su propia lógica en lugar de basarse
+     * en las decisiones de esta superclase.
+     */
+    protected usingOwnClip :boolean;
+
     private collider :Collider | null;
     
     private colliderOffset? :{
@@ -72,6 +79,7 @@ export default class Entity{
         this.dest = null;
 
         this.image = null;
+        this.usingOwnClip = false;
         this.collider = null;
 
         this.maxHealth = 100;
@@ -171,6 +179,8 @@ export default class Entity{
             } 
         }
 
+        this.manageWalkAnimation();
+
         this.syncCollider();
         this.syncImage();
     }
@@ -225,6 +235,55 @@ export default class Entity{
         this.isColliding.top = overlap.y < 0;
         this.isColliding.bottom = overlap.y > 0;   
     }
+
+    //#region Animaciones
+    public async setAnimation(layer :number, jsonFile :string) {
+        this.image = await AnimatedGraphicEntity.load(jsonFile);
+        this.image.renderLayer = layer;
+        this.syncImage();
+    }
+
+    /**
+     * Reproduce el clip adecuado para el estado de movimiento de la entidad.
+     */
+    private manageWalkAnimation() {
+        // Este método parte del supuesto de que esta imagen es una entidad animada. Si no lo es,
+        // no hay nada que hacer
+        if(!(this.image instanceof AnimatedGraphicEntity)) {
+            return;
+        }
+
+        var anim = this.image as AnimatedGraphicEntity;
+
+        // Si no hay punto de destino, ponemos una animación de inactividad
+        if(!this.dest) {
+            if(!this.usingOwnClip) {
+                anim.play("idle");
+            }
+            return;
+        }
+
+        // Si hay punto de destino pero está demasiado cerca, consideramos que la entidad
+        // también está inactiva. Si no, la ponemos a andar
+        var length = distance(this.x, this.y, this.dest.x, this.dest.y);
+        
+        if(!this.usingOwnClip) {
+            if(length < MIN_WALKABLE_DISTANCE) {
+                anim.play("idle");
+            } else {
+                anim.play("walk");
+            }
+        }
+        
+        // Ponemos la velocidad y dirección correctas
+        
+        anim.setSpeed(length * anim.getWalkAnimFactor());
+        
+        var offsetX = this.dest.x - this.x;
+        var offsetY = this.dest.y - this.y;
+        anim.setDirection(offsetX, offsetY);
+    }
+    //#endregion
 
     /** 
      * Determina si puede mover sus coordenadas en la medida que indican los parámetros, o si por el contrario las

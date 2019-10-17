@@ -1,9 +1,19 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import GraphicEntity from "./graphics/graphicentity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import GameLoop from "./gameloop.js";
 import AreaMap from "./graphics/areamap.js";
 import GameEvent from "./gameevent.js";
-import { clamp } from "./util.js";
+import { clamp, distance } from "./util.js";
+import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 /**
  * Distancia mínima a la que debe encontrarse el punto de destino para que la entidad se mueva hacia él.
  */
@@ -25,6 +35,7 @@ export default class Entity {
         this.speed = { x: 20, y: 20 };
         this.dest = null;
         this.image = null;
+        this.usingOwnClip = false;
         this.collider = null;
         this.maxHealth = 100;
         this.health = this.maxHealth;
@@ -107,6 +118,7 @@ export default class Entity {
                 this.y += nextStep.y;
             }
         }
+        this.manageWalkAnimation();
         this.syncCollider();
         this.syncImage();
     }
@@ -155,6 +167,49 @@ export default class Entity {
         this.isColliding.top = overlap.y < 0;
         this.isColliding.bottom = overlap.y > 0;
     }
+    //#region Animaciones
+    setAnimation(layer, jsonFile) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.image = yield AnimatedGraphicEntity.load(jsonFile);
+            this.image.renderLayer = layer;
+            this.syncImage();
+        });
+    }
+    /**
+     * Reproduce el clip adecuado para el estado de movimiento de la entidad.
+     */
+    manageWalkAnimation() {
+        // Este método parte del supuesto de que esta imagen es una entidad animada. Si no lo es,
+        // no hay nada que hacer
+        if (!(this.image instanceof AnimatedGraphicEntity)) {
+            return;
+        }
+        var anim = this.image;
+        // Si no hay punto de destino, ponemos una animación de inactividad
+        if (!this.dest) {
+            if (!this.usingOwnClip) {
+                anim.play("idle");
+            }
+            return;
+        }
+        // Si hay punto de destino pero está demasiado cerca, consideramos que la entidad
+        // también está inactiva. Si no, la ponemos a andar
+        var length = distance(this.x, this.y, this.dest.x, this.dest.y);
+        if (!this.usingOwnClip) {
+            if (length < MIN_WALKABLE_DISTANCE) {
+                anim.play("idle");
+            }
+            else {
+                anim.play("walk");
+            }
+        }
+        // Ponemos la velocidad y dirección correctas
+        anim.setSpeed(length * anim.getWalkAnimFactor());
+        var offsetX = this.dest.x - this.x;
+        var offsetY = this.dest.y - this.y;
+        anim.setDirection(offsetX, offsetY);
+    }
+    //#endregion
     /**
      * Determina si puede mover sus coordenadas en la medida que indican los parámetros, o si por el contrario las
      * colisiones impiden que pueda llegar tan lejos. Devuelve un objeto `{x, y}` que indica el incremento que se

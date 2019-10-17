@@ -1,5 +1,6 @@
 import Entity from "./entity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
+import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 
 /** Velocidad de desplazamiento del jugador. */
 const PLAYER_SPEED = 500;
@@ -11,6 +12,11 @@ const PLAYER_SPEED = 500;
 const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
 
 /**
+ * Tiempo en segundos que hay que esperar antes de reproducir la segunda animación de inactividad.
+ */
+const TIME_UNTIL_IDLE = 3;
+
+/**
  * Clase que representa al jugador
  */
 export default class Player extends Entity{
@@ -18,6 +24,8 @@ export default class Player extends Entity{
     private mouse :boolean = false;
     /** Evento actual del ratón o de la pulsación */
     private event :MouseEvent | TouchEvent;
+    /** Tiempo en segundos que el jugador ha estado quieto */
+    private idleTimer :number;
 
     private Inventory :{};
 
@@ -48,6 +56,8 @@ export default class Player extends Entity{
 
         this.speed.x = PLAYER_SPEED;
         this.speed.y = PLAYER_SPEED;
+
+        this.idleTimer = 0;
     }
 
     /**
@@ -92,17 +102,23 @@ export default class Player extends Entity{
     protected update(deltaTime :number) {
         
         this.dest = this.getCursorPosition();
-        if(!this.mouse) {
-            return null;
-        }
 
-        if(this.dest) {
+        if(this.mouse && this.dest) {
             this.speed.x = Math.abs(this.dest.x - this.x) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
             this.speed.y = Math.abs(this.dest.y - this.y) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
+            this.idleTimer = 0;
+        } else {
+            this.dest = null;
+            this.idleTimer += deltaTime;
         }
-    
-        super.update(deltaTime);
-        
-    }
 
+        if(this.idleTimer > TIME_UNTIL_IDLE) {
+            (this.image as AnimatedGraphicEntity).play("idle2");
+            this.usingOwnClip = true;
+        } else {
+            this.usingOwnClip = false;
+        }
+
+        super.update(deltaTime);   
+    }
 }

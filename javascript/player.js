@@ -9,6 +9,10 @@ const PLAYER_SPEED = 500;
  */
 const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
 /**
+ * Tiempo en segundos que hay que esperar antes de reproducir la segunda animación de inactividad.
+ */
+const TIME_UNTIL_IDLE = 3;
+/**
  * Clase que representa al jugador
  */
 export default class Player extends Entity {
@@ -37,6 +41,7 @@ export default class Player extends Entity {
         document.addEventListener("touchmove", e => listenerCallback(e, null));
         this.speed.x = PLAYER_SPEED;
         this.speed.y = PLAYER_SPEED;
+        this.idleTimer = 0;
     }
     /**
      * Coge el rectángulo del canvas y calcula la posición del ratón o la pulsación del dedo en el canvas
@@ -74,12 +79,21 @@ export default class Player extends Entity {
      */
     update(deltaTime) {
         this.dest = this.getCursorPosition();
-        if (!this.mouse) {
-            return null;
-        }
-        if (this.dest) {
+        if (this.mouse && this.dest) {
             this.speed.x = Math.abs(this.dest.x - this.x) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
             this.speed.y = Math.abs(this.dest.y - this.y) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
+            this.idleTimer = 0;
+        }
+        else {
+            this.dest = null;
+            this.idleTimer += deltaTime;
+        }
+        if (this.idleTimer > TIME_UNTIL_IDLE) {
+            this.image.play("idle2");
+            this.usingOwnClip = true;
+        }
+        else {
+            this.usingOwnClip = false;
         }
         super.update(deltaTime);
     }
