@@ -12,16 +12,17 @@ export class UIEntity {
         GraphicsRenderer.instance.suscribe(this, null, this.drawText);
         GameLoop.instance.suscribe(this, null, this.update, null, null);
         this.colliderOffset = { x: 0, y: 0 };
+        this.percentRelPos = true;
     }
     //#region GETTERS Y SETTERS
     getRelativePos() { return this.relativePos; }
     getText() { return this.text; }
     getCollider() { return this.collider; }
+    getPercentRelPos() { return this.percentRelPos; }
     setRealtivePos(relativePos) {
         this.relativePos = relativePos;
     }
     setText(text, textPos) { this.text = text; this.textPos = textPos; }
-    //#endregion
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     setImage(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         if (useCanvasCoords) {
@@ -31,6 +32,10 @@ export class UIEntity {
             this.image = new GraphicEntity(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
         }
     }
+    setPercentRelPos(percentRelPos) {
+        this.percentRelPos = percentRelPos;
+    }
+    //#endregion
     addToGraphicRenderer() {
         if (this.image)
             GraphicsRenderer.instance.addExistingEntity(this.image);
@@ -157,8 +162,14 @@ export class UILayout {
      * Cambia las coordenadas de la entidad según las coordenadas del layout
      */
     addUIEntity(uiEntity) {
-        uiEntity.x = this.position.x + uiEntity.getRelativePos().x * this.dimension.w - uiEntity.dimension.w * 0.5;
-        uiEntity.y = this.position.y + uiEntity.getRelativePos().y * this.dimension.h;
+        if (uiEntity.getPercentRelPos()) {
+            uiEntity.x = this.position.x + uiEntity.getRelativePos().x * this.dimension.w - uiEntity.dimension.w * 0.5;
+            uiEntity.y = this.position.y + uiEntity.getRelativePos().y * this.dimension.h;
+        }
+        else {
+            uiEntity.x = this.position.x + uiEntity.getRelativePos().x;
+            uiEntity.y = this.position.y + uiEntity.getRelativePos().y;
+        }
         this.uiEntities.push(uiEntity);
     }
     /**Añade al GraphicsRenderer todas las imágenes de las entidades de interfaz */
@@ -169,9 +180,17 @@ export class UILayout {
     }
     resize(w, h) {
         this.dimension = { w: w, h: h };
+        this.position.x = GraphicsRenderer.instance.getCanvas().width * 0.5 - this.dimension.w * 0.5;
+        this.position.y = GraphicsRenderer.instance.getCanvas().height * 0.5 - this.dimension.h * 0.5;
         for (let ent of this.uiEntities) {
-            ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
-            ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+            if (ent.getPercentRelPos()) {
+                ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
+                ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+            }
+            else {
+                ent.x = this.position.x + ent.getRelativePos().x;
+                ent.y = this.position.y + ent.getRelativePos().y;
+            }
         }
     }
     hide() {
@@ -184,6 +203,27 @@ export class UILayout {
         this.visible = true;
         for (let ent of this.uiEntities) {
             ent.show();
+        }
+    }
+    toggleActive() {
+        for (let ent of this.uiEntities) {
+            var coll = ent.getCollider();
+            if (coll)
+                coll.active = !coll.active;
+        }
+    }
+    deactivate() {
+        for (let ent of this.uiEntities) {
+            var coll = ent.getCollider();
+            if (coll)
+                coll.active = false;
+        }
+    }
+    activate() {
+        for (let ent of this.uiEntities) {
+            var coll = ent.getCollider();
+            if (coll)
+                coll.active = true;
         }
     }
 }

@@ -1,56 +1,44 @@
-import Entity from "./entity.js"
-import { BoxCollider, Collider } from "./collider.js";
-import { UILayout} from "./ui/uiEntity.js";
-import Interface from "./ui/interface.js";
 
-
-export default class Farmland{
-
-    private layout :UILayout;
-
-    //private item :Item;
-
-    private collider :Collider;
-
-    constructor(collider :Collider){
-
-        this.collider = collider;
-    
-        this.collider.addUserInteraction(this, this.onclick, null, null);
-
-        Interface.instance.addCollider(this.collider);
-        
-    }
-
-    public onclick(x :number, y :number) {
-        
-    }
+import { Collider } from "./collider.js";
+import { TileEntity } from "./graphics/areamap.js";
 
 
 
-    public initLayout(){
-        //var plant = new UICircleEntity(this.collider.centerX, this.collider.centerY, this.collider.)
-        //var harvest = new UICircleEntity();
-        //var inventory = new UICircleEntity();
-        //var layout = new UILayout();
-        //layout.addUIEntity(plant)
-        //layout.addUIEntity(harvest)
-        //layout.addUIEntity(inventory)
-    }
-
-
-}
 
 
 export class FarmlandManager{
+    public static instance = new FarmlandManager;
 
-    private farmlands :Farmland[];
+    private farmlands :[null, ...TileEntity[]];
 
-    constructor(){
 
+    private constructor(){
+        this.farmlands = [null];
     }
 
-    public addFarmland(collider :Collider){
-        this.farmlands.push(new Farmland(collider));
+    public addFarmland(tile :TileEntity){
+        this.farmlands.push(tile);
+    }
+
+    public toggleActive(){
+        for(let tile of this.farmlands){
+            if(tile){
+                tile.uiLayout.toggleActive();
+                tile.uiLayout.visible = false;
+                tile.collider.active = !tile.collider.active;
+            }
+        }
+    }
+
+    public activateThis(tile :TileEntity){
+        tile.uiLayout.visible = true;
+        tile.uiLayout.activate();
+        for(let t of this.farmlands){
+            if(t == tile) continue;
+            if(t){
+                t.uiLayout.visible = false;
+                t.uiLayout.deactivate();
+            }
+        }
     }
 }

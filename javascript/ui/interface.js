@@ -44,6 +44,15 @@ export class InterfaceInWorld {
         document.addEventListener("mousedown", e => listenerCallback(e));
         document.addEventListener("touchstart", e => listenerCallback(e));
     }
+    /**
+     * Inicializa la instancia Singleton de `GraphicsRenderer` del programa y la asocia al contexto de canvas especificado.
+     */
+    static initInstance() {
+        if (!GraphicsRenderer.instance) {
+            throw new Error("GameLoop no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
+        }
+        this.instance = new InterfaceInWorld();
+    }
     //#region GETTERS Y SETTERS
     getColliders() { return this.colliders; }
     //#endregion
@@ -52,6 +61,4 @@ export class InterfaceInWorld {
         this.colliders.add(collider);
     }
 }
-/**Instancia de la interfaz. SINGLETON */
-InterfaceInWorld.instance = new InterfaceInWorld();
 //# sourceMappingURL=interface.js.map

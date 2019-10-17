@@ -11,6 +11,8 @@ import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import Enemy from "./enemy.js";
 
 import { distance } from "./util.js";
+import { Inventory } from "./inventory.js";
+import { FarmlandManager } from "./farmland.js";
 
 //#region Declaración de variables
 var player :Player;
@@ -18,7 +20,7 @@ var enemy :Enemy | null;
 var area :AreaMap;
 var ctx :CanvasRenderingContext2D;
 
-var hud_InGame :UILayout;
+export var hud_InGame :UILayout;
 var lifeBar :ProgressBar;
 var moneyCounter :UIEntity;
 var time :UIEntity;
@@ -30,6 +32,7 @@ var resize = function(){
     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
     hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
+    Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
 }
 
 window.addEventListener("resize", resize);
@@ -46,6 +49,10 @@ window.onload = async function() {
 
     GraphicsRenderer.initInstance(ctx);
 
+    Inventory.initInstance();
+
+    InterfaceInWorld.initInstance();
+
     //#region Interfaz
     moneyCounter = new UIEntity(true)
     moneyCounter.setCollider(true, 0.12, 0.03, 320, 91, (x :number, y :number)=>{
@@ -58,6 +65,10 @@ window.onload = async function() {
     time.setCollider(true, 0.95, 0.03, 362, 128);
     inventory = new UIEntity(true);
     inventory.setCollider(false, 0.87, 0.7, 245, 245,(x :number, y :number)=>{
+        FarmlandManager.instance.toggleActive();
+        Inventory.instance.toggleVision();
+        Inventory.instance.toggleActive();
+        hud_InGame.toggleActive();
         lifeBar.setProgress(lifeBar.getProgress()+10);
     })
     

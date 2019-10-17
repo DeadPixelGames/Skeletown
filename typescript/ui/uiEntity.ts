@@ -222,11 +222,11 @@ export class ProgressBar extends UIEntity{
 /**Contenedor de entidades de layout */
 export class UILayout {
     /**COnjunto de entidades de interfaz que coniene el layout */
-    private uiEntities :UIEntity[];
+    public uiEntities :UIEntity[];
     /**Posición del layout en la pantalla */
-    private position :{x :number, y :number};
+    public position :{x :number, y :number};
     /**Dimensión del layout */
-    private dimension :{w :number, h :number};
+    public dimension :{w :number, h :number};
     
     public visible :boolean;
 
@@ -262,9 +262,18 @@ export class UILayout {
     public resize(w :number, h :number){
         this.dimension = {w: w, h: h};
 
+        this.position.x = GraphicsRenderer.instance.getCanvas().width * 0.5 - this.dimension.w * 0.5; 
+        this.position.y = GraphicsRenderer.instance.getCanvas().height * 0.5 - this.dimension.h * 0.5;
+
         for(let ent of this.uiEntities){
-            ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
-            ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+            if(ent.getPercentRelPos()){
+                ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
+                ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+            }else{
+                ent.x = this.position.x + ent.getRelativePos().x;
+                ent.y = this.position.y + ent.getRelativePos().y;
+            }
+            
         }
     }
 
@@ -279,6 +288,27 @@ export class UILayout {
         this.visible = true;
         for(let ent of this.uiEntities){
             ent.show();
+        }
+    }
+
+    public toggleActive(){
+        for(let ent of this.uiEntities){
+            var coll = ent.getCollider();
+            if(coll) coll.active = !coll.active;
+        }
+    }
+
+    public deactivate(){
+        for(let ent of this.uiEntities){
+            var coll = ent.getCollider();
+            if(coll) coll.active = false;
+        }
+    }
+
+    public activate(){
+        for(let ent of this.uiEntities){
+            var coll = ent.getCollider();
+            if (coll) coll.active = true;
         }
     }
 }

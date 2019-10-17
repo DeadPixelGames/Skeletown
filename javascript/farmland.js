@@ -1,27 +1,31 @@
-import Interface from "./ui/interface.js";
-export default class Farmland {
-    constructor(collider) {
-        this.collider = collider;
-        this.collider.addUserInteraction(this, this.onclick, null, null);
-        Interface.instance.addCollider(this.collider);
-    }
-    onclick(x, y) {
-    }
-    initLayout() {
-        //var plant = new UICircleEntity(this.collider.centerX, this.collider.centerY, this.collider.)
-        //var harvest = new UICircleEntity();
-        //var inventory = new UICircleEntity();
-        //var layout = new UILayout();
-        //layout.addUIEntity(plant)
-        //layout.addUIEntity(harvest)
-        //layout.addUIEntity(inventory)
-    }
-}
 export class FarmlandManager {
     constructor() {
+        this.farmlands = [null];
     }
-    addFarmland(collider) {
-        this.farmlands.push(new Farmland(collider));
+    addFarmland(tile) {
+        this.farmlands.push(tile);
+    }
+    toggleActive() {
+        for (let tile of this.farmlands) {
+            if (tile) {
+                tile.uiLayout.toggleActive();
+                tile.uiLayout.visible = false;
+                tile.collider.active = !tile.collider.active;
+            }
+        }
+    }
+    activateThis(tile) {
+        tile.uiLayout.visible = true;
+        tile.uiLayout.activate();
+        for (let t of this.farmlands) {
+            if (t == tile)
+                continue;
+            if (t) {
+                t.uiLayout.visible = false;
+                t.uiLayout.deactivate();
+            }
+        }
     }
 }
+FarmlandManager.instance = new FarmlandManager;
 //# sourceMappingURL=farmland.js.map

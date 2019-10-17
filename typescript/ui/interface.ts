@@ -46,9 +46,20 @@ export default class Interface{
 /**Controlador de los colliders de la interfaz gráfica en coordenadas del mundo */
 export class InterfaceInWorld{
     /**Instancia de la interfaz. SINGLETON */
-    public static instance = new InterfaceInWorld();
+    public static instance :InterfaceInWorld;
 
     private colliders :ColliderLayer;
+
+
+    /**
+     * Inicializa la instancia Singleton de `GraphicsRenderer` del programa y la asocia al contexto de canvas especificado.
+     */
+    public static initInstance() {
+        if(!GraphicsRenderer.instance) {
+            throw new Error("GameLoop no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
+        }
+        this.instance = new InterfaceInWorld();
+    }
 
     private constructor(){
         this.colliders = new ColliderLayer();
