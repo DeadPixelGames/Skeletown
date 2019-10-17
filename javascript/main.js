@@ -16,7 +16,7 @@ import { BoxCollider } from "./collider.js";
 import { UILayout, UISquareEntity, UICircleEntity, ProgressBar } from "./ui/uiEntity.js";
 import Interface from "./ui/interface.js";
 import Enemy from "./enemy.js";
-import { distance } from "./util.js";
+import { distance, sleep } from "./util.js";
 //#region Declaración de variables
 var player;
 var enemy;
@@ -42,6 +42,8 @@ window.onload = function () {
         ctx = canvas.getContext("2d");
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
+        window.gr = GraphicsRenderer.instance;
+        window.sleep = sleep;
         //#region Animación de prueba del esqueleto
         //// var anim = await AnimatedGraphicEntity.load("skeleton.json");
         //// 

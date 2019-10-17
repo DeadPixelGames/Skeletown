@@ -1,6 +1,7 @@
 import GraphicEntity from "./graphicentity.js";
 import GameEvent from "../gameevent.js";
 import GameLoop from "../gameloop.js";
+import { sleep } from "../util.js";
 
 /**
  * Clase singleton encargada de renderizar todos los gráficos del juego. Los métodos de esta clase se pueden
@@ -63,6 +64,16 @@ export default class GraphicsRenderer {
      * Evento que se dispara cada vez que un fotograma termina de renderizarse.
      */
     private onFrameUpdate :GameEvent<() => void>;
+    /**
+     * Color que tinta toda la pantalla. Los valores rojo (r), verde (g) y azul (b) están en tanto por 255,
+     * mientras que el valor alfa (a) está en tanto por 1.
+     */
+    private overlayColor :{
+        r :number,
+        g :number,
+        b :number,
+        a :number
+    };
 
     /** El constructor es privado, usa `GraphicsRenderer.initInstance(context)` en su lugar. */
     private constructor(context :CanvasRenderingContext2D) {
@@ -74,6 +85,13 @@ export default class GraphicsRenderer {
         this.scrollY = 0;
         this.onFrameUpdate = new GameEvent();
         this.onFirstFrame = new GameEvent();
+
+        this.overlayColor = {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0
+        };
     }
 
     /**
@@ -99,6 +117,13 @@ export default class GraphicsRenderer {
                 break;
             entity.render(this.context, this.scrollX, this.scrollY);
         }
+
+        // Dibujamos el overlay
+        this.context.fillStyle = "rgba(" + this.overlayColor.r + ", " + this.overlayColor.g + ", " + this.overlayColor.b + ", " + this.overlayColor.a + ")";
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.fillStyle = "#000000";
+
+        // Render del fotograma listo, disparamos el evento
         this.onFrameUpdate.dispatch();
     }
 
@@ -142,6 +167,53 @@ export default class GraphicsRenderer {
         }
         if(onFirstFrame) {
             this.onFirstFrame.suscribe(onFirstFrame, instance);
+        }
+    }
+
+    /**
+     * Reproduce una animación de desvanecimiento en el color de overlay sobre la pantalla, pensada para
+     * cambiar el estado del juego. El fundido en negro dura lo especificado en segundos. Después, se ejecuta
+     * el callback. Por último, se vuelve a realizar un nuevo fundido con la misma duración. Si el callback
+     * es asíncrono, la transición esperará a que se complete antes de continuar.
+     */
+    public async fadeOutAndIn(duration :number, callback :(() => void) | (() => Promise<void>)) {
+        
+        var durationInverse = 1 / (1000 * duration);
+        var alpha = this.overlayColor.a;
+        var oldAlpha = alpha;
+        var currentMillis = Date.now();
+
+        // Fundido hacia negro
+        while(alpha < 1) {
+            // Cada iteración de este bucle está en un fotograma distinto. Podemos producir esto esperando una
+            // cantidad simbólica de tiempo
+            await sleep(1);
+            // Subimos el canal alfa proporcionalmente al tiempo que ha pasado desde la última iteración y la
+            // duración especificada
+            alpha = Math.min(1, alpha + (Date.now() - currentMillis) * durationInverse);
+            currentMillis = Date.now();
+            // Asignamos el alfa calculado al overlay de la pantalla
+            this.overlayColor.a = alpha;
+        }
+
+        // Con el fundido hacia negro terminado, ejecutamos el callback
+        var callbackResult = callback();
+
+        // Si el callback es asíncrono, esperamos a que se complete antes de seguir
+        if(callbackResult instanceof Promise) {
+            await callbackResult;
+        }
+
+        currentMillis = Date.now();
+
+        // Fundido desde negro
+        while(alpha > oldAlpha) {
+            // El proceso es igual que en el fundido hacia negro, pero esta vez el alfa está regresando a su
+            // valor original
+            await sleep(1);
+            alpha = Math.max(oldAlpha, alpha - (Date.now() - currentMillis) * durationInverse);
+            currentMillis = Date.now();
+            this.overlayColor.a = alpha;
         }
     }
 

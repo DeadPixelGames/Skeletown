@@ -34,6 +34,13 @@ export function pixelToTilePosition(x :number, y :number) {
     };
 }
 
+/** Espera asíncronamente el número especificado de milisegundos. */
+export async function sleep(milliseconds :number) {
+    return new Promise<void>(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+}
+
 /** Devuelve el punto del centro del tile (`x`, `y`) */
 export function tileToPixelPosition(x :number, y :number) {
     var tile = AreaMap.getCurrent().getTileSize();
