@@ -15,8 +15,7 @@ import { ColliderLayer, BoxCollider } from "../collider.js";
 import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
 import Interface, { InterfaceInWorld } from "../ui/interface.js";
-import { Inventory } from "../inventory.js";
-import { hud_InGame } from "../main.js";
+import { enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
@@ -310,10 +309,7 @@ export class TileEntity extends GraphicEntity {
             this.plant.setCollider(false, 0.5, 0, 86, 86, (x, y) => {
                 if (that.plant.image.visible) {
                     console.log("PLANTAR");
-                    Inventory.instance.toggleActive();
-                    Inventory.instance.toggleVision();
-                    hud_InGame.toggleActive();
-                    FarmlandManager.instance.toggleActive();
+                    enteringInventoryFromCrops(this);
                 }
             });
             this.harvest.setCollider(false, 0.15, 0, 86, 86, (x, y) => {
@@ -361,6 +357,11 @@ export class TileEntity extends GraphicEntity {
         else {
             this.uiLayout.hide();
         }
+    }
+    plantCrop(crop) {
+        this.planted = true;
+        this.crop.visible = true;
+        this.crop.setSection(0, crop * 128, 128, 128);
     }
 }
 //#endregion

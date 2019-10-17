@@ -5,12 +5,21 @@ export class FarmlandManager {
     addFarmland(tile) {
         this.farmlands.push(tile);
     }
-    toggleActive() {
+    activate() {
         for (let tile of this.farmlands) {
             if (tile) {
-                tile.uiLayout.toggleActive();
+                tile.uiLayout.activate();
+                tile.collider.active = true;
                 tile.uiLayout.visible = false;
-                tile.collider.active = !tile.collider.active;
+            }
+        }
+    }
+    deactivate() {
+        for (let tile of this.farmlands) {
+            if (tile) {
+                tile.uiLayout.deactivate();
+                tile.collider.active = false;
+                tile.uiLayout.visible = false;
             }
         }
     }

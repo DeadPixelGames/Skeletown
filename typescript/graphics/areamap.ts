@@ -7,7 +7,7 @@ import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
 import Interface, { InterfaceInWorld } from "../ui/interface.js";
 import { Inventory } from "../inventory.js";
-import { hud_InGame } from "../main.js";
+import { hud_InGame, enteringInventory, enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 
 /**
@@ -432,10 +432,7 @@ export class TileEntity extends GraphicEntity {
         this.plant.setCollider(false, 0.5, 0, 86, 86, (x,y)=>{
             if(that.plant.image.visible){
                 console.log("PLANTAR");
-                Inventory.instance.toggleActive();
-                Inventory.instance.toggleVision();
-                hud_InGame.toggleActive();
-                FarmlandManager.instance.toggleActive();
+                enteringInventoryFromCrops(this);
             }
         })
         this.harvest.setCollider(false, 0.15, 0, 86, 86, (x,y)=>{
@@ -488,6 +485,12 @@ export class TileEntity extends GraphicEntity {
             }  
         
         
+    }
+
+    public plantCrop(crop :number){
+        this.planted = true;
+        this.crop.visible = true;
+        this.crop.setSection(0, crop * 128, 128, 128);
     }
 }
 //#endregion

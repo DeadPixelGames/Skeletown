@@ -11,8 +11,8 @@ import { UILayout, UIEntity } from "./ui/uiEntity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import FileLoader from "./fileloader.js";
 import Interface from "./ui/interface.js";
-import { hud_InGame } from "./main.js";
-import { FarmlandManager } from "./farmland.js";
+import GameLoop from "./gameloop.js";
+import { exitingInventory } from "./main.js";
 export class Inventory {
     constructor() {
         this.halfWidth = 512;
@@ -46,7 +46,7 @@ export class Inventory {
         this.initClothesLayout();
         this.initWikiLayout();
         this.initSettingsLayout();
-        this.toggleActive();
+        this.deactivate();
         this.shown = false;
     }
     /**
@@ -58,27 +58,24 @@ export class Inventory {
         }
         this.instance = new Inventory();
     }
-    addItem(item) {
-        this.items.push(item);
-    }
-    toggleVision() {
-        if (!this.shown) {
-            this.shown = true;
-            this.layout.show();
-            this.cropsLayout.show();
-            this.clothesLayout.hide();
-            this.wikiLayout.hide();
-            this.settingsLayout.hide();
-        }
-        else {
-            this.shown = false;
-            this.layout.hide();
-            this.cropsLayout.hide();
-            this.clothesLayout.hide();
-            this.wikiLayout.hide();
-            this.settingsLayout.hide();
+    addItem(item, count) {
+        for (let it of this.items) {
+            if (it) {
+                if (it.blocked)
+                    return;
+                if (it.id == item.id) {
+                    it.addItem(count);
+                }
+                else if (it.count <= 0) {
+                    console.log("UwU");
+                    it.setItem(item);
+                    it.addItem(count);
+                    return;
+                }
+            }
         }
     }
+    //#region Loading imágenes y colliders
     loadImages() {
         return __awaiter(this, void 0, void 0, function* () {
             this.background.setImage(true, 101, yield FileLoader.loadImage("resources/interface/inv_base.png"), 0, 0, this.halfWidth * 2, this.halfHeight * 2);
@@ -122,10 +119,7 @@ export class Inventory {
             console.log("SETTINGS");
         });
         this.closeInventory.setCollider(false, 981, -43, 86, 86, (x, y) => {
-            hud_InGame.toggleActive();
-            FarmlandManager.instance.toggleActive();
-            Inventory.instance.toggleVision();
-            Inventory.instance.toggleActive();
+            exitingInventory();
         });
         Interface.instance.addCollider(this.crops.getCollider());
         Interface.instance.addCollider(this.clothes.getCollider());
@@ -133,13 +127,38 @@ export class Inventory {
         Interface.instance.addCollider(this.settings.getCollider());
         Interface.instance.addCollider(this.closeInventory.getCollider());
     }
-    toggleActive() {
-        this.layout.toggleActive();
-        this.cropsLayout.toggleActive();
-        this.clothesLayout.toggleActive();
-        this.wikiLayout.toggleActive();
-        this.settingsLayout.toggleActive();
+    //#endregion
+    show() {
+        this.shown = true;
+        this.layout.show();
+        this.cropsLayout.show();
+        this.clothesLayout.hide();
+        this.wikiLayout.hide();
+        this.settingsLayout.hide();
     }
+    hide() {
+        this.shown = false;
+        this.layout.hide();
+        this.cropsLayout.hide();
+        this.clothesLayout.hide();
+        this.wikiLayout.hide();
+        this.settingsLayout.hide();
+    }
+    activate() {
+        this.layout.activate();
+        this.cropsLayout.activate();
+        this.clothesLayout.deactivate();
+        this.wikiLayout.deactivate();
+        this.settingsLayout.deactivate();
+    }
+    deactivate() {
+        this.layout.deactivate();
+        this.cropsLayout.deactivate();
+        this.clothesLayout.deactivate();
+        this.wikiLayout.deactivate();
+        this.settingsLayout.deactivate();
+    }
+    //#region initLayouts
     initCropsLayout() {
         return __awaiter(this, void 0, void 0, function* () {
             var background = new UIEntity(false);
@@ -147,6 +166,31 @@ export class Inventory {
             background.setCollider(true, 0, 0, 1024, 696);
             background.setPercentRelPos(false);
             this.cropsLayout.addUIEntity(background);
+            var constX = 201;
+            var constY = 56;
+            var constInBetweenX = 24;
+            var constInBetweenY = 20;
+            var constW = 128;
+            this.items = [null];
+            for (var i = 0; i < 4; i++) {
+                for (var j = 0; j < 5; j++) {
+                    var item = new itemInInventory(constX + j * constInBetweenX + j * constW, constY + i * constInBetweenY + i * constW, constW, constW, (x, y) => {
+                        if (!item.blocked) {
+                            if (this.farmableTile) {
+                                this.farmableTile.plantCrop(item.id);
+                                this.farmableTile = undefined;
+                            }
+                        }
+                    });
+                    if (i != 0)
+                        item.blocked = true;
+                    this.items.push(item);
+                }
+            }
+            for (let item of this.items) {
+                if (item)
+                    this.cropsLayout.addUIEntity(item.image);
+            }
             this.cropsLayout.addEntitiesToRenderer();
             this.cropsLayout.hide();
         });
@@ -184,6 +228,7 @@ export class Inventory {
             this.settingsLayout.hide();
         });
     }
+    //#endregion
     resize(width, height) {
         this.layout.position.x = width * 0.5 - this.halfWidth;
         this.layout.position.y = height * 0.5 - this.halfHeight;
@@ -215,6 +260,48 @@ export class Inventory {
             ent.x = this.settingsLayout.position.x + ent.getRelativePos().x;
             ent.y = this.settingsLayout.position.y + ent.getRelativePos().y;
         }
+    }
+    togglePlanting(tile) {
+        this.farmableTile = tile;
+        this.layout.activate();
+        this.cropsLayout.activate();
+        this.clothesLayout.deactivate();
+        this.wikiLayout.deactivate();
+        this.settingsLayout.deactivate();
+    }
+}
+class itemInInventory {
+    constructor(left, top, width, height, onClick) {
+        this.count = 0;
+        this.image = new UIEntity(true);
+        this.initImage(left, top, width, height, onClick);
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
+    }
+    initImage(left, top, width, height, onClick) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.image.setImage(true, 103, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 512, 0, 128, 128);
+            this.image.setPercentRelPos(false);
+            this.image.setCollider(false, left, top, width, height, onClick);
+            var coll = this.image.getCollider();
+            if (coll) {
+                Interface.instance.addCollider(coll);
+                console.log("OwO");
+            }
+        });
+    }
+    setItem(item) {
+        this.id = item.id;
+        this.name = item.name;
+    }
+    addItem(count) {
+        this.count += count;
+    }
+    takeItem(count) {
+        this.count -= count;
+    }
+    update(deltaTime) {
+        if (this.id)
+            this.image.image.setSection(512, this.id * 128, 128, 128);
     }
 }
 //# sourceMappingURL=inventory.js.map

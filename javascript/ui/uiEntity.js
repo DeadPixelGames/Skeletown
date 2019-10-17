@@ -9,20 +9,26 @@ export class UIEntity {
     constructor(clickable) {
         this.clickable = clickable;
         this.ctx = GraphicsRenderer.instance.getCanvasContext();
-        GraphicsRenderer.instance.suscribe(this, null, this.drawText);
         GameLoop.instance.suscribe(this, null, this.update, null, null);
         this.colliderOffset = { x: 0, y: 0 };
+        this.relativePos = { x: 0, y: 0 };
+        this.dimension = { w: 0, h: 0 };
         this.percentRelPos = true;
     }
     //#region GETTERS Y SETTERS
     getRelativePos() { return this.relativePos; }
-    getText() { return this.text; }
+    getText() {
+        return this.image.text;
+    }
     getCollider() { return this.collider; }
     getPercentRelPos() { return this.percentRelPos; }
     setRealtivePos(relativePos) {
         this.relativePos = relativePos;
     }
-    setText(text, textPos) { this.text = text; this.textPos = textPos; }
+    setText(text, textPos) {
+        this.image.text = text;
+        this.image.textPos = textPos;
+    }
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     setImage(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
         if (useCanvasCoords) {
@@ -39,17 +45,6 @@ export class UIEntity {
     addToGraphicRenderer() {
         if (this.image)
             GraphicsRenderer.instance.addExistingEntity(this.image);
-    }
-    drawText() {
-        if (this.text && this.textPos) {
-            this.ctx.font = "45px yumaro";
-            this.ctx.textAlign = "end";
-            this.ctx.strokeStyle = 'white';
-            this.ctx.lineWidth = 5;
-            this.ctx.strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
-            this.ctx.fillStyle = "#000000";
-            this.ctx.fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
-        }
     }
     hide() {
         if (this.image)
@@ -235,6 +230,18 @@ export class UIGraphicEntity extends GraphicEntity {
     /**Deja las coordenadas de la cámara (no tiene en cuenta el scroll) */
     render(context) {
         context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, this.x, this.y, this.section.w, this.section.h);
+        this.drawText();
+    }
+    drawText() {
+        if (this.text && this.textPos) {
+            GraphicsRenderer.instance.getCanvasContext().font = "45px Arco";
+            GraphicsRenderer.instance.getCanvasContext().textAlign = "end";
+            GraphicsRenderer.instance.getCanvasContext().strokeStyle = 'white';
+            GraphicsRenderer.instance.getCanvasContext().lineWidth = 5;
+            GraphicsRenderer.instance.getCanvasContext().strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
+            GraphicsRenderer.instance.getCanvasContext().fillStyle = "#000000";
+            GraphicsRenderer.instance.getCanvasContext().fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
+        }
     }
 }
 //# sourceMappingURL=uiEntity.js.map

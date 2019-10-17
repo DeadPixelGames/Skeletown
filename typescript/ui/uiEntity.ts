@@ -17,9 +17,7 @@ export class UIEntity{
 
     public image :GraphicEntity;
 
-    protected text? :string;
-    /**Posición del texto en coordenadas locales de la interfaz */
-    protected textPos? :{x :number, y :number};
+    
 
     protected ctx :CanvasRenderingContext2D;
 
@@ -39,25 +37,31 @@ export class UIEntity{
     constructor(clickable :boolean){
         this.clickable = clickable;
         this.ctx = GraphicsRenderer.instance.getCanvasContext();
-        GraphicsRenderer.instance.suscribe(this, null, this.drawText);
 
         GameLoop.instance.suscribe(this, null, this.update, null, null);
         this.colliderOffset = {x: 0, y: 0};
-
+        this.relativePos = {x: 0, y: 0};
+        this.dimension = {w: 0, h: 0}
         this.percentRelPos = true;
     }
 
     
     //#region GETTERS Y SETTERS
     public getRelativePos() :{x :number, y:number}{ return this.relativePos;}
-    public getText() {return this.text;}
+    public getText() {
+        return  this.image.text;
+    }
     public getCollider(){return this.collider;}
     public getPercentRelPos(){return this.percentRelPos;}
 
     public setRealtivePos(relativePos :{x :number, y:number}){
         this.relativePos = relativePos;
     }
-    public setText(text :string, textPos :{x :number, y :number}){this.text = text; this.textPos = textPos;}
+    public setText(text :string, textPos :{x :number, y :number}){
+        this.image.text = text; 
+        this.image.textPos = textPos;
+        
+    }
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     public setImage(useCanvasCoords :boolean, layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         if(useCanvasCoords){
@@ -79,18 +83,7 @@ export class UIEntity{
         GraphicsRenderer.instance.addExistingEntity(this.image);
     }
 
-    protected drawText() {
-        
-        if(this.text && this.textPos) {
-            this.ctx.font = "45px yumaro";
-            this.ctx.textAlign = "end";
-            this.ctx.strokeStyle = 'white';
-            this.ctx.lineWidth = 5;
-            this.ctx.strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
-            this.ctx.fillStyle = "#000000";
-            this.ctx.fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
-        }
-    }
+    
 
     public hide(){
         if(this.image)
@@ -141,8 +134,8 @@ export class UIEntity{
 
 export class ProgressBar extends UIEntity{
 
-    private progressBar :UIGraphicEntity;
-    private icon :UIGraphicEntity;
+    private progressBar :GraphicEntity;
+    private icon :GraphicEntity;
 
     private progress :number;
 
@@ -315,6 +308,7 @@ export class UILayout {
 
 /**Hereda de GraphicEntity cambia el método render */
 export class UIGraphicEntity extends GraphicEntity{
+
     constructor(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number){
         super(layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY);
 
@@ -323,5 +317,20 @@ export class UIGraphicEntity extends GraphicEntity{
     public render(context :CanvasRenderingContext2D){
         context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h,
         this.x, this.y, this.section.w, this.section.h);
+        this.drawText();
+    }
+
+
+    private drawText() {
+        
+        if(this.text && this.textPos) {
+            GraphicsRenderer.instance.getCanvasContext().font = "45px Arco";
+            GraphicsRenderer.instance.getCanvasContext().textAlign = "end";
+            GraphicsRenderer.instance.getCanvasContext().strokeStyle = 'white';
+            GraphicsRenderer.instance.getCanvasContext().lineWidth = 5;
+            GraphicsRenderer.instance.getCanvasContext().strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
+            GraphicsRenderer.instance.getCanvasContext().fillStyle = "#000000";
+            GraphicsRenderer.instance.getCanvasContext().fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
+        }
     }
 }

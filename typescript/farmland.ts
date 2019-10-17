@@ -20,12 +20,22 @@ export class FarmlandManager{
         this.farmlands.push(tile);
     }
 
-    public toggleActive(){
+
+    public activate(){
         for(let tile of this.farmlands){
             if(tile){
-                tile.uiLayout.toggleActive();
+                tile.uiLayout.activate();
+                tile.collider.active = true;
                 tile.uiLayout.visible = false;
-                tile.collider.active = !tile.collider.active;
+            }
+        }
+    }
+    public deactivate(){
+        for(let tile of this.farmlands){
+            if(tile){
+                tile.uiLayout.deactivate();
+                tile.collider.active = false;
+                tile.uiLayout.visible = false;
             }
         }
     }

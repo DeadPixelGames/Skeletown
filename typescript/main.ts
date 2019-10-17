@@ -1,6 +1,6 @@
 import Player from "./player.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
-import AreaMap from "./graphics/areamap.js";
+import AreaMap, { TileEntity } from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 
@@ -65,10 +65,7 @@ window.onload = async function() {
     time.setCollider(true, 0.95, 0.03, 362, 128);
     inventory = new UIEntity(true);
     inventory.setCollider(false, 0.87, 0.7, 245, 245,(x :number, y :number)=>{
-        FarmlandManager.instance.toggleActive();
-        Inventory.instance.toggleVision();
-        Inventory.instance.toggleActive();
-        hud_InGame.toggleActive();
+        enteringInventory();
         lifeBar.setProgress(lifeBar.getProgress()+10);
     })
     
@@ -84,8 +81,7 @@ window.onload = async function() {
     hud_InGame.addUIEntity(time);
     hud_InGame.addUIEntity(inventory);
 
-    moneyCounter.setText("1283902", {x: 250, y: 65});
-    time.setText("10:21", {x: 145, y: 80});
+
 
     lifeBar.setImage(true, 99, await FileLoader.loadImage("resources/interface/HUD_life3.png"), 0, 0, 768, 91, 768, 91);
     lifeBar.setIcon(true, 100, await FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
@@ -93,7 +89,10 @@ window.onload = async function() {
     moneyCounter.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"));
     time.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_time.png"));
     inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
-    hud_InGame.addEntitiesToRenderer();
+    inventory.image.getSource().width = 300;
+    hud_InGame.addEntitiesToRenderer();    
+    moneyCounter.setText("1283902", {x: 250, y: 65});
+    time.setText("10:21", {x: 145, y: 80});
     //#endregion
  
     //#region Jugador
@@ -120,7 +119,16 @@ window.onload = async function() {
     }, () => console.log("Game Over :("));
     //#endregion
 
-    
+    Inventory.instance.addItem({
+        id: 0,
+        name: "Skullpkin",
+        description: "Skulled Pumpkin"
+    }, 3);
+    Inventory.instance.addItem({
+        id: 1,
+        name: "SoulCorn",
+        description: "Corn Cub with souls"
+    }, 4);
 
     //#region Área
     area = AreaMap.load("farmland2.json", () => {
@@ -248,3 +256,25 @@ function renderDebug() {
     InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
 }
 //#endregion
+
+
+export function enteringInventory(){
+    Inventory.instance.activate();
+    Inventory.instance.show();
+    hud_InGame.deactivate();
+    FarmlandManager.instance.deactivate();
+}
+
+export function exitingInventory(){
+    Inventory.instance.deactivate();
+    Inventory.instance.hide();
+    hud_InGame.activate();
+    FarmlandManager.instance.activate();
+}
+
+export function enteringInventoryFromCrops(tile :TileEntity){
+    Inventory.instance.togglePlanting(tile);
+    Inventory.instance.show();
+    hud_InGame.deactivate();
+    FarmlandManager.instance.deactivate();
+}
