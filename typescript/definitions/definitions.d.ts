@@ -45,3 +45,9 @@ type ClickEvent = {
     clientX :number,
     clientY :number
 }
+
+// Propiedades no declaradas que usamos de Window
+declare interface Window {
+    
+    TouchEvent :typeof TouchEvent;
+}

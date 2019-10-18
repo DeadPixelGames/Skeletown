@@ -97,10 +97,6 @@ export abstract class Collider {
     public discarded :boolean;
 
     /**
-     * Indica si el collider está activo
-     */
-    public active :boolean;
-    /**
      * El constructor básico para `Collider` está protegido ya que es una clase abstracta. Utiliza una clase derivada.
      */
     protected constructor(x :number, y :number, activationRadius :number, dynamic :boolean) {
@@ -121,7 +117,6 @@ export abstract class Collider {
 
         this.dynamic = dynamic;
         this.discarded = false;
-        this.active = true;
 
         this.intersectingColliders = [];
     }
@@ -226,7 +221,7 @@ export abstract class Collider {
      * Dispara el evento de click si el collider contiene el punto al que se ha enviado el click.
      */
     public sendUserClick(x :number, y :number) {
-        if(this.containsPoint(x, y) && this.active) {
+        if(this.containsPoint(x, y)) {
             this.onClick.dispatch(x, y);
         }
     }

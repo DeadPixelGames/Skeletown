@@ -4,7 +4,7 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import GameLoop from "./gameloop.js";
 import AreaMap from "./graphics/areamap.js";
 import GameEvent from "./gameevent.js";
-import { clamp, distance } from "./util.js";
+import { clamp, distance, sleep } from "./util.js";
 import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 
 /**
@@ -57,6 +57,8 @@ export default class Entity{
     
     private health :number;
 
+    private attacking :boolean;
+
     private onHealthChanged :GameEvent<(health :number, maxHealth :number) => void>;
 
     private onDead :GameEvent<() => void>;
@@ -86,6 +88,7 @@ export default class Entity{
         this.health = this.maxHealth;
         this.onHealthChanged = new GameEvent();
         this.onDead = new GameEvent();
+        this.attacking = false;
 
         this.isColliding = {
             left: false,
@@ -118,6 +121,10 @@ export default class Entity{
         return this.image;
     }
 
+    public isAttacking() {
+        return this.attacking;
+    }
+
     public setCollider(collider :Collider, offset? :{x :number, y :number}) {
         this.collider = collider;
         this.collider.entity = this;
@@ -148,6 +155,10 @@ export default class Entity{
         if(health == 0) {
             this.onDead.dispatch();
         }
+    }
+
+    public setAttacking(attacking :boolean) {
+        this.attacking = attacking;
     }
     //#endregion
 
@@ -229,17 +240,42 @@ export default class Entity{
 
     }
 
-    public updateCollision(overlap :{x :number, y :number}){
+    public updateCollision(overlap :{x :number, y :number}) {
         this.isColliding.left = overlap.x < 0;
         this.isColliding.right = overlap.x > 0;
         this.isColliding.top = overlap.y < 0;
         this.isColliding.bottom = overlap.y > 0;   
     }
 
+    public async blink(blinks :number, time :number) {
+        if(!this.getImage()) {
+            return;
+        }
+
+        var image = this.getImage() as GraphicEntity;
+
+        var oldVisible = image.visible;
+        for(let i = 0; i < blinks * 2; i++) {
+            image.visible = !image.visible;
+            await sleep(time * 1000);
+        }
+
+        image.visible = oldVisible;
+    }
+
     //#region Animaciones
     public async setAnimation(layer :number, jsonFile :string) {
         this.image = await AnimatedGraphicEntity.load(jsonFile);
         this.image.renderLayer = layer;
+        
+        var imageAsAnimation = this.image as AnimatedGraphicEntity;
+
+        imageAsAnimation.suscribe(this, function(prevClip, nextClip) {
+            if(prevClip == "attack") {
+                this.setAttacking(false);
+            }
+        });
+
         this.syncImage();
     }
 
@@ -265,23 +301,31 @@ export default class Entity{
 
         // Si hay punto de destino pero está demasiado cerca, consideramos que la entidad
         // también está inactiva. Si no, la ponemos a andar
-        var length = distance(this.x, this.y, this.dest.x, this.dest.y);
+        var length = this.dest ? distance(this.x, this.y, this.dest.x, this.dest.y) : AreaMap.getCurrent().getTileSize().width;
         
         if(!this.usingOwnClip) {
-            if(length < MIN_WALKABLE_DISTANCE) {
-                anim.play("idle");
-            } else {
+            if(this.attacking) {
+                anim.play("attack");
+            } else if(length > MIN_WALKABLE_DISTANCE) {
                 anim.play("walk");
+            } else {
+                anim.play("idle");
             }
         }
         
         // Ponemos la velocidad y dirección correctas
         
-        anim.setSpeed(length * anim.getWalkAnimFactor());
+        if(!this.isAttacking()) {
+            anim.setSpeed(length * anim.getWalkAnimFactor());
+        } else {
+            anim.setSpeed(1);
+        }
         
-        var offsetX = this.dest.x - this.x;
-        var offsetY = this.dest.y - this.y;
-        anim.setDirection(offsetX, offsetY);
+        if(this.dest) {
+            var offsetX = this.dest.x - this.x;
+            var offsetY = this.dest.y - this.y;
+            anim.setDirection(offsetX, offsetY);
+        }
     }
     //#endregion
 

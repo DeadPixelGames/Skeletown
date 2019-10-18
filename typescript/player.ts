@@ -1,11 +1,6 @@
 import Entity from "./entity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
-
-import { UIGraphicEntity } from "./ui/uiEntity.js";
-import { Inventory } from "./inventory.js";
-
 import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
-
 
 /** Velocidad de desplazamiento del jugador. */
 const PLAYER_SPEED = 500;
@@ -14,10 +9,7 @@ const PLAYER_SPEED = 500;
  * movimiento. Cuanto más alto el valor, más grande será la diferencia de velocidad entre el centro y los
  * márgenes de la pantalla.
  */
-const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
-
-/**Capacidad máxima del inventario */
-const INVENTORY_MAX_SPACES = 10;
+const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 800;
 
 /**
  * Tiempo en segundos que hay que esperar antes de reproducir la segunda animación de inactividad.
@@ -35,9 +27,7 @@ export default class Player extends Entity{
     /** Tiempo en segundos que el jugador ha estado quieto */
     private idleTimer :number;
 
-    private inventory :Inventory;
-
-    private xp :number;
+    private Inventory :{};
 
 
     /**
@@ -68,7 +58,6 @@ export default class Player extends Entity{
         this.speed.y = PLAYER_SPEED;
 
         this.idleTimer = 0;
-
     }
 
     /**
@@ -113,19 +102,30 @@ export default class Player extends Entity{
     protected update(deltaTime :number) {
         
         this.dest = this.getCursorPosition();
+        if(this.isAttacking()) {
+            this.usingOwnClip = false;
+        }
 
-        if(this.mouse && this.dest) {
-            this.speed.x = Math.abs(this.dest.x - this.x) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
-            this.speed.y = Math.abs(this.dest.y - this.y) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
+        if(this.mouse && this.dest && !this.isAttacking()) {
+            this.speed.x = Math.abs(this.dest.x - this.x) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED; 
+            this.speed.y = Math.abs(this.dest.y - this.y) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED; 
             this.idleTimer = 0;
         } else {
-            this.dest = null;
+            if(!this.isAttacking()) {
+                this.dest = null;
+            } else {
+                this.speed.x = 0;
+                this.speed.y = 0;
+            }
             this.idleTimer += deltaTime;
         }
 
-        if(this.idleTimer > TIME_UNTIL_IDLE) {
+        if(!this.isAttacking()) {
+            this.idleTimer = 0;
+        } else if(this.idleTimer > TIME_UNTIL_IDLE) {
             (this.image as AnimatedGraphicEntity).play("idle2");
             this.usingOwnClip = true;
+            this.idleTimer = 0;
         } else {
             this.usingOwnClip = false;
         }
@@ -133,4 +133,3 @@ export default class Player extends Entity{
         super.update(deltaTime);   
     }
 }
-

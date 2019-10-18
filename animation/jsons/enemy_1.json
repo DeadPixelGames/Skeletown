@@ -1,0 +1,143 @@
+{
+    "source": "../SpriteSheets/SpriteSheet_Enemy_1.png",
+
+    "framerate": 8,
+
+    "framewidth": 140,
+
+    "frameheight": 160,
+
+    "pivotX": 70,
+
+    "pivotY": 80,
+
+    "walkAnimFactor": 0.0035,
+
+    "clips": [
+        {
+            "id": "idle",
+
+            "frames": [
+                [2, 0], [2, 0], [2, 0], [2, 1], [2, 1], [2, 1]
+            ],
+
+            "flip": false,
+
+            "pause": 0,
+
+            "after": "repeat"
+        },
+
+        {
+            "id": "idle2",
+
+            "frames": [
+                [2, 0], [2, 0], [2, 0], [2, 1], [2, 1], [2, 1]
+            ],
+
+            "flip": false,
+
+            "pause": 0,
+
+            "after": "repeat"
+        },
+
+        {
+            "id": "walk",
+
+            "up": {
+                "frames": [
+                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]
+                ],
+
+                "flip": true,
+
+                "pause": 7
+
+            },
+
+            "down": {
+                "frames": [
+                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]
+                ],
+
+                "flip": false,
+
+                "pause": 7
+
+            },
+
+            "left": {
+                "frames": [
+                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]
+                ],
+
+                "flip": true,
+
+                "pause": 7
+            },
+
+            "right": {
+                "frames": [
+                    [0, 0], [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]
+                ],
+
+                "flip": false,
+
+                "pause": 7
+            },
+
+            "after":  "repeat"
+        },
+
+        {
+            "id": "attack",
+
+            "up": {
+                "frames": [
+                    [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]
+                ],
+
+                "flip": true,
+
+                "pause": 0
+
+            },
+
+            "down": {
+                "frames": [
+                    [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]
+                ],
+
+                "flip": false,
+
+                "pause": 0
+
+            },
+
+            "left": {
+                "frames": [
+                    [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]
+                ],
+
+                "flip": true,
+
+                "pause": 0
+            },
+
+            "right": {
+                "frames": [
+                    [1, 0], [1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 6], [1, 7]
+                ],
+
+                "flip": false,
+
+                "pause": 0
+            },
+
+            "after": {"goto" : "idle"}
+        }
+
+
+    ]
+}

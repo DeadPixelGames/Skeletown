@@ -1,45 +1,15 @@
-export class FarmlandManager {
-    constructor() {
-        this.farmlands = [null];
-    }
-    addFarmland(tile) {
-        this.farmlands.push(tile);
-    }
-    activate() {
-        for (let tile of this.farmlands) {
-            if (tile) {
-                tile.uiLayout.activate();
-                tile.collider.active = true;
-                tile.uiLayout.visible = false;
-            }
+import Entity from "./entity.js";
+import { BoxCollider } from "./collider.js";
+export default class Farmland extends Entity {
+    constructor(canvas, ctx, x, y, w, h) {
+        super();
+        this.setCollider(new BoxCollider(x, y, w, h, false));
+        var col = this.getCollider();
+        if (col) {
+            col.addUserInteraction(this, this.onclick, null, null);
         }
     }
-    deactivate() {
-        for (let tile of this.farmlands) {
-            if (tile) {
-                tile.uiLayout.deactivate();
-                tile.collider.active = false;
-                tile.uiLayout.visible = false;
-            }
-        }
-    }
-    activateThis(tile) {
-        if (tile.uiLayout.visible) {
-            tile.uiLayout.visible = false;
-        }
-        else {
-            tile.uiLayout.visible = true;
-            tile.uiLayout.activate();
-            for (let t of this.farmlands) {
-                if (t == tile)
-                    continue;
-                if (t) {
-                    t.uiLayout.visible = false;
-                    t.uiLayout.deactivate();
-                }
-            }
-        }
+    onclick(x, y) {
     }
 }
-FarmlandManager.instance = new FarmlandManager;
 //# sourceMappingURL=farmland.js.map

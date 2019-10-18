@@ -31,12 +31,11 @@ export default class FileLoader {
         });
     }
     /**
-     * Carga un buffer que representa el audio especificado.
+     * Carga el audio especificado.
      */
-    static loadAudio(context, path) {
+    static loadAudio(path) {
         return __awaiter(this, void 0, void 0, function* () {
-            var response = yield FileLoader.loadRawFile(path, "arraybuffer");
-            return context.decodeAudioData(response);
+            return new Audio(path);
         });
     }
     //#region Funciones auxiliares
@@ -45,12 +44,12 @@ export default class FileLoader {
      * utilizando API Rest. El contenido devuelto debe procesarse más
      * a fondo para poder utilizarse en el programa.
      */
-    static loadRawFile(path, type = "") {
+    static loadRawFile(path) {
         return __awaiter(this, void 0, void 0, function* () {
             var request = new XMLHttpRequest();
             // Los eventos asociados a la petición los realizamos en
             // la promesa para poder cargar el contenido asíncronamente
-            return new Promise(resolve => {
+            return new Promise((resolve) => {
                 // Asignamos, ya dentro de la promesa para poder cargar
                 // el archivo asíncronamente, el evento que se encargará
                 // de gestionar los cambios de estado de la petición
@@ -72,7 +71,6 @@ export default class FileLoader {
                 // evento para no arriesgarnos a que la petición cambie de
                 // estado antes de que nosotros asignemos el evento
                 request.open("GET", path, true);
-                request.responseType = type;
                 request.send();
             });
         });

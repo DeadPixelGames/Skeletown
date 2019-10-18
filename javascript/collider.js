@@ -36,7 +36,6 @@ export class Collider {
         this.entity = null;
         this.dynamic = dynamic;
         this.discarded = false;
-        this.active = true;
         this.intersectingColliders = [];
     }
     /**
@@ -113,7 +112,7 @@ export class Collider {
      * Dispara el evento de click si el collider contiene el punto al que se ha enviado el click.
      */
     sendUserClick(x, y) {
-        if (this.containsPoint(x, y) && this.active) {
+        if (this.containsPoint(x, y)) {
             this.onClick.dispatch(x, y);
         }
     }
