@@ -322,7 +322,7 @@ export class TileEntity extends GraphicEntity {
                     that.planted = false;
                     this.crop.visible = false;
                     var adder = 0;
-                    if (this.fertilizerType == 1)
+                    if (this.fertilizerType == 0)
                         switch (this.fertilizerStrength) {
                             case 0:
                                 adder = 1;
@@ -393,6 +393,7 @@ export class TileEntity extends GraphicEntity {
             this.fertilizerBanner.x = this.x;
             this.fertilizerBanner.y = this.y;
             this.fertilizerType = -1;
+            GraphicsRenderer.instance.addExistingEntity(this.fertilizerBanner);
         });
     }
     onClick() {
@@ -436,7 +437,7 @@ export class TileEntity extends GraphicEntity {
         this.fertilizerStrength = strength;
         this.fertilizerBanner.visible = true;
         this.fertilizerBanner.setSection(8 * 128 + strength * 128, fertilizer * 128, 128, 128);
-        if (this.fertilizerType == 0) {
+        if (this.fertilizerType == 1) {
             switch (this.fertilizerStrength) {
                 case 0:
                     this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.9;

@@ -15,13 +15,19 @@ import GameLoop from "./gameloop.js";
 import { exitingInventory } from "./main.js";
 export class Inventory {
     constructor() {
+        //#endregion
+        /**Mitad de la anchura del contenedor del inventario */
         this.halfWidth = 512;
+        /**Mitad de la altura del contenedor del inventario */
         this.halfHeight = 348;
+        //#region Inicialización de los contenedores
         this.layout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         this.cropsLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         this.clothesLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         this.wikiLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         this.settingsLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
+        //#endregion
+        //#region Inicialización elementos del layout base
         this.background = new UIEntity(false);
         this.crops = new UIEntity(true);
         this.clothes = new UIEntity(true);
@@ -34,6 +40,7 @@ export class Inventory {
         this.wiki.setPercentRelPos(false);
         this.settings.setPercentRelPos(false);
         this.closeInventory.setPercentRelPos(false);
+        //#endregion
         this.loadImages();
         this.loadColliders();
         this.layout.addUIEntity(this.background);
@@ -47,7 +54,6 @@ export class Inventory {
         this.initWikiLayout();
         this.initSettingsLayout();
         this.deactivate();
-        this.shown = false;
     }
     /**
      * Inicializa la instancia Singleton de `Inventory` del programa y la asocia al contexto de canvas especificado.
@@ -142,8 +148,8 @@ export class Inventory {
         Interface.instance.addCollider(this.closeInventory.getCollider());
     }
     //#endregion
+    //#region Mostrar / Esconder; Activar / Desactivar el inventario
     show() {
-        this.shown = true;
         this.layout.show();
         this.cropsLayout.show();
         this.clothesLayout.hide();
@@ -151,7 +157,6 @@ export class Inventory {
         this.settingsLayout.hide();
     }
     hide() {
-        this.shown = false;
         this.layout.hide();
         this.cropsLayout.hide();
         this.clothesLayout.hide();
@@ -172,7 +177,8 @@ export class Inventory {
         this.wikiLayout.deactivate();
         this.settingsLayout.deactivate();
     }
-    //#region initLayouts
+    //#endregion
+    //#region Inicialización de los contenedores
     initCropsLayout() {
         return __awaiter(this, void 0, void 0, function* () {
             var background = new UIEntity(false);
@@ -270,9 +276,10 @@ export class Inventory {
             ent.y = this.settingsLayout.position.y + ent.getRelativePos().y;
         }
     }
+    /**Método que abre el inventario en el contenedor de los cultivos y no da posibilidad a cambiarlo */
     togglePlanting(tile) {
         this.farmableTile = tile;
-        this.layout.activate();
+        this.layout.deactivate();
         this.cropsLayout.activate();
         this.clothesLayout.deactivate();
         this.wikiLayout.deactivate();

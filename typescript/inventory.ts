@@ -10,30 +10,43 @@ import { TileEntity } from "./graphics/areamap.js";
 
 
 export class Inventory{
+    /**Instancia singleton */
     public static instance :Inventory;
 
+    /**Objetos en el inventario de cultivos */
     public items :[null, ... itemInInventory[]];
 
+    /**Contenedor de los elementos de interfaz del inventario */
     public layout :UILayout;
-
+    /**Contenedor de los elementos de interfaz del apartado de cultivos */
     private cropsLayout :UILayout;
+    /**Contenedor de los elementos de interfaz del apartado de cosméticos */
     private clothesLayout :UILayout;
+    /**Contenedor de los elementos de interfaz del apartado de wiki */
     private wikiLayout :UILayout;
+    /**Contenedor de los elementos de interfaz del apartado de ajustes*/
     private settingsLayout :UILayout;
 
+    //#region Elementos de interfaz del inventario generales
+    /**Botón para cerrar el inventario */
     private closeInventory :UIEntity;
-
+    /**Fondo del inventario */
     private background :UIEntity;
+    /**Botón para acceder al apartado de cultivos */
     private crops :UIEntity;
+    /**Botón para acceder al apartado de cosméticos */
     private clothes :UIEntity;
+    /**Botón para acceder al apartado de wiki */
     private wiki :UIEntity;
+    /**Botón para acceder al apartado de ajustes */
     private settings :UIEntity;
-
+    //#endregion
+    
+    /**Mitad de la anchura del contenedor del inventario */
     private halfWidth = 512;
+    /**Mitad de la altura del contenedor del inventario */
     private halfHeight = 348;
-
-    private shown :boolean;
-
+    /**Tile de cultivo asociada para abonar / plantar */
     public farmableTile? :TileEntity;
 
     /**
@@ -48,6 +61,7 @@ export class Inventory{
 
 
     private constructor(){
+        //#region Inicialización de los contenedores
         this.layout = new UILayout(
             GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
             GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, 
@@ -78,13 +92,14 @@ export class Inventory{
             this.halfWidth*2, 
             this.halfHeight*2
         );
+        //#endregion
 
+        //#region Inicialización elementos del layout base
         this.background = new UIEntity(false);
         this.crops = new UIEntity(true);
         this.clothes = new UIEntity(true);
         this.wiki = new UIEntity(true);
         this.settings = new UIEntity(true);
-
         this.closeInventory = new UIEntity(true);
         
         this.background.setPercentRelPos(false);
@@ -92,8 +107,8 @@ export class Inventory{
         this.clothes.setPercentRelPos(false);
         this.wiki.setPercentRelPos(false);
         this.settings.setPercentRelPos(false);
-
         this.closeInventory.setPercentRelPos(false);
+        //#endregion
         
         this.loadImages();
         this.loadColliders();
@@ -112,7 +127,7 @@ export class Inventory{
 
         this.deactivate();
         
-        this.shown = false;
+        
     }
 
     public addItem(item :Item, count :number, strength? :number){
@@ -207,9 +222,8 @@ export class Inventory{
     }
     //#endregion
 
-    
+    //#region Mostrar / Esconder; Activar / Desactivar el inventario
     public show(){
-        this.shown = true;
         this.layout.show();
         this.cropsLayout.show();
         this.clothesLayout.hide();
@@ -218,7 +232,6 @@ export class Inventory{
     }
 
     public hide(){
-        this.shown = false;
         this.layout.hide();
         this.cropsLayout.hide();
         this.clothesLayout.hide();
@@ -242,7 +255,9 @@ export class Inventory{
         this.wikiLayout.deactivate();
         this.settingsLayout.deactivate();
     }
-    //#region initLayouts
+    //#endregion
+
+    //#region Inicialización de los contenedores
     private async initCropsLayout(){
         var background = new UIEntity(false);
 
@@ -308,6 +323,7 @@ export class Inventory{
         this.settingsLayout.hide();
     }
     //#endregion
+    
     public resize(width :number, height :number){
         this.layout.position.x = width * 0.5 - this.halfWidth;
         this.layout.position.y = height * 0.5 - this.halfHeight;
@@ -345,11 +361,11 @@ export class Inventory{
         }
     }
     
-
+    /**Método que abre el inventario en el contenedor de los cultivos y no da posibilidad a cambiarlo */
     public togglePlanting(tile :TileEntity){
         this.farmableTile = tile;
 
-        this.layout.activate();
+        this.layout.deactivate();
 
         this.cropsLayout.activate();
 
