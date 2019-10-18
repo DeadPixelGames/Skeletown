@@ -15,9 +15,7 @@ import { distance } from "./util.js";
 import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 
-
-
-import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
+import AudioManager from "./audiomanager.js";
 
 //#region Declaración de variables
 var player :Player;
@@ -44,8 +42,6 @@ window.addEventListener("resize", resize);
 
 window.onload = async function() {
 
-    
-
   //TODO Adecentar esto
     var canvas :HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
 
@@ -58,20 +54,6 @@ window.onload = async function() {
     Inventory.initInstance();
 
     InterfaceInWorld.initInstance();
-
-    //#region Animación de prueba del esqueleto
-    //// var anim = await AnimatedGraphicEntity.load("skeleton.json");
-    //// 
-    //// anim.renderLayer = 2.5;
-    //// anim.x = 1200;
-    //// anim.y = 1280;
-    //// anim.play("walkright");
-    //// 
-    //// (window as any)["anim"] = anim;
-    //// 
-    //// GraphicsRenderer.instance.addExistingEntity(anim);
-    //#endregion
-
 
     //#region Interfaz
     moneyCounter = new UIEntity(true)
@@ -137,6 +119,9 @@ window.onload = async function() {
 
     player.suscribe(lifeBar, (health :number, maxHealth :number) => {
         lifeBar.setProgress(health * 100 / maxHealth);
+        if(AudioManager.instance.contextIsActive()) {
+            AudioManager.instance.playSound("sound");
+        }
     }, () => console.log("Game Over :("));
     //#endregion
 
@@ -204,6 +189,20 @@ window.onload = async function() {
     });
     GameLoop.instance.suscribe(null, null, renderDebug, null, null);
 };
+
+//#region Generar AudioContext
+function generateAudioContext() {
+    if(!AudioManager.instance) {
+        AudioManager.initInstance();
+    }
+    AudioManager.instance.activateContext();
+    AudioManager.instance.load("sound", "sound.ogg");
+    (window as any).audiomanager = AudioManager.instance;
+}
+
+window.addEventListener("mouseover", generateAudioContext);
+window.addEventListener("touchstart", generateAudioContext);
+//#endregion
 
 //#region Crear enemigo
 async function generateEnemy(onDead :() => void) {

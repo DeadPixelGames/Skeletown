@@ -19,8 +19,7 @@ import Enemy from "./enemy.js";
 import { distance } from "./util.js";
 import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
-import { distance, sleep } from "./util.js";
-
+import AudioManager from "./audiomanager.js";
 //#region Declaración de variables
 var player;
 var enemy;
@@ -48,22 +47,6 @@ window.onload = function () {
         GraphicsRenderer.initInstance(ctx);
         Inventory.initInstance();
         InterfaceInWorld.initInstance();
-
-        window.gr = GraphicsRenderer.instance;
-        window.sleep = sleep;
-        //#region Animación de prueba del esqueleto
-        //// var anim = await AnimatedGraphicEntity.load("skeleton.json");
-        //// 
-        //// anim.renderLayer = 2.5;
-        //// anim.x = 1200;
-        //// anim.y = 1280;
-        //// anim.play("walkright");
-        //// 
-        //// (window as any)["anim"] = anim;
-        //// 
-        //// GraphicsRenderer.instance.addExistingEntity(anim);
-        //#endregion
-
         //#region Interfaz
         moneyCounter = new UIEntity(true);
         moneyCounter.setCollider(true, 0.12, 0.03, 320, 91, (x, y) => {
@@ -115,6 +98,9 @@ window.onload = function () {
         GraphicsRenderer.instance.follow(player.getImage());
         player.suscribe(lifeBar, (health, maxHealth) => {
             lifeBar.setProgress(health * 100 / maxHealth);
+            if (AudioManager.instance.contextIsActive()) {
+                AudioManager.instance.playSound("sound");
+            }
         }, () => console.log("Game Over :("));
         //#endregion
         Inventory.instance.addItem({
@@ -177,6 +163,18 @@ window.onload = function () {
         GameLoop.instance.suscribe(null, null, renderDebug, null, null);
     });
 };
+//#region Generar AudioContext
+function generateAudioContext() {
+    if (!AudioManager.instance) {
+        AudioManager.initInstance();
+    }
+    AudioManager.instance.activateContext();
+    AudioManager.instance.load("sound", "sound.ogg");
+    window.audiomanager = AudioManager.instance;
+}
+window.addEventListener("mouseover", generateAudioContext);
+window.addEventListener("touchstart", generateAudioContext);
+//#endregion
 //#region Crear enemigo
 function generateEnemy(onDead) {
     return __awaiter(this, void 0, void 0, function* () {
