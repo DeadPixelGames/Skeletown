@@ -1,24 +1,58 @@
-import Entity from "./entity.js"
-import { BoxCollider, Collider } from "./collider.js";
+
+import { Collider } from "./collider.js";
+import { TileEntity } from "./graphics/areamap.js";
 
 
-export default class Farmland extends Entity{
 
-    
 
-    constructor(canvas :HTMLCanvasElement, ctx :CanvasRenderingContext2D, x :number, y :number, w :number, h :number){
-        super();
 
-        this.setCollider(new BoxCollider(x, y, w, h, false));
-        var col = this.getCollider();
-        if(col){
-            col.addUserInteraction(this, this.onclick, null, null);
+export class FarmlandManager{
+    public static instance = new FarmlandManager;
+
+    private farmlands :[null, ...TileEntity[]];
+
+
+    private constructor(){
+        this.farmlands = [null];
+    }
+
+    public addFarmland(tile :TileEntity){
+        this.farmlands.push(tile);
+    }
+
+
+    public activate(){
+        for(let tile of this.farmlands){
+            if(tile){
+                tile.uiLayout.activate();
+                tile.collider.active = true;
+                tile.uiLayout.visible = false;
+            }
+        }
+    }
+    public deactivate(){
+        for(let tile of this.farmlands){
+            if(tile){
+                tile.uiLayout.deactivate();
+                tile.collider.active = false;
+                tile.uiLayout.visible = false;
+            }
         }
     }
 
-    public onclick(x :number, y :number) {
-        
+    public activateThis(tile :TileEntity){
+        if(tile.uiLayout.visible){
+            tile.uiLayout.visible = false;
+        }else{
+            tile.uiLayout.visible = true;
+            tile.uiLayout.activate();
+            for(let t of this.farmlands){
+                if(t == tile) continue;
+                if(t){
+                    t.uiLayout.visible = false;
+                    t.uiLayout.deactivate();
+                }
+            }
+        }
     }
-
-
 }

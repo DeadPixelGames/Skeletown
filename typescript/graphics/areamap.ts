@@ -2,14 +2,22 @@ import FileLoader from "../fileloader.js";
 import GraphicEntity from "./graphicentity.js";
 import GraphicsRenderer from "./graphicsrenderer.js";
 import GameEvent from "../gameevent.js";
-import { ColliderLayer, Collider, BoxCollider } from "../collider.js";
+import { ColliderLayer, Collider, BoxCollider, CircleCollider } from "../collider.js";
 import GameLoop from "../gameloop.js";
+import { UILayout, UIEntity } from "../ui/uiEntity.js";
+import Interface, { InterfaceInWorld } from "../ui/interface.js";
+import { Inventory } from "../inventory.js";
+import { hud_InGame, enteringInventory, enteringInventoryFromCrops } from "../main.js";
+import { FarmlandManager } from "../farmland.js";
 
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
  * añadir '/' al principio ni al final.
  */
 const MAPS_JSON_FOLDER = "resources/tilemaps";
+
+/**Tiempo entre cada estadío de crecimiento de los cultivos */
+const TIME_GROWTH_SPAN = 6;
 
 /**
  * Clase que representa un mapa de Tiled en formato JSON cargado en el juego.
@@ -217,6 +225,12 @@ export default class AreaMap {
                 tile.x = (count % mapWidth) * tileWidth;
                 tile.y = Math.floor(count / mapWidth) * tileHeight;
 
+                if(tileProto.farmable){
+                    tile.initLayout();
+                    FarmlandManager.instance.addFarmland(tile);
+                }
+                    
+
                 if(tile.collider) {
                     // Colocamos el collider también en el mismo lugar que el tile
                     tile.collider.centerX = tile.x + tileWidth * 0.5;
@@ -262,6 +276,11 @@ export default class AreaMap {
                         solid = false;
                     }
 
+                    let farmable = AreaMap.findCustomPropertyValue<boolean>("farmable", y*tileset.columns + x, tileset.tiles)
+                    if(farmable == null){
+                        farmable = false;
+                    }
+
                     // Añadimos el prototipo a la paleta
                     this.palette.push({
                         source: image,
@@ -269,7 +288,8 @@ export default class AreaMap {
                         sY: y * tileset.tileheight,
                         sWidth: tileset.tilewidth,
                         sHeight: tileset.tileheight,
-                        solid: solid
+                        solid: solid,
+                        farmable: farmable
                     });
                 }
             }
@@ -351,30 +371,230 @@ type TilePrototype = {
     sWidth :number,
     sHeight :number
     solid :boolean,
+    farmable :boolean
 };
 
 /**
  * Instancia de tile particular que se puede renderizar directamente en la pantalla.
  */
-class TileEntity extends GraphicEntity {
+export class TileEntity extends GraphicEntity {
 
     /**
      * Indica si el tile se puede atravesar por otras entidades o no.
      */
     public solid :boolean;
+
+    /**
+     * Indica si el tile es interactuable y disponible para plantar 
+    */
+    public farmable :boolean;
     /**
      * El colisionador asignado a este tile.
      */
     public collider :Collider;
+    /**Botones asociados al tile */
+    public uiLayout :UILayout;
 
     public constructor(layer :number, proto :TilePrototype) {
         super(layer, proto.source, proto.sX, proto.sY, proto.sWidth, proto.sHeight, 0, 0);
         this.solid = proto.solid;
+        this.farmable = proto.farmable;
         if(this.solid) {
             this.collider = new BoxCollider(0, 0, proto.sWidth, proto.sHeight, false);
         }
+        if(this.farmable){
+            this.collider.addUserInteraction(this, this.onClick, null, null);
+            Interface.instance.addCollider(this.collider);
+            GameLoop.instance.suscribe(this, null, this.update, null, null);
+        }
     }
 
+    public plant :UIEntity;
+    public harvest :UIEntity;
+    public fertilizer :UIEntity;
+
+    private fertilizerStrength :number;
+    public fertilizerType :number;
+    private fertilizerBanner :GraphicEntity;
+    private crop :GraphicEntity;
+    private currentCrop :number;
+    private growthState :number;
+    private timeOfPlanting :number;
+    private timeOfGrowthState = TIME_GROWTH_SPAN;
+
+    public planted :boolean;
+
+    /**Inicializa el HUD asociado a un terreno plantable.
+     * BOTONES: 
+     * plant: para plantar
+     * harvest: para recolectar
+     * fertilizer: para abonar
+     */
+    public async initLayout(){
+        var that = this;
+        this.planted = false;
+        this.plant = new UIEntity(true);
+        this.harvest = new UIEntity(true);
+        this.fertilizer = new UIEntity(true);
+        this.uiLayout = new UILayout(this.x, this.y - 128, this.getWidth(), this.getHeight());
+        this.plant.setCollider(false, 0.5, 0, 86, 86, (x,y)=>{
+            if(that.plant.image.visible){
+                console.log("PLANTAR");
+                enteringInventoryFromCrops(this);
+            }
+        })
+        this.harvest.setCollider(false, 0.15, 0, 86, 86, (x,y)=>{
+            if(that.harvest.image.visible){
+                console.log("RECOGER")
+                that.planted = false;
+                this.crop.visible = false;
+                var adder = 0;
+                if(this.fertilizerType == 0)
+                switch(this.fertilizerStrength){
+                    case 0:
+                        adder = 1;
+                        break;
+                    case 1:
+                        adder = 2;
+                        break;
+                    case 2:
+                        adder = 3;
+                        break;
+                    default:
+                        adder = 0;
+                }
+
+                this.fertilizerType = -1;
+                this.fertilizerBanner.visible = false;
+                var count = 0;
+                switch(this.growthState){
+                    case 0:
+                        count = 1 + adder;
+                        break;
+                    case 1:
+                        count = 2 + adder;
+                        break;
+                    case 2:
+                        count = 5 + adder;
+                        break;
+                    case 3:
+                        count = 1;
+                        break;
+                    default:
+                        count = 1;
+                        break;
+                }
+
+                Inventory.instance.addItem({
+                    id: this.currentCrop,
+                    name: "",
+                    description: "",
+                    type: "crop"}, count);
+                this.uiLayout.visible = false;
+            }
+        })
+        this.fertilizer.setCollider(false, 0.85, 0, 86, 86, (x,y)=>{
+            if(that.fertilizer.image.visible){
+                console.log("ABONAR")
+                enteringInventoryFromCrops(this)
+            }
+                
+
+        })
+        this.plant.setImage(false, 100, await FileLoader.loadImage("resources/interface/but_plantar.png"),0,0,86,86)
+        this.harvest.setImage(false, 100, await FileLoader.loadImage("resources/interface/but_recolectar.png"),0,0,86,86);
+        this.fertilizer.setImage(false, 100, await FileLoader.loadImage("resources/interface/but_abono.png"),0,0,86,86);
+        this.uiLayout.addUIEntity(this.plant);
+        this.uiLayout.addUIEntity(this.harvest);
+        this.uiLayout.addUIEntity(this.fertilizer);
+        this.uiLayout.addEntitiesToRenderer();
+        this.uiLayout.hide();
+
+        InterfaceInWorld.instance.addCollider(this.plant.getCollider() as CircleCollider);
+        InterfaceInWorld.instance.addCollider(this.harvest.getCollider() as CircleCollider);
+        InterfaceInWorld.instance.addCollider(this.fertilizer.getCollider() as CircleCollider);
+
+        this.crop = new GraphicEntity(2, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
+        this.crop.visible = false;
+        this.crop.x = this.x;
+        this.crop.y = this.y;
+        this.currentCrop = -1;
+        
+        GraphicsRenderer.instance.addExistingEntity(this.crop);
+
+        this.fertilizerBanner = new GraphicEntity(2, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
+        this.fertilizerBanner.visible = false;
+        this.fertilizerBanner.x = this.x;
+        this.fertilizerBanner.y = this.y;
+        this.fertilizerType = -1;
+
+        GraphicsRenderer.instance.addExistingEntity(this.fertilizerBanner);
+
+    }
+
+    public onClick(){
+        FarmlandManager.instance.activateThis(this); 
+    }
+
+    public update(deltaTime :number){
+        if(this.planted){
+            
+            this.timeOfPlanting += deltaTime;
+            if(this.timeOfPlanting > this.timeOfGrowthState && this.growthState < 3){
+                this.growthState ++;
+                this.timeOfPlanting = 0;
+                this.crop.setSection(this.growthState * 128, this.currentCrop * 128, 128, 128);
+            }
+        }
+        if(this.uiLayout.visible){
+            if(this.planted){
+                this.plant.hide();
+                this.harvest.show()
+                this.fertilizer.show();
+            }else{
+                this.plant.show();
+                this.harvest.hide();
+                this.fertilizer.hide();
+            }
+        }else{
+            this.uiLayout.hide();
+        }  
+        
+        
+    }
+
+    public plantCrop(crop :number){
+        this.currentCrop = crop;
+        this.planted = true;
+        this.crop.visible = true;
+        this.crop.setSection(0, crop * 128, 128, 128);
+        this.timeOfPlanting = 0;
+        this.growthState = 0;
+    }
+
+    public fertilize(fertilizer :number, strength :number){
+        this.fertilizerType = fertilizer;
+        this.fertilizerStrength = strength;
+        this.fertilizerBanner.visible = true;
+        this.fertilizerBanner.setSection(8 * 128 + strength * 128, fertilizer * 128, 128, 128);
+        if(this.fertilizerType == 1){
+            switch(this.fertilizerStrength){
+                case 0:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.9;
+                    break;
+                case 1:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.7;
+                    break;
+                case 2:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.5;
+                    break;
+                default:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN;
+            }
+        }else{
+            this.timeOfGrowthState = TIME_GROWTH_SPAN;
+        }
+    }
 }
 //#endregion
 

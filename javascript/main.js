@@ -13,26 +13,30 @@ import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import { BoxCollider } from "./collider.js";
-import { UILayout, UISquareEntity, UICircleEntity, ProgressBar } from "./ui/uiEntity.js";
-import Interface from "./ui/interface.js";
+import { UILayout, UIEntity, ProgressBar } from "./ui/uiEntity.js";
+import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import Enemy from "./enemy.js";
+import { distance } from "./util.js";
+import { Inventory } from "./inventory.js";
+import { FarmlandManager } from "./farmland.js";
 import { distance, sleep } from "./util.js";
+
 //#region Declaración de variables
 var player;
 var enemy;
 var area;
 var ctx;
-var hud_InGame;
+export var hud_InGame;
 var lifeBar;
 var moneyCounter;
 var time;
 var inventory;
-var interf;
 //#endregion
 var resize = function () {
     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
     hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
+    Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
 };
 window.addEventListener("resize", resize);
 window.onload = function () {
@@ -42,6 +46,9 @@ window.onload = function () {
         ctx = canvas.getContext("2d");
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
+        Inventory.initInstance();
+        InterfaceInWorld.initInstance();
+
         window.gr = GraphicsRenderer.instance;
         window.sleep = sleep;
         //#region Animación de prueba del esqueleto
@@ -56,35 +63,40 @@ window.onload = function () {
         //// 
         //// GraphicsRenderer.instance.addExistingEntity(anim);
         //#endregion
+
         //#region Interfaz
-        moneyCounter = new UISquareEntity(0.09, 0.03, 320, 91, true, (x, y) => {
+        moneyCounter = new UIEntity(true);
+        moneyCounter.setCollider(true, 0.12, 0.03, 320, 91, (x, y) => {
         });
         lifeBar = new ProgressBar(0.5, 0.03, 703, 128, true, (x, y) => {
             lifeBar.setProgress(lifeBar.getProgress() - 10);
         });
-        time = new UISquareEntity(0.95, 0.03, 362, 128, false);
-        inventory = new UICircleEntity(0.9, 0.8, 122, true, (x, y) => {
+        time = new UIEntity(false);
+        time.setCollider(true, 0.95, 0.03, 362, 128);
+        inventory = new UIEntity(true);
+        inventory.setCollider(false, 0.87, 0.7, 245, 245, (x, y) => {
+            enteringInventory();
             lifeBar.setProgress(lifeBar.getProgress() + 10);
         });
-        interf = new Interface(canvas.width, canvas.height);
-        interf.addCollider(lifeBar.getCollider());
-        interf.addCollider(moneyCounter.getCollider());
-        interf.addCollider(time.getCollider());
-        interf.addCollider(inventory.getCollider());
+        Interface.instance.addCollider(lifeBar.getCollider());
+        Interface.instance.addCollider(moneyCounter.getCollider());
+        Interface.instance.addCollider(time.getCollider());
+        Interface.instance.addCollider(inventory.getCollider());
         hud_InGame = new UILayout(0, 0, canvas.width, canvas.height);
         hud_InGame.addUIEntity(lifeBar);
         hud_InGame.addUIEntity(moneyCounter);
         hud_InGame.addUIEntity(time);
         hud_InGame.addUIEntity(inventory);
-        moneyCounter.setText("1283902", { x: 30, y: 65 });
-        time.setText("10:21", { x: 30, y: 65 });
-        lifeBar.setImage(99, yield FileLoader.loadImage("resources/interface/HUD_life3.png"));
-        lifeBar.setIcon(100, yield FileLoader.loadImage("resources/interface/HUD_life1.png"));
-        lifeBar.setProgressBar(100, yield FileLoader.loadImage("resources/interface/HUD_life2.png"));
-        moneyCounter.setImage(100, yield FileLoader.loadImage("resources/interface/HUD_money.png"));
-        time.setImage(100, yield FileLoader.loadImage("resources/interface/HUD_time.png"));
-        inventory.setImage(100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
+        lifeBar.setImage(true, 99, yield FileLoader.loadImage("resources/interface/HUD_life3.png"), 0, 0, 768, 91, 768, 91);
+        lifeBar.setIcon(true, 100, yield FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
+        lifeBar.setProgressBar(true, 100, yield FileLoader.loadImage("resources/interface/HUD_life2.png"), 0, 0, 768, 91, 768, 91);
+        moneyCounter.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_money.png"));
+        time.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_time.png"));
+        inventory.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
+        inventory.image.getSource().width = 300;
         hud_InGame.addEntitiesToRenderer();
+        moneyCounter.setText("1283902", { x: 250, y: 65 }, "45px");
+        time.setText("10:21", { x: 145, y: 80 }, "45px");
         //#endregion
         //#region Jugador
         player = new Player();
@@ -105,6 +117,48 @@ window.onload = function () {
             lifeBar.setProgress(health * 100 / maxHealth);
         }, () => console.log("Game Over :("));
         //#endregion
+        Inventory.instance.addItem({
+            id: 0,
+            name: "Skullpkin",
+            description: "Skulled Pumpkin",
+            type: "crop"
+        }, 3);
+        Inventory.instance.addItem({
+            id: 1,
+            name: "Ghost Pepper",
+            description: "Peppers' immortal souls",
+            type: "crop"
+        }, 4);
+        Inventory.instance.addItem({
+            id: 2,
+            name: "SoulCorn",
+            description: "Corn Cub with souls",
+            type: "crop"
+        }, 2);
+        Inventory.instance.addItem({
+            id: 3,
+            name: "Zombihorias",
+            description: "The undead tubercule",
+            type: "crop"
+        }, 5);
+        Inventory.instance.addItem({
+            id: 4,
+            name: "Demonions",
+            description: "So evil, they will make you cry",
+            type: "crop"
+        }, 5);
+        Inventory.instance.addItem({
+            id: 0,
+            name: "Speeder",
+            description: "Grow in a blink",
+            type: "fertilizer"
+        }, 6, 2);
+        Inventory.instance.addItem({
+            id: 1,
+            name: "Quantity",
+            description: "Quantity over quality",
+            type: "fertilizer"
+        }, 6, 2);
         //#region Área
         area = AreaMap.load("farmland2.json", () => {
             if (enemy) {
@@ -129,7 +183,7 @@ function generateEnemy(onDead) {
         var enemy = new Enemy();
         enemy.x = 2176;
         enemy.y = 1280;
-        enemy.setImage(2.5, yield FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
+        enemy.setImage(2.5, yield FileLoader.loadImage("animation/Enemy_Placeholder/enemy0.png"), 0, 0, 133, 128, 66, 54);
         var image = enemy.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
@@ -204,12 +258,32 @@ function renderDebug() {
     }
     var scrollX = GraphicsRenderer.instance.scrollX;
     var scrollY = GraphicsRenderer.instance.scrollY;
+    ctx.lineWidth = 1;
     area.getColliders().render(ctx, scrollX, scrollY);
     player.renderDebug(ctx, scrollX, scrollY);
     if (enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
-    interf.getColliders().render(ctx);
+    Interface.instance.getColliders().render(ctx);
+    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
 }
 //#endregion
+export function enteringInventory() {
+    Inventory.instance.activate();
+    Inventory.instance.show();
+    hud_InGame.deactivate();
+    FarmlandManager.instance.deactivate();
+}
+export function exitingInventory() {
+    Inventory.instance.deactivate();
+    Inventory.instance.hide();
+    hud_InGame.activate();
+    FarmlandManager.instance.activate();
+}
+export function enteringInventoryFromCrops(tile) {
+    Inventory.instance.togglePlanting(tile);
+    Inventory.instance.show();
+    hud_InGame.deactivate();
+    FarmlandManager.instance.deactivate();
+}
 //# sourceMappingURL=main.js.map

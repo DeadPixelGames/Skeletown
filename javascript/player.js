@@ -8,6 +8,8 @@ const PLAYER_SPEED = 500;
  * márgenes de la pantalla.
  */
 const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
+/**Capacidad máxima del inventario */
+const INVENTORY_MAX_SPACES = 10;
 /**
  * Tiempo en segundos que hay que esperar antes de reproducir la segunda animación de inactividad.
  */

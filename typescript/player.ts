@@ -1,6 +1,11 @@
 import Entity from "./entity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
+
+import { UIGraphicEntity } from "./ui/uiEntity.js";
+import { Inventory } from "./inventory.js";
+
 import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
+
 
 /** Velocidad de desplazamiento del jugador. */
 const PLAYER_SPEED = 500;
@@ -10,6 +15,9 @@ const PLAYER_SPEED = 500;
  * márgenes de la pantalla.
  */
 const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
+
+/**Capacidad máxima del inventario */
+const INVENTORY_MAX_SPACES = 10;
 
 /**
  * Tiempo en segundos que hay que esperar antes de reproducir la segunda animación de inactividad.
@@ -27,7 +35,9 @@ export default class Player extends Entity{
     /** Tiempo en segundos que el jugador ha estado quieto */
     private idleTimer :number;
 
-    private Inventory :{};
+    private inventory :Inventory;
+
+    private xp :number;
 
 
     /**
@@ -58,6 +68,7 @@ export default class Player extends Entity{
         this.speed.y = PLAYER_SPEED;
 
         this.idleTimer = 0;
+
     }
 
     /**
@@ -122,3 +133,4 @@ export default class Player extends Entity{
         super.update(deltaTime);   
     }
 }
+
