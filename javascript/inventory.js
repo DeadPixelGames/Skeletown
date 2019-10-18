@@ -70,6 +70,7 @@ export class Inventory {
                     console.log("UwU");
                     it.setItem(item);
                     it.addItem(count);
+                    console.log(this.items);
                     return;
                 }
             }
@@ -80,7 +81,7 @@ export class Inventory {
         return __awaiter(this, void 0, void 0, function* () {
             this.background.setImage(true, 101, yield FileLoader.loadImage("resources/interface/inv_base.png"), 0, 0, this.halfWidth * 2, this.halfHeight * 2);
             this.crops.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
-            this.clothes.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
+            this.clothes.setImage(true, 103, yield FileLoader.loadImage("resources/interface/cos_inv_button.png"), 113, 0, 101, 101);
             this.wiki.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
             this.settings.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
             this.closeInventory.setImage(true, 102, yield FileLoader.loadImage("resources/interface/but_cerrar.png"), 0, 0, 86, 86);
@@ -172,16 +173,10 @@ export class Inventory {
             var constInBetweenY = 20;
             var constW = 128;
             this.items = [null];
+            var that = this;
             for (var i = 0; i < 4; i++) {
                 for (var j = 0; j < 5; j++) {
-                    var item = new itemInInventory(constX + j * constInBetweenX + j * constW, constY + i * constInBetweenY + i * constW, constW, constW, (x, y) => {
-                        if (!item.blocked) {
-                            if (this.farmableTile) {
-                                this.farmableTile.plantCrop(item.id);
-                                this.farmableTile = undefined;
-                            }
-                        }
-                    });
+                    var item = new itemInInventory(j + i * 5 + 1, constX + j * constInBetweenX + j * constW, constY + i * constInBetweenY + i * constW, constW, constW);
                     if (i != 0)
                         item.blocked = true;
                     this.items.push(item);
@@ -191,14 +186,16 @@ export class Inventory {
                 if (item)
                     this.cropsLayout.addUIEntity(item.image);
             }
+            console.log(this.cropsLayout);
             this.cropsLayout.addEntitiesToRenderer();
             this.cropsLayout.hide();
+            this.deactivate();
         });
     }
     initClothesLayout() {
         return __awaiter(this, void 0, void 0, function* () {
             var background = new UIEntity(false);
-            background.setImage(true, 102, yield FileLoader.loadImage("resources/interface/or_inv_page.png"));
+            background.setImage(true, 102, yield FileLoader.loadImage("resources/interface/cos_inv_page.png"));
             background.setCollider(true, 0, 0, 1024, 696);
             background.setPercentRelPos(false);
             this.clothesLayout.addUIEntity(background);
@@ -271,22 +268,33 @@ export class Inventory {
     }
 }
 class itemInInventory {
-    constructor(left, top, width, height, onClick) {
+    constructor(pos, left, top, width, height) {
         this.count = 0;
         this.image = new UIEntity(true);
-        this.initImage(left, top, width, height, onClick);
+        this.initImage(left, top, width, height);
         GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
-    initImage(left, top, width, height, onClick) {
+    initImage(left, top, width, height) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.image.setImage(true, 103, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 512, 0, 128, 128);
             this.image.setPercentRelPos(false);
-            this.image.setCollider(false, left, top, width, height, onClick);
+            this.image.setCollider(false, left, top, width, height, (x, y) => {
+                if (!this.blocked) {
+                    console.log("LLEGO PASADO BLOCK");
+                    if (Inventory.instance.farmableTile) {
+                        console.log("LLEGO HASTA EL ENVÍO");
+                        Inventory.instance.farmableTile.plantCrop(this.id);
+                        Inventory.instance.farmableTile = undefined;
+                        exitingInventory();
+                    }
+                }
+            });
             var coll = this.image.getCollider();
             if (coll) {
                 Interface.instance.addCollider(coll);
-                console.log("OwO");
             }
+            this.image.setImage(true, 105, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 512, 0, 128, 128);
+            this.image.hide();
+            GraphicsRenderer.instance.addExistingEntity(this.image.image);
         });
     }
     setItem(item) {
@@ -300,8 +308,12 @@ class itemInInventory {
         this.count -= count;
     }
     update(deltaTime) {
-        if (this.id)
+        if (this.id >= 0) {
             this.image.image.setSection(512, this.id * 128, 128, 128);
+        }
+        else {
+            this.image.image.setSection(1, 1, 1, 1);
+        }
     }
 }
 //# sourceMappingURL=inventory.js.map

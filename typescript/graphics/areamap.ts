@@ -460,6 +460,8 @@ export class TileEntity extends GraphicEntity {
 
         this.crop = new GraphicEntity(2, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
         this.crop.visible = false;
+        this.crop.x = this.x;
+        this.crop.y = this.y;
         GraphicsRenderer.instance.addExistingEntity(this.crop);
 
     }
@@ -491,6 +493,7 @@ export class TileEntity extends GraphicEntity {
         this.planted = true;
         this.crop.visible = true;
         this.crop.setSection(0, crop * 128, 128, 128);
+        console.log("RECIBO EL ENVÍO")
     }
 }
 //#endregion
