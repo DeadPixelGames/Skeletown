@@ -122,18 +122,45 @@ window.onload = async function() {
     Inventory.instance.addItem({
         id: 0,
         name: "Skullpkin",
-        description: "Skulled Pumpkin"
+        description: "Skulled Pumpkin",
+        type: "crop"
     }, 3);
     Inventory.instance.addItem({
         id: 1,
         name: "Ghost Pepper",
-        description: "Peppers' immortal souls"
+        description: "Peppers' immortal souls",
+        type: "crop"
     }, 4);
     Inventory.instance.addItem({
         id: 2,
         name: "SoulCorn",
-        description: "Corn Cub with souls"
+        description: "Corn Cub with souls",
+        type: "crop"
     }, 2);
+    Inventory.instance.addItem({
+        id: 3,
+        name: "Zombihorias",
+        description: "The undead tubercule",
+        type: "crop"
+    }, 5);
+    Inventory.instance.addItem({
+        id: 4,
+        name: "Demonions",
+        description: "So evil, they will make you cry",
+        type: "crop"
+    }, 5);
+    Inventory.instance.addItem({
+        id: 0,
+        name: "Speeder",
+        description: "Grow in a blink",
+        type: "fertilizer"
+    }, 6, 2);
+    Inventory.instance.addItem({
+        id: 1,
+        name: "Quantity",
+        description: "Quantity over quality",
+        type: "fertilizer"
+    }, 6, 2);
 
     //#region Área
     area = AreaMap.load("farmland2.json", () => {

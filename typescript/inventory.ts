@@ -115,19 +115,29 @@ export class Inventory{
         this.shown = false;
     }
 
-    public addItem(item :Item, count :number){
+    public addItem(item :Item, count :number, strength? :number){
         var found = false;
         var i = 1;
         while(!found || i == this.items.length){
             var it = this.items[i]
             if(it){
                 if(it.blocked) found = true;
-                if(it.id == item.id){
-                    it.addItem(count);
-                    found = true;
+                if(it.type == item.type){
+                    if(it.id == item.id){
+                        it.addItem(count);
+                        found = true;
+                    }
                 }else if(it.count <= 0){
                     it.setItem(item);
                     it.addItem(count);
+                    if(item.type == "fertilizer"){
+                        if(strength){
+                            it.fertStrength = strength
+                        }else{
+                            console.log("No se ha incluido potencia en el abono: "+item.name)
+                        }
+                        
+                    }
                     found = true;
                 }
                 i++;
@@ -141,7 +151,7 @@ export class Inventory{
     private async loadImages(){
         this.background.setImage(true, 101, await FileLoader.loadImage("resources/interface/inv_base.png"), 0, 0, this.halfWidth*2, this.halfHeight*2);
         this.crops.setImage(true, 103, await FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
-        this.clothes.setImage(true, 103, await FileLoader.loadImage("resources/interface/cos_inv_button.png"), 113, 0, 101, 101);
+        this.clothes.setImage(true, 103, await FileLoader.loadImage("resources/interface/cos_inv_button.png"), 58, 211, 102, 102);
         this.wiki.setImage(true, 103, await FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
         this.settings.setImage(true, 103, await FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
         this.closeInventory.setImage(true, 102, await FileLoader.loadImage("resources/interface/but_cerrar.png"), 0, 0, 86, 86);
@@ -254,7 +264,7 @@ export class Inventory{
                 var item = new itemInInventory(j + i * 5 + 1, constX + j * constInBetweenX + j * constW, 
                     constY + i * constInBetweenY + i * constW, 
                     constW, constW);
-                if(i != 0) item.blocked = true;
+                if(i > 1) item.blocked = true;
                 this.items.push(item);
             }
         }
@@ -356,8 +366,9 @@ class itemInInventory{
     public id :number;
     public name :string;
     public count :number;
-
+    public type :string;
     public image :UIEntity;
+    public fertStrength :number;
 
     public blocked :boolean;
 
@@ -381,17 +392,34 @@ class itemInInventory{
                     var it = Inventory.instance.items[this.pos]
                     if(it){
                         if(it.count > 0){
-                            it.takeItem(1);
-                            Inventory.instance.farmableTile.plantCrop(this.id);
-                            Inventory.instance.farmableTile = undefined;
-                            exitingInventory();
-                            if(it.count == 0){
-                                this.id = -1;
+                            if(it.type == "crop" && !Inventory.instance.farmableTile.planted){
+                                Inventory.instance.farmableTile.plantCrop(this.id);
+                                it.takeItem(1);
+                                Inventory.instance.farmableTile = undefined;
+                                exitingInventory();
+                                if(it.count == 0){
+                                    this.id = -1;
+                                }
+                            }else if(it.type == "fertilizer" && Inventory.instance.farmableTile.planted){
+                                if(Inventory.instance.farmableTile.fertilizerType == -1){
+                                    Inventory.instance.farmableTile.fertilize(this.id, this.fertStrength);
+                                    it.takeItem(1);
+                                    Inventory.instance.farmableTile = undefined;
+                                    exitingInventory();
+                                    if(it.count == 0){
+                                        this.id = -1;
+                                    }
+                                }else{
+                                    console.log("Ya hay fertilizante")
+                                }
+                                
+                            }else{
+                                console.log("Action not posible")
                             }
+                            
                         }
                         
                     }
-                    
                 }
             }
 
@@ -409,6 +437,7 @@ class itemInInventory{
     public setItem(item :Item){
         this.id = item.id;
         this.name = item.name;
+        this.type = item.type;
     }
 
     public addItem(count :number){
@@ -421,9 +450,15 @@ class itemInInventory{
 
     public update(deltaTime :number){
         if(this.id >= 0){
-            this.image.image.setSection( 512, this.id * 128, 128, 128);
+            if(this.type == "crop"){
+                this.image.image.setSection( 512, this.id * 128, 128, 128);
+            }else if(this.type == "fertilizer"){
+                this.image.image.setSection( 640 + this.fertStrength * 128, this.id * 128, 128, 128);
+            }
+            
             this.image.setText(this.count.toString(), {x: 110, y: 110}, "30px");
         }else{
+            this.image.image.setSection( 1, 1, 1, 1);
             this.image.hide();
         }
 
@@ -433,5 +468,6 @@ class itemInInventory{
 type Item = {
     id :number,
     name :string,
-    description :string
+    description :string,
+    type :string
 }

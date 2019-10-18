@@ -16,6 +16,9 @@ import { FarmlandManager } from "../farmland.js";
  */
 const MAPS_JSON_FOLDER = "resources/tilemaps";
 
+/**Tiempo entre cada estadío de crecimiento de los cultivos */
+const TIME_GROWTH_SPAN = 6;
+
 /**
  * Clase que representa un mapa de Tiled en formato JSON cargado en el juego.
  */
@@ -410,12 +413,14 @@ export class TileEntity extends GraphicEntity {
     public harvest :UIEntity;
     public fertilizer :UIEntity;
 
-    public cropNumber :number;
-    public cropState :number;
-    public crop :GraphicEntity;
-    public currentCrop :number;
-    public growthState :number;
-    public timeOfPlanting :number;
+    private fertilizerStrength :number;
+    public fertilizerType :number;
+    private fertilizerBanner :GraphicEntity;
+    private crop :GraphicEntity;
+    private currentCrop :number;
+    private growthState :number;
+    private timeOfPlanting :number;
+    private timeOfGrowthState = TIME_GROWTH_SPAN;
 
     public planted :boolean;
 
@@ -443,16 +448,34 @@ export class TileEntity extends GraphicEntity {
                 console.log("RECOGER")
                 that.planted = false;
                 this.crop.visible = false;
+                var adder = 0;
+                if(this.fertilizerType == 1)
+                switch(this.fertilizerStrength){
+                    case 0:
+                        adder = 1;
+                        break;
+                    case 1:
+                        adder = 2;
+                        break;
+                    case 2:
+                        adder = 3;
+                        break;
+                    default:
+                        adder = 0;
+                }
+
+                this.fertilizerType = -1;
+                this.fertilizerBanner.visible = false;
                 var count = 0;
                 switch(this.growthState){
                     case 0:
-                        count = 1;
+                        count = 1 + adder;
                         break;
                     case 1:
-                        count = 2;
+                        count = 2 + adder;
                         break;
                     case 2:
-                        count = 5;
+                        count = 5 + adder;
                         break;
                     case 3:
                         count = 1;
@@ -465,13 +488,18 @@ export class TileEntity extends GraphicEntity {
                 Inventory.instance.addItem({
                     id: this.currentCrop,
                     name: "",
-                    description: ""}, count);
+                    description: "",
+                    type: "crop"}, count);
                 this.uiLayout.visible = false;
             }
         })
         this.fertilizer.setCollider(false, 0.85, 0, 86, 86, (x,y)=>{
-            if(that.fertilizer.image.visible)
+            if(that.fertilizer.image.visible){
                 console.log("ABONAR")
+                enteringInventoryFromCrops(this)
+            }
+                
+
         })
         this.plant.setImage(false, 100, await FileLoader.loadImage("resources/interface/but_plantar.png"),0,0,86,86)
         this.harvest.setImage(false, 100, await FileLoader.loadImage("resources/interface/but_recolectar.png"),0,0,86,86);
@@ -494,6 +522,12 @@ export class TileEntity extends GraphicEntity {
         
         GraphicsRenderer.instance.addExistingEntity(this.crop);
 
+        this.fertilizerBanner = new GraphicEntity(2, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
+        this.fertilizerBanner.visible = false;
+        this.fertilizerBanner.x = this.x;
+        this.fertilizerBanner.y = this.y;
+        this.fertilizerType = -1;
+
     }
 
     public onClick(){
@@ -502,8 +536,9 @@ export class TileEntity extends GraphicEntity {
 
     public update(deltaTime :number){
         if(this.planted){
+            
             this.timeOfPlanting += deltaTime;
-            if(this.timeOfPlanting > 6 && this.growthState < 3){
+            if(this.timeOfPlanting > this.timeOfGrowthState && this.growthState < 3){
                 this.growthState ++;
                 this.timeOfPlanting = 0;
                 this.crop.setSection(this.growthState * 128, this.currentCrop * 128, 128, 128);
@@ -533,6 +568,30 @@ export class TileEntity extends GraphicEntity {
         this.crop.setSection(0, crop * 128, 128, 128);
         this.timeOfPlanting = 0;
         this.growthState = 0;
+    }
+
+    public fertilize(fertilizer :number, strength :number){
+        this.fertilizerType = fertilizer;
+        this.fertilizerStrength = strength;
+        this.fertilizerBanner.visible = true;
+        this.fertilizerBanner.setSection(8 * 128 + strength * 128, fertilizer * 128, 128, 128);
+        if(this.fertilizerType == 0){
+            switch(this.fertilizerStrength){
+                case 0:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.9;
+                    break;
+                case 1:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.7;
+                    break;
+                case 2:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN * 0.5;
+                    break;
+                default:
+                    this.timeOfGrowthState = TIME_GROWTH_SPAN;
+            }
+        }else{
+            this.timeOfGrowthState = TIME_GROWTH_SPAN;
+        }
     }
 }
 //#endregion
