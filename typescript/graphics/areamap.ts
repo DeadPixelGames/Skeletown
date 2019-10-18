@@ -413,6 +413,7 @@ export class TileEntity extends GraphicEntity {
     public cropNumber :number;
     public cropState :number;
     public crop :GraphicEntity;
+    public currentCrop :number;
 
     public planted :boolean;
 
@@ -439,6 +440,12 @@ export class TileEntity extends GraphicEntity {
             if(that.harvest.image.visible){
                 console.log("RECOGER")
                 that.planted = false;
+                this.crop.visible = false;
+                Inventory.instance.addItem({
+                    id: this.currentCrop,
+                    name: "",
+                    description: ""}, 1);
+                this.uiLayout.visible = false;
             }
         })
         this.fertilizer.setCollider(false, 0.85, 0, 86, 86, (x,y)=>{
@@ -462,6 +469,8 @@ export class TileEntity extends GraphicEntity {
         this.crop.visible = false;
         this.crop.x = this.x;
         this.crop.y = this.y;
+        this.currentCrop = -1;
+        
         GraphicsRenderer.instance.addExistingEntity(this.crop);
 
     }
@@ -490,10 +499,10 @@ export class TileEntity extends GraphicEntity {
     }
 
     public plantCrop(crop :number){
+        this.currentCrop = crop;
         this.planted = true;
         this.crop.visible = true;
         this.crop.setSection(0, crop * 128, 128, 128);
-        console.log("RECIBO EL ENVÍO")
     }
 }
 //#endregion

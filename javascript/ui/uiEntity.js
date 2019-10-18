@@ -25,9 +25,10 @@ export class UIEntity {
     setRealtivePos(relativePos) {
         this.relativePos = relativePos;
     }
-    setText(text, textPos) {
+    setText(text, textPos, fontSize) {
         this.image.text = text;
         this.image.textPos = textPos;
+        this.image.fontSize = fontSize;
     }
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     setImage(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
@@ -234,7 +235,7 @@ export class UIGraphicEntity extends GraphicEntity {
     }
     drawText() {
         if (this.text && this.textPos) {
-            GraphicsRenderer.instance.getCanvasContext().font = "45px Arco";
+            GraphicsRenderer.instance.getCanvasContext().font = this.fontSize + " Arco";
             GraphicsRenderer.instance.getCanvasContext().textAlign = "end";
             GraphicsRenderer.instance.getCanvasContext().strokeStyle = 'white';
             GraphicsRenderer.instance.getCanvasContext().lineWidth = 5;

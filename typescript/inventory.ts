@@ -12,7 +12,7 @@ import { TileEntity } from "./graphics/areamap.js";
 export class Inventory{
     public static instance :Inventory;
 
-    private items :[null, ... itemInInventory[]];
+    public items :[null, ... itemInInventory[]];
 
     public layout :UILayout;
 
@@ -116,20 +116,24 @@ export class Inventory{
     }
 
     public addItem(item :Item, count :number){
-        for(let it of this.items){
+        var found = false;
+        var i = 1;
+        while(!found || i == this.items.length){
+            var it = this.items[i]
             if(it){
-                if(it.blocked) return;
+                if(it.blocked) found = true;
                 if(it.id == item.id){
                     it.addItem(count);
+                    found = true;
                 }else if(it.count <= 0){
-                    console.log("UwU")
                     it.setItem(item);
                     it.addItem(count);
-                    console.log(this.items)
-                    return;
+                    found = true;
                 }
+                i++;
             }
         }
+        
     }
 
 
@@ -244,7 +248,7 @@ export class Inventory{
         var constW = 128;
 
         this.items = [null];
-        var that = this;
+       
         for(var i = 0; i < 4; i++){
             for(var j = 0; j < 5; j++){
                 var item = new itemInInventory(j + i * 5 + 1, constX + j * constInBetweenX + j * constW, 
@@ -363,6 +367,7 @@ class itemInInventory{
         this.count = 0;
         this.image = new UIEntity(true);
         this.initImage(left, top, width, height);
+        this.pos = pos;
 
         GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
@@ -372,12 +377,21 @@ class itemInInventory{
         this.image.setPercentRelPos(false);
         this.image.setCollider(false, left, top, width, height, (x,y)=>{
             if( !this.blocked){
-                console.log("LLEGO PASADO BLOCK")
                 if(Inventory.instance.farmableTile){
-                    console.log("LLEGO HASTA EL ENVÍO")
-                    Inventory.instance.farmableTile.plantCrop(this.id);
-                    Inventory.instance.farmableTile = undefined;
-                    exitingInventory();
+                    var it = Inventory.instance.items[this.pos]
+                    if(it){
+                        if(it.count > 0){
+                            it.takeItem(1);
+                            Inventory.instance.farmableTile.plantCrop(this.id);
+                            Inventory.instance.farmableTile = undefined;
+                            exitingInventory();
+                            if(it.count == 0){
+                                this.id = -1;
+                            }
+                        }
+                        
+                    }
+                    
                 }
             }
 
@@ -407,10 +421,12 @@ class itemInInventory{
 
     public update(deltaTime :number){
         if(this.id >= 0){
-            this.image.image.setSection( 512,this.id * 128, 128, 128);
+            this.image.image.setSection( 512, this.id * 128, 128, 128);
+            this.image.setText(this.count.toString(), {x: 110, y: 110}, "30px");
         }else{
-            this.image.image.setSection( 1, 1, 1, 1);
+            this.image.hide();
         }
+
     }
 }
 

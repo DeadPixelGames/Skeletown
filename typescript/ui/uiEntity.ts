@@ -57,9 +57,10 @@ export class UIEntity{
     public setRealtivePos(relativePos :{x :number, y:number}){
         this.relativePos = relativePos;
     }
-    public setText(text :string, textPos :{x :number, y :number}){
+    public setText(text :string, textPos :{x :number, y :number}, fontSize :string){
         this.image.text = text; 
         this.image.textPos = textPos;
+        this.image.fontSize = fontSize;
         
     }
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
@@ -324,7 +325,7 @@ export class UIGraphicEntity extends GraphicEntity{
     private drawText() {
         
         if(this.text && this.textPos) {
-            GraphicsRenderer.instance.getCanvasContext().font = "45px Arco";
+            GraphicsRenderer.instance.getCanvasContext().font =  this.fontSize + " Arco";
             GraphicsRenderer.instance.getCanvasContext().textAlign = "end";
             GraphicsRenderer.instance.getCanvasContext().strokeStyle = 'white';
             GraphicsRenderer.instance.getCanvasContext().lineWidth = 5;

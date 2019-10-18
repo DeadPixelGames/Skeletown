@@ -41,13 +41,17 @@ export class FarmlandManager{
     }
 
     public activateThis(tile :TileEntity){
-        tile.uiLayout.visible = true;
-        tile.uiLayout.activate();
-        for(let t of this.farmlands){
-            if(t == tile) continue;
-            if(t){
-                t.uiLayout.visible = false;
-                t.uiLayout.deactivate();
+        if(tile.uiLayout.visible){
+            tile.uiLayout.visible = false;
+        }else{
+            tile.uiLayout.visible = true;
+            tile.uiLayout.activate();
+            for(let t of this.farmlands){
+                if(t == tile) continue;
+                if(t){
+                    t.uiLayout.visible = false;
+                    t.uiLayout.deactivate();
+                }
             }
         }
     }

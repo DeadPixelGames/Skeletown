@@ -51,6 +51,8 @@ export default class GraphicEntity {
     /**Posición del texto en coordenadas locales de la interfaz */
     public textPos? :{x :number, y :number};
 
+    public fontSize :string;
+
     constructor(layer :number, source :HTMLImageElement, sX? :number, sY? :number, sWidth? :number, sHeight? :number, pivotX? :number, pivotY? :number) {
         this.sourceElement = source;
         this.section = {

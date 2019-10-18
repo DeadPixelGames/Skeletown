@@ -91,8 +91,8 @@ window.onload = async function() {
     inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
     inventory.image.getSource().width = 300;
     hud_InGame.addEntitiesToRenderer();    
-    moneyCounter.setText("1283902", {x: 250, y: 65});
-    time.setText("10:21", {x: 145, y: 80});
+    moneyCounter.setText("1283902", {x: 250, y: 65}, "45px");
+    time.setText("10:21", {x: 145, y: 80}, "45px");
     //#endregion
  
     //#region Jugador

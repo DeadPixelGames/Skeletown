@@ -15,6 +15,7 @@ import { ColliderLayer, BoxCollider } from "../collider.js";
 import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
 import Interface, { InterfaceInWorld } from "../ui/interface.js";
+import { Inventory } from "../inventory.js";
 import { enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 /**
@@ -316,6 +317,13 @@ export class TileEntity extends GraphicEntity {
                 if (that.harvest.image.visible) {
                     console.log("RECOGER");
                     that.planted = false;
+                    this.crop.visible = false;
+                    Inventory.instance.addItem({
+                        id: this.currentCrop,
+                        name: "",
+                        description: ""
+                    }, 1);
+                    this.uiLayout.visible = false;
                 }
             });
             this.fertilizer.setCollider(false, 0.85, 0, 86, 86, (x, y) => {
@@ -337,6 +345,7 @@ export class TileEntity extends GraphicEntity {
             this.crop.visible = false;
             this.crop.x = this.x;
             this.crop.y = this.y;
+            this.currentCrop = -1;
             GraphicsRenderer.instance.addExistingEntity(this.crop);
         });
     }
@@ -361,10 +370,10 @@ export class TileEntity extends GraphicEntity {
         }
     }
     plantCrop(crop) {
+        this.currentCrop = crop;
         this.planted = true;
         this.crop.visible = true;
         this.crop.setSection(0, crop * 128, 128, 128);
-        console.log("RECIBO EL ENVÍO");
     }
 }
 //#endregion
