@@ -14,6 +14,8 @@ import { distance } from "./util.js";
 import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 
+
+
 //#region Declaración de variables
 var player :Player;
 var enemy :Enemy | null;
