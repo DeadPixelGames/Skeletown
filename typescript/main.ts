@@ -11,10 +11,13 @@ import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import Enemy from "./enemy.js";
 
 import { distance } from "./util.js";
+
 import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 
 
+
+import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 
 //#region Declaración de variables
 var player :Player;
@@ -30,7 +33,7 @@ var inventory :UIEntity;
 //#endregion
 
 
-var resize = function(){
+var resize = function() {
     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
     hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
@@ -39,8 +42,9 @@ var resize = function(){
 
 window.addEventListener("resize", resize);
 
-
 window.onload = async function() {
+
+    
 
   //TODO Adecentar esto
     var canvas :HTMLCanvasElement = document.getElementById("gameCanvas") as HTMLCanvasElement;
@@ -54,6 +58,20 @@ window.onload = async function() {
     Inventory.initInstance();
 
     InterfaceInWorld.initInstance();
+
+    //#region Animación de prueba del esqueleto
+    //// var anim = await AnimatedGraphicEntity.load("skeleton.json");
+    //// 
+    //// anim.renderLayer = 2.5;
+    //// anim.x = 1200;
+    //// anim.y = 1280;
+    //// anim.play("walkright");
+    //// 
+    //// (window as any)["anim"] = anim;
+    //// 
+    //// GraphicsRenderer.instance.addExistingEntity(anim);
+    //#endregion
+
 
     //#region Interfaz
     moneyCounter = new UIEntity(true)
@@ -98,12 +116,13 @@ window.onload = async function() {
     //#endregion
  
     //#region Jugador
-    player = new Player();
+    player = new Player();   
 
     player.x = 1200;
-    player.y = 1280;    
-
-    player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+    player.y = 1280; 
+    
+    //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+    await player.setAnimation(2.5, "skeleton.json");
     var image = player.getImage();
     if(image){
         GraphicsRenderer.instance.addExistingEntity(image);
@@ -120,6 +139,7 @@ window.onload = async function() {
         lifeBar.setProgress(health * 100 / maxHealth);
     }, () => console.log("Game Over :("));
     //#endregion
+
 
     Inventory.instance.addItem({
         id: 0,
@@ -164,17 +184,17 @@ window.onload = async function() {
         type: "fertilizer"
     }, 6, 2);
 
+
     //#region Área
     area = AreaMap.load("farmland2.json", () => {
         if(enemy){
             area.getColliders().add(player.getCollider() as BoxCollider);
-
-            
             GameLoop.instance.start();
         }
         
     });
     //#endregion
+    
     enemy = await generateEnemy(() => {
         if(enemy) {
             enemy.dispose();

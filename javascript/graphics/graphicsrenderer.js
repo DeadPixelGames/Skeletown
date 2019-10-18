@@ -1,6 +1,16 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import GraphicEntity from "./graphicentity.js";
 import GameEvent from "../gameevent.js";
 import GameLoop from "../gameloop.js";
+import { sleep } from "../util.js";
 /**
  * Clase singleton encargada de renderizar todos los gráficos del juego. Los métodos de esta clase se pueden
  * acceder mediante `GraphicsRenderer.instance`.
@@ -16,6 +26,12 @@ export default class GraphicsRenderer {
         this.scrollY = 0;
         this.onFrameUpdate = new GameEvent();
         this.onFirstFrame = new GameEvent();
+        this.overlayColor = {
+            r: 0,
+            g: 0,
+            b: 0,
+            a: 0
+        };
     }
     /** La instancia única de esta clase singleton. */
     static get instance() {
@@ -58,12 +74,18 @@ export default class GraphicsRenderer {
                 break;
             entity.render(this.context, this.scrollX, this.scrollY);
         }
+        // Dibujamos el overlay
+        this.context.fillStyle = "rgba(" + this.overlayColor.r + ", " + this.overlayColor.g + ", " + this.overlayColor.b + ", " + this.overlayColor.a + ")";
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.fillStyle = "#000000";
+        // Render del fotograma listo, disparamos el evento
         this.onFrameUpdate.dispatch();
     }
     /**
      * Descarta todas las entidades almacenadas y vuelve a ejecutar el evento del primer fotograma.
      */
     flush() {
+        this.entities.forEach(e => e.dispose());
         this.entities = [];
         this.following = null;
         this.onFirstFrame.dispatch();
@@ -96,6 +118,48 @@ export default class GraphicsRenderer {
         if (onFirstFrame) {
             this.onFirstFrame.suscribe(onFirstFrame, instance);
         }
+    }
+    /**
+     * Reproduce una animación de desvanecimiento en el color de overlay sobre la pantalla, pensada para
+     * cambiar el estado del juego. El fundido en negro dura lo especificado en segundos. Después, se ejecuta
+     * el callback. Por último, se vuelve a realizar un nuevo fundido con la misma duración. Si el callback
+     * es asíncrono, la transición esperará a que se complete antes de continuar.
+     */
+    fadeOutAndIn(duration, callback) {
+        return __awaiter(this, void 0, void 0, function* () {
+            var durationInverse = 1 / (1000 * duration);
+            var alpha = this.overlayColor.a;
+            var oldAlpha = alpha;
+            var currentMillis = Date.now();
+            // Fundido hacia negro
+            while (alpha < 1) {
+                // Cada iteración de este bucle está en un fotograma distinto. Podemos producir esto esperando una
+                // cantidad simbólica de tiempo
+                yield sleep(1);
+                // Subimos el canal alfa proporcionalmente al tiempo que ha pasado desde la última iteración y la
+                // duración especificada
+                alpha = Math.min(1, alpha + (Date.now() - currentMillis) * durationInverse);
+                currentMillis = Date.now();
+                // Asignamos el alfa calculado al overlay de la pantalla
+                this.overlayColor.a = alpha;
+            }
+            // Con el fundido hacia negro terminado, ejecutamos el callback
+            var callbackResult = callback();
+            // Si el callback es asíncrono, esperamos a que se complete antes de seguir
+            if (callbackResult instanceof Promise) {
+                yield callbackResult;
+            }
+            currentMillis = Date.now();
+            // Fundido desde negro
+            while (alpha > oldAlpha) {
+                // El proceso es igual que en el fundido hacia negro, pero esta vez el alfa está regresando a su
+                // valor original
+                yield sleep(1);
+                alpha = Math.max(oldAlpha, alpha - (Date.now() - currentMillis) * durationInverse);
+                currentMillis = Date.now();
+                this.overlayColor.a = alpha;
+            }
+        });
     }
     /**
      * Ordena las entidades para ordenarlas correctamente. Se ordenan primero por capa, luego por coordenada Y, y por

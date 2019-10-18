@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import AreaMap from "./graphics/areamap.js";
 //#region Random
 /** Devuelve un número aleatorio entre `min` (inclusivo) y `max` (exclusivo) */
@@ -27,6 +36,14 @@ export function pixelToTilePosition(x, y) {
         x: Math.floor(x / tile.width),
         y: Math.floor(y / tile.height)
     };
+}
+/** Espera asíncronamente el número especificado de milisegundos. */
+export function sleep(milliseconds) {
+    return __awaiter(this, void 0, void 0, function* () {
+        return new Promise(resolve => {
+            setTimeout(resolve, milliseconds);
+        });
+    });
 }
 /** Devuelve el punto del centro del tile (`x`, `y`) */
 export function tileToPixelPosition(x, y) {

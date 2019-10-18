@@ -1,4 +1,5 @@
 import GraphicsRenderer from "./graphicsrenderer.js";
+import GameLoop from "../gameloop.js";
 
 /** Clase que representa una entidad gráfica fundamental. Es la unidad básica utilizada por el `GraphicsRenderer` para
  * renderizar todos los elementos gráficos del juego. 
@@ -28,6 +29,11 @@ export default class GraphicEntity {
         x :number,
         y :number
     }
+
+    /**
+     * Indica si la entidad está horizontalmente volteada.
+     */
+    protected flipped :boolean;
     
     /**
      * Capa en la que se va a renderizar la entidad gráfica. La escala del valor absoluto que pueda tomar esta variable es irrelevante;
@@ -66,9 +72,12 @@ export default class GraphicEntity {
             x: pivotX != null ? pivotX : 0,
             y: pivotY != null ? pivotY : 0
         }
+        this.flipped = false;
         this.x = 0;
         this.y = 0;
         this.visible = true;
+
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
 
     /**
@@ -78,7 +87,18 @@ export default class GraphicEntity {
     public render(context :CanvasRenderingContext2D, offsetX? :number, offsetY? :number) {
         var x = Math.floor(offsetX == null ? this.x : this.x - offsetX);
         var y = Math.floor(offsetY == null ? this.y : this.y - offsetY);
-        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, x - this.pivot.x, y - this.pivot.y, this.section.w, this.section.h);
+
+        // Si la entidad gráfica está volteada, hay que voltear el contexto para dibujarla correctamente
+        var sign = 1;
+        if(this.flipped) {
+            context.scale(-1, 1);
+            sign = -1;
+        }
+        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, sign * (x - this.pivot.x), y - this.pivot.y, sign * this.section.w, this.section.h);
+        // Y ahora hay que devolver el contexto a su escala natural para no afectar al resto de entidades a dibujar
+        if(this.flipped) {
+            context.scale(-1, 1);
+        }
     };
 
     //#region Getters y setters
@@ -142,6 +162,20 @@ export default class GraphicEntity {
 
     public getHeight() {
         return this.section.h;
+    }
+
+    /**
+     * Actualiza la entidad gráfica de acuerdo con los eventos de actualización del GameLoop.
+     */
+    protected update(deltaTime :number) {
+        // Dejado vacío intencionalmente. Utiliza el método update de las clases derivadas
+    }
+
+    /**
+     * Elimina la referencia a esta entidad en otras instancias para poder eliminarla.
+     */
+    public dispose() {
+        GameLoop.instance.unsuscribe(this, null, this.update, null, null);
     }
     //#endregion
 }
