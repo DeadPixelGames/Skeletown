@@ -126,9 +126,14 @@ window.onload = async function() {
     }, 3);
     Inventory.instance.addItem({
         id: 1,
+        name: "Ghost Pepper",
+        description: "Peppers' immortal souls"
+    }, 4);
+    Inventory.instance.addItem({
+        id: 2,
         name: "SoulCorn",
         description: "Corn Cub with souls"
-    }, 4);
+    }, 2);
 
     //#region Área
     area = AreaMap.load("farmland2.json", () => {

@@ -373,7 +373,7 @@ export class TileEntity extends GraphicEntity {
     update(deltaTime) {
         if (this.planted) {
             this.timeOfPlanting += deltaTime;
-            if (this.timeOfPlanting > 6 && this.growthState < 4) {
+            if (this.timeOfPlanting > 6 && this.growthState < 3) {
                 this.growthState++;
                 this.timeOfPlanting = 0;
                 this.crop.setSection(this.growthState * 128, this.currentCrop * 128, 128, 128);
