@@ -318,11 +318,29 @@ export class TileEntity extends GraphicEntity {
                     console.log("RECOGER");
                     that.planted = false;
                     this.crop.visible = false;
+                    var count = 0;
+                    switch (this.growthState) {
+                        case 0:
+                            count = 1;
+                            break;
+                        case 1:
+                            count = 2;
+                            break;
+                        case 2:
+                            count = 5;
+                            break;
+                        case 3:
+                            count = 1;
+                            break;
+                        default:
+                            count = 1;
+                            break;
+                    }
                     Inventory.instance.addItem({
                         id: this.currentCrop,
                         name: "",
                         description: ""
-                    }, 1);
+                    }, count);
                     this.uiLayout.visible = false;
                 }
             });
@@ -353,6 +371,14 @@ export class TileEntity extends GraphicEntity {
         FarmlandManager.instance.activateThis(this);
     }
     update(deltaTime) {
+        if (this.planted) {
+            this.timeOfPlanting += deltaTime;
+            if (this.timeOfPlanting > 6 && this.growthState < 4) {
+                this.growthState++;
+                this.timeOfPlanting = 0;
+                this.crop.setSection(this.growthState * 128, this.currentCrop * 128, 128, 128);
+            }
+        }
         if (this.uiLayout.visible) {
             if (this.planted) {
                 this.plant.hide();
@@ -374,6 +400,8 @@ export class TileEntity extends GraphicEntity {
         this.planted = true;
         this.crop.visible = true;
         this.crop.setSection(0, crop * 128, 128, 128);
+        this.timeOfPlanting = 0;
+        this.growthState = 0;
     }
 }
 //#endregion
