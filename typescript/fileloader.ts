@@ -21,10 +21,12 @@ export default class FileLoader {
     }
     
     /**
-     * Carga el audio especificado.
+     * Carga un buffer que representa el audio especificado.
      */
-    public static async loadAudio(path :string) {
-        return new Audio(path);
+    public static async loadAudio(context :AudioContext, path :string) {
+
+        var response = await FileLoader.loadRawFile(path, "arraybuffer") as ArrayBuffer;
+        return context.decodeAudioData(response);
     }
 
     //#region Funciones auxiliares
@@ -34,13 +36,13 @@ export default class FileLoader {
      * utilizando API Rest. El contenido devuelto debe procesarse más
      * a fondo para poder utilizarse en el programa.
      */
-    private static async loadRawFile(path :string) {
+    private static async loadRawFile(path :string, type :XMLHttpRequestResponseType = "") {
         
         var request = new XMLHttpRequest();
 
         // Los eventos asociados a la petición los realizamos en
         // la promesa para poder cargar el contenido asíncronamente
-        return new Promise<string>((resolve) => {
+        return new Promise<any>(resolve => {
             
             // Asignamos, ya dentro de la promesa para poder cargar
             // el archivo asíncronamente, el evento que se encargará
@@ -64,6 +66,7 @@ export default class FileLoader {
             // evento para no arriesgarnos a que la petición cambie de
             // estado antes de que nosotros asignemos el evento
             request.open("GET", path, true);
+            request.responseType = type;
             request.send();
         });
     }
