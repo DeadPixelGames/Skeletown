@@ -20,6 +20,9 @@ import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 import AudioManager from "./audiomanager.js";
 import { Hud } from "./ui/hud.js";
+import { MainMenu } from "./ui/mainmenu.js";
+import { MaxScore } from "./ui/maxscores.js";
+import { GameOver } from "./ui/gameover.js";
 export const STANDARD_SCREEN_SIZE_X = 1366;
 export const STANDARD_SCREEN_SIZE_Y = 768;
 //#region Declaración de variables
@@ -50,6 +53,9 @@ var resize = function () {
     oldscaleY = GraphicsRenderer.instance.scaleY;
     Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
     Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    MainMenu.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    MaxScore.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    GameOver.instance.resize(ctx.canvas.width, ctx.canvas.height);
 };
 window.addEventListener("resize", resize);
 window.onload = function () {
@@ -61,17 +67,20 @@ window.onload = function () {
         canvas.height = STANDARD_SCREEN_SIZE_Y;
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
+        Hud.initInstance(ctx);
         Inventory.initInstance();
         InterfaceInWorld.initInstance();
-        Hud.initInstance(ctx);
+        MainMenu.initInstance(ctx);
+        MaxScore.initInstance(ctx);
+        GameOver.initInstance(ctx);
         window.gr = GraphicsRenderer.instance;
         //#region Jugador
         player = new Player();
-        player.x = 1200;
-        player.y = 1280;
+        player.x = 14592;
+        player.y = 4352;
         window.player = player;
-        //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
-        yield player.setAnimation(2.5, "skeleton.json");
+        //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+        yield player.setAnimation(3.5, "skeleton.json");
         var image = player.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
@@ -128,7 +137,7 @@ window.onload = function () {
             type: "fertilizer"
         }, 6, 2);
         //#region Área
-        area = AreaMap.load("farmland2.json", () => {
+        area = AreaMap.load("farmland.json", () => {
             if (enemy) {
                 area.getColliders().add(player.getCollider());
                 GameLoop.instance.start();

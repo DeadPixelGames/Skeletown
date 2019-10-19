@@ -68,8 +68,8 @@ export default class Player extends Entity {
         }
         if (onCanvasX != null && onCanvasY != null && onCanvasX < this.canvas.width && onCanvasY < this.canvas.height) {
             ret = {
-                x: onCanvasX + GraphicsRenderer.instance.scrollX,
-                y: onCanvasY + GraphicsRenderer.instance.scrollY
+                x: onCanvasX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX,
+                y: onCanvasY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY
             };
         }
         return ret;

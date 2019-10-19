@@ -514,7 +514,7 @@ export class TileEntity extends GraphicEntity {
         InterfaceInWorld.instance.addCollider(this.harvest.getCollider() as CircleCollider);
         InterfaceInWorld.instance.addCollider(this.fertilizer.getCollider() as CircleCollider);
 
-        this.crop = new GraphicEntity(2, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
+        this.crop = new GraphicEntity(3, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
         this.crop.visible = false;
         this.crop.x = this.x;
         this.crop.y = this.y;
@@ -522,7 +522,7 @@ export class TileEntity extends GraphicEntity {
         
         GraphicsRenderer.instance.addExistingEntity(this.crop);
 
-        this.fertilizerBanner = new GraphicEntity(2, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
+        this.fertilizerBanner = new GraphicEntity(3, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),0,0,128,128);
         this.fertilizerBanner.visible = false;
         this.fertilizerBanner.x = this.x;
         this.fertilizerBanner.y = this.y;

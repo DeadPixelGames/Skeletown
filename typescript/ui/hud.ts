@@ -35,7 +35,7 @@ export class Hud{
      */
     public static initInstance(context :CanvasRenderingContext2D) {
         if(!GraphicsRenderer.instance) {
-            throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
+            throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar Hud.");
         }
         var ret = new Hud();
         Hud.initSingleton(ret);
@@ -55,7 +55,6 @@ export class Hud{
     private constructor(){
         this.width = GraphicsRenderer.instance.getCanvas().width;
         this.height = GraphicsRenderer.instance.getCanvas().height;
-        console.log(this.width, this.height)
         this.hud_InGame = new UILayout(0, 0, this.width, this.height);
 
         this.moneyCounter = new UIEntity(true);
@@ -103,6 +102,8 @@ export class Hud{
         this.hud_InGame.addEntitiesToRenderer();
         this.moneyCounter.setText("1283902", {x: 250, y: 65}, "45px");
         this.time.setText("10:21", {x: 145, y: 80}, "45px");
+        this.deactivate();
+        this.hide();
     }
 
     public activate(){
