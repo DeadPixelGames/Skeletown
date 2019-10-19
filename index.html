@@ -20,7 +20,11 @@
             font-family: Arco, sans-serif;
         }
         html {height: 100%; width: 100%;}
-        body {min-height: 100%; width: 100%; font-family: 'Chela One', cursive;}
+        body {height: 100%; width: 100%; font-family: 'Chela One', cursive;}
+
+        .disable-dbl-tap-zoom {
+            touch-action: manipulation;
+            }
     </style>
 
     <!--<script src="https://connect.facebook.net/en_US/fbinstant.6.0.js"></script>-->
@@ -32,7 +36,7 @@
 </head>
 <body>
     <span>&nbsp;</span>
-    <canvas id="gameCanvas" width="1366" height="768" style="border:1px solid #000000;">Hola</canvas>
+    <canvas class="disable-dbl-tap-zoom" id="gameCanvas" style="border:1px solid #000000;">Hola</canvas>
 
 </body>
 

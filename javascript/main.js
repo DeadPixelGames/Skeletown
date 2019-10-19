@@ -62,6 +62,8 @@ window.onload = function () {
         //TODO Adecentar esto
         var canvas = document.getElementById("gameCanvas");
         ctx = canvas.getContext("2d");
+        canvas.width = innerWidth * 0.9;
+        canvas.height = innerHeight * 0.9;
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
         Inventory.initInstance();
@@ -100,6 +102,8 @@ window.onload = function () {
         hud_InGame.addEntitiesToRenderer();
         moneyCounter.setText("1283902", { x: 250, y: 65 }, "45px");
         time.setText("10:21", { x: 145, y: 80 }, "45px");
+        //hud_InGame.deactivate();
+        //hud_InGame.hide();
         //#endregion
         //#region Jugador
         player = new Player();
@@ -179,7 +183,7 @@ window.onload = function () {
             enemy = null;
         });
         GameLoop.instance.suscribe(null, null, renderDebug, null, null);
-        // resize();
+        resize();
     });
 };
 //#region Generar AudioContext

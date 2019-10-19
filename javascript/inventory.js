@@ -280,7 +280,7 @@ export class Inventory {
     /**Método que abre el inventario en el contenedor de los cultivos y no da posibilidad a cambiarlo */
     togglePlanting(tile) {
         this.farmableTile = tile;
-        this.layout.deactivate();
+        this.layout.activate();
         this.cropsLayout.activate();
         this.clothesLayout.deactivate();
         this.wikiLayout.deactivate();

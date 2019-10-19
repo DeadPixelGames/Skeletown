@@ -42,7 +42,7 @@ export class UIEntity{
         this.colliderOffset = {x: 0, y: 0};
         this.relativePos = {x: 0, y: 0};
         this.dimension = {w: 0, h: 0}
-        this.percentRelPos = true;
+        this.percentRelPos = false;
     }
 
     

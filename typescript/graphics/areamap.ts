@@ -7,7 +7,7 @@ import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
 import Interface, { InterfaceInWorld } from "../ui/interface.js";
 import { Inventory } from "../inventory.js";
-import { hud_InGame, enteringInventory, enteringInventoryFromCrops } from "../main.js";
+import { enteringInventory, enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 
 /**

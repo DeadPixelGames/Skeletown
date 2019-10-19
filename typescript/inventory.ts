@@ -4,7 +4,7 @@ import FileLoader from "./fileloader.js";
 import Interface from "./ui/interface.js";
 import { BoxCollider, CircleCollider } from "./collider.js";
 import GameLoop from "./gameloop.js";
-import { hud_InGame, exitingInventory } from "./main.js";
+import { exitingInventory } from "./main.js";
 import { FarmlandManager } from "./farmland.js";
 import { TileEntity } from "./graphics/areamap.js";
 
@@ -366,7 +366,7 @@ export class Inventory{
     public togglePlanting(tile :TileEntity){
         this.farmableTile = tile;
 
-        this.layout.deactivate();
+        this.layout.activate();
 
         this.cropsLayout.activate();
 

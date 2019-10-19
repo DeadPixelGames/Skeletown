@@ -16,6 +16,7 @@ import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 
 import AudioManager from "./audiomanager.js";
+import { Hud } from "./ui/hud.js";
 
 const STANDARD_SCREEN_SIZE_X = 1366;
 
@@ -27,11 +28,6 @@ var enemy :Enemy | null;
 var area :AreaMap;
 var ctx :CanvasRenderingContext2D;
 
-export var hud_InGame :UILayout;
-var lifeBar :ProgressBar;
-var moneyCounter :UIEntity;
-var time :UIEntity;
-var inventory :UIEntity;
 //#endregion
 
 var oldscaleX = 1;
@@ -54,7 +50,7 @@ var resize = function() {
     ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
     oldscaleX = GraphicsRenderer.instance.scaleX;
     oldscaleY = GraphicsRenderer.instance.scaleY;
-    hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
+    Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
     Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
 }
 
@@ -67,6 +63,9 @@ window.onload = async function() {
 
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     
+    canvas.width = innerWidth * 0.9;
+    canvas.height = innerHeight * 0.9;
+
     GameLoop.initInstance();
 
     GraphicsRenderer.initInstance(ctx);
@@ -75,50 +74,11 @@ window.onload = async function() {
 
     InterfaceInWorld.initInstance();
 
+    Hud.initInstance(ctx);
+
     (window as any).gr = GraphicsRenderer.instance;
 
-    //#region Interfaz
-    moneyCounter = new UIEntity(true)
-    moneyCounter.setCollider(true, 0.12, 0.07, 320, 91, (x :number, y :number)=>{
 
-    });
-    lifeBar = new ProgressBar(0.5, 0.09, 703, 128, true, (x :number, y :number)=>{
-        lifeBar.setProgress(lifeBar.getProgress()-10);
-    });
-    time = new UIEntity(false);
-    time.setCollider(true, 0.95, 0.09, 362, 128);
-    inventory = new UIEntity(true);
-    inventory.setCollider(false, 0.9, 0.85, 245, 245,(x :number, y :number)=>{
-        enteringInventory();
-        lifeBar.setProgress(lifeBar.getProgress()+10);
-    })
-    
-    Interface.instance.addCollider(lifeBar.getCollider() as BoxCollider);
-    Interface.instance.addCollider(moneyCounter.getCollider() as BoxCollider);
-    Interface.instance.addCollider(time.getCollider() as BoxCollider);
-    Interface.instance.addCollider(inventory.getCollider() as CircleCollider);
-    
-    hud_InGame = new UILayout(0, 0, canvas.width, canvas.height);
-    
-    hud_InGame.addUIEntity(lifeBar);
-    hud_InGame.addUIEntity(moneyCounter);
-    hud_InGame.addUIEntity(time);
-    hud_InGame.addUIEntity(inventory);
-
-
-
-    lifeBar.setImage(true, 99, await FileLoader.loadImage("resources/interface/HUD_life3.png"), 0, 0, 768, 91, 768, 91);
-    lifeBar.setIcon(true, 100, await FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
-    lifeBar.setProgressBar(true, 100, await FileLoader.loadImage("resources/interface/HUD_life2.png"), 0, 0, 768, 91, 768, 91);
-    moneyCounter.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"));
-    time.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_time.png"));
-    inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
-    inventory.image.getSource().width = 300;
-    hud_InGame.addEntitiesToRenderer();
-    moneyCounter.setText("1283902", {x: 250, y: 65}, "45px");
-    time.setText("10:21", {x: 145, y: 80}, "45px");
-    //#endregion
- 
     //#region Jugador
     player = new Player();   
 
@@ -141,8 +101,8 @@ window.onload = async function() {
     
     GraphicsRenderer.instance.follow(player.getImage());
 
-    player.suscribe(lifeBar, (health :number, maxHealth :number) => {
-        lifeBar.setProgress(health * 100 / maxHealth);
+    player.suscribe(Hud.instance.lifeBar, (health :number, maxHealth :number) => {
+        Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
     }, () => console.log("Game Over :("));
     //#endregion
 
@@ -210,7 +170,7 @@ window.onload = async function() {
     });
     GameLoop.instance.suscribe(null, null, renderDebug, null, null);
 
-    // resize();
+    resize();
 };
 
 //#region Generar AudioContext
@@ -343,21 +303,21 @@ function renderDebug() {
 export function enteringInventory(){
     Inventory.instance.activate();
     Inventory.instance.show();
-    hud_InGame.deactivate();
+    Hud.instance.deactivate();
     FarmlandManager.instance.deactivate();
 }
 
 export function exitingInventory(){
     Inventory.instance.deactivate();
     Inventory.instance.hide();
-    hud_InGame.activate();
+    Hud.instance.activate();
     FarmlandManager.instance.activate();
 }
 
 export function enteringInventoryFromCrops(tile :TileEntity){
     Inventory.instance.togglePlanting(tile);
     Inventory.instance.show();
-    hud_InGame.deactivate();
+    Hud.instance.deactivate();
     FarmlandManager.instance.deactivate();
 }
 //#endregion
