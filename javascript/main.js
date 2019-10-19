@@ -19,14 +19,17 @@ import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 import AudioManager from "./audiomanager.js";
 import { Hud } from "./ui/hud.js";
+
 const STANDARD_SCREEN_SIZE_X = 1730;
 const STANDARD_SCREEN_SIZE_Y = 875;
+
 //#region Declaración de variables
 var player;
 var enemy;
 var area;
 var ctx;
 //#endregion
+
 //#region Rescalamiento
 var originalWidth = document.documentElement.clientWidth;
 var originalHeight = document.documentElement.clientHeight;
@@ -78,6 +81,7 @@ var resize = function () {
 const BLINK_PROPERTIES = {
     blink: 2,
     time: 0.1
+
 };
 window.addEventListener("resize", resize);
 window.onload = function () {
@@ -85,12 +89,16 @@ window.onload = function () {
         //TODO Adecentar esto
         var canvas = document.getElementById("gameCanvas");
         ctx = canvas.getContext("2d");
+
         canvas.width = STANDARD_SCREEN_SIZE_X * 0.9;
         canvas.height = STANDARD_SCREEN_SIZE_Y * 0.9;
+
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
+        Hud.initInstance(ctx);
         Inventory.initInstance();
         InterfaceInWorld.initInstance();
+
         Hud.initInstance(ctx);
         window.gr = GraphicsRenderer.instance;
         //#region Jugador
@@ -101,6 +109,7 @@ window.onload = function () {
         window.sleep = sleep;
         //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
         yield player.setAnimation(2.5, "skeleton.json");
+
         var image = player.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
@@ -115,7 +124,7 @@ window.onload = function () {
         }, () => console.log("Game Over :("));
         //#endregion
         //#region Área
-        area = AreaMap.load("farmland2.json", () => {
+        area = AreaMap.load("farmland.json", () => {
             if (enemy) {
                 area.getColliders().add(player.getCollider());
                 GameLoop.instance.start();
@@ -233,15 +242,19 @@ function renderDebug() {
     var scaleX = GraphicsRenderer.instance.scaleX;
     var scaleY = GraphicsRenderer.instance.scaleY;
     ctx.lineWidth = 1;
+
     area.getColliders().render(ctx, scrollX, scrollY);
     // ctx.scale(scaleX, scaleY);
+
     player.renderDebug(ctx, scrollX, scrollY);
     if (enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
     Interface.instance.getColliders().render(ctx);
+
     InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
     // ctx.scale(1 / scaleX, 1 / scaleY);
+
 }
 //#endregion
 //#region Inventario

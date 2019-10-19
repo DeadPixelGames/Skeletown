@@ -26,19 +26,23 @@ export default class GraphicEntity {
      * Dibuja la entidad en sus coordenadas usando el contexto indicado. Se puede indicar un desplazamiento adicional para tener en
      * cuenta el desplazamiento de la pantalla. Los valores de desplazamiento están invertidos.
      */
+
     render(context, offsetX, offsetY, scaleX = 1, scaleY = 1) {
         var x = Math.round((offsetX == null ? this.x : this.x - offsetX) - this.pivot.x);
         var y = Math.round((offsetY == null ? this.y : this.y - offsetY) - this.pivot.y);
         var w = this.section.w;
         var h = this.section.h;
+
         // Si la entidad gráfica está volteada, hay que voltear el contexto para dibujarla correctamente
         var sign = 1;
         if (this.flipped) {
             context.scale(-1, 1);
             sign = -1;
         }
+
         context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, sign * x, y, sign * w + 1, h + 1);
         context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, sign * x, y, sign * w, h);
+
         // Y ahora hay que devolver el contexto a su escala natural para no afectar al resto de entidades a dibujar
         if (this.flipped) {
             context.scale(-1, 1);

@@ -101,8 +101,8 @@ export class Inventory {
         return __awaiter(this, void 0, void 0, function* () {
             this.background.setImage(true, 101, yield FileLoader.loadImage("resources/interface/inv_base.png"), 0, 0, this.halfWidth * 2, this.halfHeight * 2);
             this.crops.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
-            this.clothes.setImage(true, 103, yield FileLoader.loadImage("resources/interface/cos_inv_button.png"), 58, 211, 102, 102);
-            this.wiki.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
+            this.clothes.setImage(true, 103, yield FileLoader.loadImage("resources/interface/cos_inv_button.png"), 58, 211, 103, 103);
+            this.wiki.setImage(true, 103, yield FileLoader.loadImage("resources/interface/bok_inv_button.png"), 57, 360, 110, 110);
             this.settings.setImage(true, 103, yield FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
             this.closeInventory.setImage(true, 102, yield FileLoader.loadImage("resources/interface/but_cerrar.png"), 0, 0, 86, 86);
             this.layout.addEntitiesToRenderer();
@@ -223,7 +223,7 @@ export class Inventory {
     initWikiLayout() {
         return __awaiter(this, void 0, void 0, function* () {
             var background = new UIEntity(false);
-            background.setImage(true, 102, yield FileLoader.loadImage("resources/interface/or_inv_page.png"));
+            background.setImage(true, 102, yield FileLoader.loadImage("resources/interface/bok_inv_page.png"));
             background.setCollider(true, 0, 0, 1024, 696);
             background.setPercentRelPos(false);
             this.wikiLayout.addUIEntity(background);

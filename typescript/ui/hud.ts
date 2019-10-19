@@ -1,6 +1,8 @@
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
+
 import { enteringInventory } from "../main.js";
+
 import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
@@ -35,7 +37,9 @@ export class Hud{
      */
     public static initInstance(context :CanvasRenderingContext2D) {
         if(!GraphicsRenderer.instance) {
-            throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
+
+            throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar Hud.");
+
         }
         var ret = new Hud();
         Hud.initSingleton(ret);
@@ -49,22 +53,32 @@ export class Hud{
     private time :UIEntity;
     private inventory :UIEntity;
 
+
+    private width :number;
+    private height :number;
+
     private constructor(){
-        this.hud_InGame = new UILayout(0, 0, GraphicsRenderer.instance.getCanvas().width, GraphicsRenderer.instance.getCanvas().height);
+        this.width = GraphicsRenderer.instance.getCanvas().width;
+        this.height = GraphicsRenderer.instance.getCanvas().height;
+        this.hud_InGame = new UILayout(0, 0, this.width, this.height);
+
 
         this.moneyCounter = new UIEntity(true);
         this.time = new UIEntity(false);
         this.inventory = new UIEntity(true);
-        this.lifeBar = new ProgressBar(0.5, 0.09, 703, 128, true, (x :number, y :number)=>{
+
+        this.lifeBar = new ProgressBar(this.width * 0.5 - 351, 5, 703, 128, true, (x :number, y :number)=>{
             this.lifeBar.setProgress(this.lifeBar.getProgress()-10);
         });
 
         //#region Colliders
-        this.moneyCounter.setCollider(true, 0.12, 0.07, 320, 91, (x :number, y :number)=>{
+
+        this.moneyCounter.setCollider(true, 5, 5, 320, 91, (x :number, y :number)=>{
 
         });
-        this.time.setCollider(true, 0.95, 0.09, 362, 128);
-        this.inventory.setCollider(false, 0.9, 0.85, 245, 245,(x :number, y :number)=>{
+        this.time.setCollider(true, this.width - 265, 5, 362, 128);
+        this.inventory.setCollider(false, this.width - 245, this.height - 245, 245, 245,(x :number, y :number)=>{
+
             enteringInventory();
             this.lifeBar.setProgress(this.lifeBar.getProgress()+10);
         })
@@ -77,12 +91,14 @@ export class Hud{
         
         //#endregion
 
-        this.initImages();
-
         this.hud_InGame.addUIEntity(this.lifeBar);
         this.hud_InGame.addUIEntity(this.moneyCounter);
         this.hud_InGame.addUIEntity(this.time);
         this.hud_InGame.addUIEntity(this.inventory);
+
+
+        this.initImages();
+
     }
 
     private async initImages(){
@@ -90,12 +106,19 @@ export class Hud{
         this.lifeBar.setIcon(true, 100, await FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
         this.lifeBar.setProgressBar(true, 100, await FileLoader.loadImage("resources/interface/HUD_life2.png"), 0, 0, 768, 91, 768, 91);
         this.moneyCounter.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"), 0, 0);
-        this.time.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_time.png"));
+
+        this.time.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_time.png"), 0, 0, 362, 128);
+
         this.inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
         
         this.hud_InGame.addEntitiesToRenderer();
         this.moneyCounter.setText("1283902", {x: 250, y: 65}, "45px");
         this.time.setText("10:21", {x: 145, y: 80}, "45px");
+
+        this.deactivate();
+        this.hide();
+
+
     }
 
     public activate(){
@@ -113,6 +136,15 @@ export class Hud{
 
 
     public resize(canvasWidth :number, canvasHeight :number){
+
+        var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
+        var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
+        this.hud_InGame.position.x = w - STANDARD_SCREEN_SIZE_X * 0.5;
+        this.hud_InGame.position.y = h - STANDARD_SCREEN_SIZE_Y * 0.5;
+        for(let ent of this.hud_InGame.uiEntities){
+            ent.x = this.hud_InGame.position.x + ent.getRelativePos().x;
+            ent.y = this.hud_InGame.position.y + ent.getRelativePos().y;
+        }
 
     }
 

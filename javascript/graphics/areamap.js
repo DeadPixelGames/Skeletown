@@ -385,13 +385,13 @@ export class TileEntity extends GraphicEntity {
             InterfaceInWorld.instance.addCollider(this.plant.getCollider());
             InterfaceInWorld.instance.addCollider(this.harvest.getCollider());
             InterfaceInWorld.instance.addCollider(this.fertilizer.getCollider());
-            this.crop = new GraphicEntity(2, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 0, 0, 128, 128);
+            this.crop = new GraphicEntity(3, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 0, 0, 128, 128);
             this.crop.visible = false;
             this.crop.x = this.x;
             this.crop.y = this.y;
             this.currentCrop = -1;
             GraphicsRenderer.instance.addExistingEntity(this.crop);
-            this.fertilizerBanner = new GraphicEntity(2, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 0, 0, 128, 128);
+            this.fertilizerBanner = new GraphicEntity(3, yield FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"), 0, 0, 128, 128);
             this.fertilizerBanner.visible = false;
             this.fertilizerBanner.x = this.x;
             this.fertilizerBanner.y = this.y;
@@ -402,8 +402,10 @@ export class TileEntity extends GraphicEntity {
     shouldBeCulled(scrollX, scrollY, scaleX = 1, scaleY = 1) {
         const CULL_MARGIN = 384;
         var ret = false;
+
         if ((this.x + this.getWidth()) < scrollX - CULL_MARGIN || this.x > scrollX + GraphicsRenderer.instance.getCanvas().width + CULL_MARGIN
             || (this.y + this.getHeight()) < scrollY - CULL_MARGIN || this.y > scrollY + GraphicsRenderer.instance.getCanvas().height + CULL_MARGIN) {
+
             ret = true;
         }
         return ret;

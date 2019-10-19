@@ -132,4 +132,6 @@ export default class Player extends Entity{
 
         super.update(deltaTime);   
     }
+
 }
+

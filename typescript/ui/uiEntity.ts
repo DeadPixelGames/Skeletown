@@ -122,7 +122,7 @@ export class UIEntity{
         }else{
             this.collider = new CircleCollider(left, top, w * 0.5, false);
         }
-        this.colliderOffset = {x: w * 0.5, y: h * 0.5};
+        this.colliderOffset = {x:0, y: 0};
 
         if(this.clickable && onClick){
             this.collider.addUserInteraction(this, onClick, null, null);
@@ -171,7 +171,7 @@ export class ProgressBar extends UIEntity{
 
     public setProgress(progress :number){
         this.progress = progress;
-        this.progressBar.setSection(this.relativePos.x, this.relativePos.y, Math.max(1,(progress * this.dimension.w) * 0.01), this.dimension.h);
+        this.progressBar.setSection(0, 0, Math.max(1,(progress * this.dimension.w) * 0.01), this.dimension.h);
     }
     //#endregion
 
