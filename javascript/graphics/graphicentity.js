@@ -29,13 +29,15 @@ export default class GraphicEntity {
     render(context, offsetX, offsetY) {
         var x = Math.floor(offsetX == null ? this.x : this.x - offsetX);
         var y = Math.floor(offsetY == null ? this.y : this.y - offsetY);
+        var w = Math.ceil(this.section.w);
+        var h = Math.ceil(this.section.h);
         // Si la entidad gráfica está volteada, hay que voltear el contexto para dibujarla correctamente
         var sign = 1;
         if (this.flipped) {
             context.scale(-1, 1);
             sign = -1;
         }
-        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, sign * (x - this.pivot.x), y - this.pivot.y, sign * this.section.w, this.section.h);
+        context.drawImage(this.sourceElement, this.section.x, this.section.y, this.section.w, this.section.h, sign * (x - this.pivot.x), y - this.pivot.y, sign * w, h);
         // Y ahora hay que devolver el contexto a su escala natural para no afectar al resto de entidades a dibujar
         if (this.flipped) {
             context.scale(-1, 1);
@@ -60,6 +62,9 @@ export default class GraphicEntity {
             w: this.section.w,
             h: this.section.h
         };
+    }
+    shouldBeCulled(scrollX, scrollY, scaleX = 1, scaleY = 1) {
+        return false;
     }
     /**
      * Devuelve una copia del punto de origen que usa esta entidad. {x: 0, y: 0} significa que el punto de origen es la esquina

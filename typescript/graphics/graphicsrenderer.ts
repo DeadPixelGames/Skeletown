@@ -56,6 +56,10 @@ export default class GraphicsRenderer {
      * Indica el desplazamiento vertical de la pantalla.
      */
     public scrollY :number;
+
+    public scaleX :number;
+
+    public scaleY :number;
     /**
      * Evento que se dispara al renovar el renderer descartando todas las entidades actuales. 
      */
@@ -83,6 +87,8 @@ export default class GraphicsRenderer {
         this.following = null;
         this.scrollX = 0;
         this.scrollY = 0;
+        this.scaleX = 1;
+        this.scaleY = 1;
         this.onFrameUpdate = new GameEvent();
         this.onFirstFrame = new GameEvent();
 
@@ -115,9 +121,12 @@ export default class GraphicsRenderer {
         for(let entity of this.entities) {
             if(!entity.visible)
                 break;
+
+            if(entity.shouldBeCulled(this.scrollX, this.scrollY, this.scaleX, this.scaleY))
+                continue;
+            
             entity.render(this.context, this.scrollX, this.scrollY);
         }
-
         // Dibujamos el overlay
         this.context.fillStyle = "rgba(" + this.overlayColor.r + ", " + this.overlayColor.g + ", " + this.overlayColor.b + ", " + this.overlayColor.a + ")";
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -260,8 +269,8 @@ export default class GraphicsRenderer {
 
     private updateScrollToFollow() {
         if(this.following) {
-            this.scrollX = this.following.x - this.canvas.width * 0.5;
-            this.scrollY = this.following.y - this.canvas.height * 0.5;
+            this.scrollX = this.following.x - this.canvas.width * 0.5 / this.scaleX;
+            this.scrollY = this.following.y - this.canvas.height * 0.5 / this.scaleY;
         }
     }
     //#endregion

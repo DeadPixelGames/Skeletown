@@ -7,7 +7,7 @@ import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
 import Interface, { InterfaceInWorld } from "../ui/interface.js";
 import { Inventory } from "../inventory.js";
-import { hud_InGame, enteringInventory, enteringInventoryFromCrops } from "../main.js";
+import { enteringInventory, enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 
 /**
@@ -532,6 +532,18 @@ export class TileEntity extends GraphicEntity {
 
     }
 
+    public shouldBeCulled(scrollX :number, scrollY :number, scaleX = 1, scaleY = 1) {
+
+        const CULL_MARGIN = 384;
+
+        var ret = false;
+        if((this.x + this.getWidth()) < scrollX - CULL_MARGIN / scaleX || this.x > scrollX + GraphicsRenderer.instance.getCanvas().width + CULL_MARGIN / scaleX
+        || (this.y + this.getHeight()) < scrollY - CULL_MARGIN / scaleY || this.y > scrollY + GraphicsRenderer.instance.getCanvas().height + CULL_MARGIN / scaleY) {
+            ret = true;
+        }
+        return ret;
+    }
+
     public onClick(){
         FarmlandManager.instance.activateThis(this); 
     }
@@ -546,7 +558,7 @@ export class TileEntity extends GraphicEntity {
                 this.crop.setSection(this.growthState * 128, this.currentCrop * 128, 128, 128);
             }
         }
-        if(this.uiLayout.visible){
+        if(this.uiLayout && this.uiLayout.visible){
             if(this.planted){
                 this.plant.hide();
                 this.harvest.show()
@@ -556,7 +568,7 @@ export class TileEntity extends GraphicEntity {
                 this.harvest.hide();
                 this.fertilizer.hide();
             }
-        }else{
+        }else if(this.uiLayout){
             this.uiLayout.hide();
         }  
         
