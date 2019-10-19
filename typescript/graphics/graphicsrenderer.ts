@@ -61,6 +61,14 @@ export default class GraphicsRenderer {
 
     public scaleY :number;
     /**
+     * La escala horizontal de la pantalla
+     */
+    public scaleX :number;
+    /**
+     * La escala vertical de la pantalla
+     */
+    public scaleY :number;
+    /**
      * Evento que se dispara al renovar el renderer descartando todas las entidades actuales. 
      */
     private onFirstFrame :GameEvent<() => void>;
@@ -122,7 +130,8 @@ export default class GraphicsRenderer {
             if(!entity.visible)
                 break;
 
-            if(entity.shouldBeCulled(this.scrollX, this.scrollY, this.scaleX, this.scaleY))
+
+            if(entity.shouldBeCulled(this.scrollX, this.scrollY))
                 continue;
             
             entity.render(this.context, this.scrollX, this.scrollY);

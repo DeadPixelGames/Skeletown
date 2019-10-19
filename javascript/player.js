@@ -7,9 +7,7 @@ const PLAYER_SPEED = 500;
  * movimiento. Cuanto más alto el valor, más grande será la diferencia de velocidad entre el centro y los
  * márgenes de la pantalla.
  */
-const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 500;
-/**Capacidad máxima del inventario */
-const INVENTORY_MAX_SPACES = 10;
+const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 800;
 /**
  * Tiempo en segundos que hay que esperar antes de reproducir la segunda animación de inactividad.
  */
@@ -66,7 +64,7 @@ export default class Player extends Entity {
             onCanvasX = this.event.touches[0].clientX - rect.left;
             onCanvasY = this.event.touches[0].clientY - rect.top;
         }
-        if (onCanvasX != null && onCanvasY != null && onCanvasX < this.canvas.width && onCanvasY < this.canvas.height) {
+        if (onCanvasX != null && onCanvasY != null && onCanvasX < this.canvas.width * GraphicsRenderer.instance.scaleX && onCanvasY < this.canvas.height * GraphicsRenderer.instance.scaleY) {
             ret = {
                 x: onCanvasX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX,
                 y: onCanvasY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY
@@ -81,18 +79,31 @@ export default class Player extends Entity {
      */
     update(deltaTime) {
         this.dest = this.getCursorPosition();
-        if (this.mouse && this.dest) {
+        if (this.isAttacking()) {
+            this.usingOwnClip = false;
+        }
+        if (this.mouse && this.dest && !this.isAttacking()) {
             this.speed.x = Math.abs(this.dest.x - this.x) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
             this.speed.y = Math.abs(this.dest.y - this.y) * MOUSE_DISTANCE_SPEED_FACTOR * PLAYER_SPEED;
             this.idleTimer = 0;
         }
         else {
-            this.dest = null;
+            if (!this.isAttacking()) {
+                this.dest = null;
+            }
+            else {
+                this.speed.x = 0;
+                this.speed.y = 0;
+            }
             this.idleTimer += deltaTime;
         }
-        if (this.idleTimer > TIME_UNTIL_IDLE) {
+        if (!this.isAttacking()) {
+            this.idleTimer = 0;
+        }
+        else if (this.idleTimer > TIME_UNTIL_IDLE) {
             this.image.play("idle2");
             this.usingOwnClip = true;
+            this.idleTimer = 0;
         }
         else {
             this.usingOwnClip = false;

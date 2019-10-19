@@ -13,7 +13,7 @@ export class UIEntity {
         this.colliderOffset = { x: 0, y: 0 };
         this.relativePos = { x: 0, y: 0 };
         this.dimension = { w: 0, h: 0 };
-        this.percentRelPos = true;
+        this.percentRelPos = false;
     }
     //#region GETTERS Y SETTERS
     getRelativePos() { return this.relativePos; }
@@ -175,13 +175,12 @@ export class UILayout {
         }
     }
     resize(w, h) {
-        this.dimension = { w: w, h: h };
-        this.position.x = GraphicsRenderer.instance.getCanvas().width * 0.5 - this.dimension.w * 0.5;
-        this.position.y = GraphicsRenderer.instance.getCanvas().height * 0.5 - this.dimension.h * 0.5;
+        this.position.x = -this.dimension.w * 0.5 + w * 0.5 / GraphicsRenderer.instance.scaleX;
+        this.position.y = -this.dimension.h * 0.5 + h * 0.5 / GraphicsRenderer.instance.scaleY;
         for (let ent of this.uiEntities) {
             if (ent.getPercentRelPos()) {
                 ent.x = this.position.x + ent.getRelativePos().x * this.dimension.w - ent.dimension.w * 0.5;
-                ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h;
+                ent.y = this.position.y + ent.getRelativePos().y * this.dimension.h - ent.dimension.h * 0.5;
             }
             else {
                 ent.x = this.position.x + ent.getRelativePos().x;

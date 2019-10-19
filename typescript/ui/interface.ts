@@ -16,10 +16,13 @@ export default class Interface{
         var that = this;
         /**Añadir a los colliders un evento de escucha de clicks */
         var listenerCallback = (e :MouseEvent | TouchEvent)=>{
+            var scaleX = 1; // GraphicsRenderer.instance.scaleX;
+            var scaleY = 1; // GraphicsRenderer.instance.scaleY;
+            
             if(e instanceof MouseEvent){
-                that.colliders.sendUserClick(e.clientX, e.clientY);
+                that.colliders.sendUserClick(e.clientX / scaleX, e.clientY / scaleY);
             }else if(window.TouchEvent && e instanceof TouchEvent){
-                that.colliders.sendUserClick(e.touches[0].clientX, e.touches[0].clientY);
+                that.colliders.sendUserClick(e.touches[0].clientX / scaleX, e.touches[0].clientY / scaleY);
             }
         };
 
@@ -67,9 +70,9 @@ export class InterfaceInWorld{
         /**Añadir a los colliders un evento de escucha de clicks */
         var listenerCallback = (e :MouseEvent | TouchEvent)=>{
             if(e instanceof MouseEvent){
-                that.colliders.sendUserClick(e.clientX + GraphicsRenderer.instance.scrollX, e.clientY + GraphicsRenderer.instance.scrollY);
+                that.colliders.sendUserClick(e.clientX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX, e.clientY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY);
             }else if(window.TouchEvent && e instanceof TouchEvent){
-                that.colliders.sendUserClick(e.touches[0].clientX + GraphicsRenderer.instance.scrollX, e.touches[0].clientY + GraphicsRenderer.instance.scrollY);
+                that.colliders.sendUserClick(e.touches[0].clientX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX, e.touches[0].clientY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY);
             }
         };
 

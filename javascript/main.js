@@ -10,52 +10,78 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import Player from "./player.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import AreaMap from "./graphics/areamap.js";
-import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import { BoxCollider } from "./collider.js";
 import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import Enemy from "./enemy.js";
-import { distance } from "./util.js";
+import { distance, sleep } from "./util.js";
 import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 import AudioManager from "./audiomanager.js";
 import { Hud } from "./ui/hud.js";
-import { MainMenu } from "./ui/mainmenu.js";
-import { MaxScore } from "./ui/maxscores.js";
-import { GameOver } from "./ui/gameover.js";
-export const STANDARD_SCREEN_SIZE_X = 1366;
-export const STANDARD_SCREEN_SIZE_Y = 768;
+
+const STANDARD_SCREEN_SIZE_X = 1730;
+const STANDARD_SCREEN_SIZE_Y = 875;
+
 //#region Declaración de variables
 var player;
 var enemy;
 var area;
 var ctx;
 //#endregion
-var oldscaleX = 1;
-var oldscaleY = 1;
+
+//#region Rescalamiento
+var originalWidth = document.documentElement.clientWidth;
+var originalHeight = document.documentElement.clientHeight;
+var originalRatio = originalWidth / originalHeight;
+var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
+console.log(originalWidth, originalHeight);
 var resize = function () {
-    var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
+    var currentWidth = document.documentElement.clientWidth;
+    var currentHeight = document.documentElement.clientHeight;
     var currentRatio = document.documentElement.clientWidth / document.documentElement.clientHeight;
+    var myScale = (originalHeight * STANDARD_SCREEN_SIZE_X) / (originalWidth * STANDARD_SCREEN_SIZE_Y);
+    ctx.canvas.style.transformOrigin = "top left";
+    //ctx.canvas.style.transform = "scale("+ Math.min(currentHeight  * STANDARD_SCREEN_SIZE_Y / originalHeight, currentWidth * STANDARD_SCREEN_SIZE_X / originalWidth) + ")";
     if (currentRatio > ratio) {
-        ctx.canvas.height = document.documentElement.clientHeight * 0.95;
-        ctx.canvas.width = ctx.canvas.height * ratio;
+        ctx.canvas.style.transform = "scale(" + currentHeight / STANDARD_SCREEN_SIZE_Y + ")";
+        GraphicsRenderer.instance.scaleX = currentHeight / STANDARD_SCREEN_SIZE_Y;
+        GraphicsRenderer.instance.scaleY = currentHeight / STANDARD_SCREEN_SIZE_Y;
     }
     else {
-        ctx.canvas.width = document.documentElement.clientWidth * 0.95;
-        ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+        ctx.canvas.style.transform = "scale(" + currentWidth / STANDARD_SCREEN_SIZE_X + ")";
+        GraphicsRenderer.instance.scaleX = currentWidth / STANDARD_SCREEN_SIZE_X;
+        GraphicsRenderer.instance.scaleY = currentWidth / STANDARD_SCREEN_SIZE_X;
     }
-    if (GraphicsRenderer.instance) {
-        GraphicsRenderer.instance.scaleX = ctx.canvas.width / STANDARD_SCREEN_SIZE_X;
-        GraphicsRenderer.instance.scaleY = ctx.canvas.height / STANDARD_SCREEN_SIZE_Y;
-    }
-    ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
-    oldscaleX = GraphicsRenderer.instance.scaleX;
-    oldscaleY = GraphicsRenderer.instance.scaleY;
-    Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
-    Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
-    MainMenu.instance.resize(ctx.canvas.width, ctx.canvas.height);
-    MaxScore.instance.resize(ctx.canvas.width, ctx.canvas.height);
-    GameOver.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    /*if((currentWidth / currentHeight) > (originalWidth / originalHeight)) {
+        ctx.canvas.style.transform = "scale(" + (currentHeight / originalHeight) + ")";
+    } else {
+        ctx.canvas.style.transform = "scale(" + (currentWidth / originalWidth)  + ")";
+    }*/
+    //// GraphicsRenderer.instance.scaleX = currentHeight / STANDARD_SCREEN_SIZE_Y;
+    //// GraphicsRenderer.instance.scaleY = (currentHeight / originalHeight) * myScale;
+    //// if(currentRatio > ratio){
+    ////     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+    ////     ctx.canvas.width = ctx.canvas.height * ratio;
+    //// }else{
+    ////     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
+    ////     ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+    //// }
+    //// if(GraphicsRenderer.instance) {
+    ////     GraphicsRenderer.instance.scaleX = 1; /* ctx.canvas.width / STANDARD_SCREEN_SIZE_X */;
+    ////     GraphicsRenderer.instance.scaleY = 1; /* ctx.canvas.height / STANDARD_SCREEN_SIZE_Y; */
+    //// }
+    //// ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
+    //// oldscaleX = GraphicsRenderer.instance.scaleX;
+    //// oldscaleY = GraphicsRenderer.instance.scaleY;
+    //// Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    //// Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
+};
+//#endregion
+const BLINK_PROPERTIES = {
+    blink: 2,
+    time: 0.1
+
 };
 window.addEventListener("resize", resize);
 window.onload = function () {
@@ -63,28 +89,31 @@ window.onload = function () {
         //TODO Adecentar esto
         var canvas = document.getElementById("gameCanvas");
         ctx = canvas.getContext("2d");
-        canvas.width = STANDARD_SCREEN_SIZE_X;
-        canvas.height = STANDARD_SCREEN_SIZE_Y;
+
+        canvas.width = STANDARD_SCREEN_SIZE_X * 0.9;
+        canvas.height = STANDARD_SCREEN_SIZE_Y * 0.9;
+
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
         Hud.initInstance(ctx);
         Inventory.initInstance();
         InterfaceInWorld.initInstance();
-        MainMenu.initInstance(ctx);
-        MaxScore.initInstance(ctx);
-        GameOver.initInstance(ctx);
+
+        Hud.initInstance(ctx);
         window.gr = GraphicsRenderer.instance;
         //#region Jugador
         player = new Player();
-        player.x = 14592;
-        player.y = 4352;
+        player.x = 1200;
+        player.y = 1280;
         window.player = player;
-        //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
-        yield player.setAnimation(3.5, "skeleton.json");
+        window.sleep = sleep;
+        //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+        yield player.setAnimation(2.5, "skeleton.json");
+
         var image = player.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
-            player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.9, image.getWidth() * 0.9, true), {
+            player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.5, image.getWidth() * 0.5, true), {
                 x: 0,
                 y: image.getHeight() * 0.3
             });
@@ -94,48 +123,6 @@ window.onload = function () {
             Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
         }, () => console.log("Game Over :("));
         //#endregion
-        Inventory.instance.addItem({
-            id: 0,
-            name: "Skullpkin",
-            description: "Skulled Pumpkin",
-            type: "crop"
-        }, 3);
-        Inventory.instance.addItem({
-            id: 1,
-            name: "Ghost Pepper",
-            description: "Peppers' immortal souls",
-            type: "crop"
-        }, 4);
-        Inventory.instance.addItem({
-            id: 2,
-            name: "SoulCorn",
-            description: "Corn Cub with souls",
-            type: "crop"
-        }, 2);
-        Inventory.instance.addItem({
-            id: 3,
-            name: "Zombihorias",
-            description: "The undead tubercule",
-            type: "crop"
-        }, 5);
-        Inventory.instance.addItem({
-            id: 4,
-            name: "Demonions",
-            description: "So evil, they will make you cry",
-            type: "crop"
-        }, 5);
-        Inventory.instance.addItem({
-            id: 0,
-            name: "Speeder",
-            description: "Grow in a blink",
-            type: "fertilizer"
-        }, 6, 2);
-        Inventory.instance.addItem({
-            id: 1,
-            name: "Quantity",
-            description: "Quantity over quality",
-            type: "fertilizer"
-        }, 6, 2);
         //#region Área
         area = AreaMap.load("farmland.json", () => {
             if (enemy) {
@@ -172,7 +159,8 @@ function generateEnemy(onDead) {
         var enemy = new Enemy();
         enemy.x = 2176;
         enemy.y = 1280;
-        enemy.setImage(2.5, yield FileLoader.loadImage("animation/Enemy_Placeholder/enemy0.png"), 0, 0, 133, 128, 66, 54);
+        //// enemy.setImage(2.5, await FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
+        yield enemy.setAnimation(2.5, "enemy_1.json");
         var image = enemy.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
@@ -182,6 +170,8 @@ function generateEnemy(onDead) {
             });
         }
         enemy.setAttack(target => {
+            enemy.setAttacking(true);
+            target.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
             target.setHealth(target.getHealth() - 10);
             console.log(target.constructor.name + ": \"ouch\"");
         });
@@ -215,6 +205,8 @@ function attackEnemy() {
     const ATTACK_RADIUS = 200;
     if (enemy)
         if (distance(player.x, player.y, enemy.x, enemy.y) < ATTACK_RADIUS) {
+            player.setAttacking(true);
+            enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
             enemy.setHealth(enemy.getHealth() - 10);
             console.log("Enemy: ouch");
         }
@@ -250,15 +242,19 @@ function renderDebug() {
     var scaleX = GraphicsRenderer.instance.scaleX;
     var scaleY = GraphicsRenderer.instance.scaleY;
     ctx.lineWidth = 1;
-    area.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
-    ctx.scale(scaleX, scaleY);
+
+    area.getColliders().render(ctx, scrollX, scrollY);
+    // ctx.scale(scaleX, scaleY);
+
     player.renderDebug(ctx, scrollX, scrollY);
     if (enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
     Interface.instance.getColliders().render(ctx);
-    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
-    ctx.scale(1 / scaleX, 1 / scaleY);
+
+    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
+    // ctx.scale(1 / scaleX, 1 / scaleY);
+
 }
 //#endregion
 //#region Inventario

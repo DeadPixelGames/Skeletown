@@ -74,7 +74,9 @@ export default class GraphicsRenderer {
         for (let entity of this.entities) {
             if (!entity.visible)
                 break;
-            if (entity.shouldBeCulled(this.scrollX, this.scrollY, this.scaleX, this.scaleY))
+
+            if (entity.shouldBeCulled(this.scrollX, this.scrollY))
+
                 continue;
             entity.render(this.context, this.scrollX, this.scrollY);
         }

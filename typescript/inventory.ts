@@ -61,6 +61,7 @@ export class Inventory{
 
 
     private constructor(){
+        this.items = [null];
         //#region Inicialización de los contenedores
         this.layout = new UILayout(
             GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
@@ -272,7 +273,7 @@ export class Inventory{
         var constInBetweenY = 20;
         var constW = 128;
 
-        this.items = [null];
+        
        
         for(var i = 0; i < 4; i++){
             for(var j = 0; j < 5; j++){
@@ -287,7 +288,6 @@ export class Inventory{
             if(item)
             this.cropsLayout.addUIEntity(item.image);
         }
-        console.log(this.cropsLayout)
         this.cropsLayout.addEntitiesToRenderer();
         this.cropsLayout.hide();
         this.deactivate();
@@ -325,36 +325,38 @@ export class Inventory{
     //#endregion
     
     public resize(width :number, height :number){
-        this.layout.position.x = width * 0.5 - this.halfWidth;
-        this.layout.position.y = height * 0.5 - this.halfHeight;
+        var posX = width * 0.5  / GraphicsRenderer.instance.scaleX - this.halfWidth;
+        var posY = height * 0.5 / GraphicsRenderer.instance.scaleY - this.halfHeight ;
+        this.layout.position.x = posX;
+        this.layout.position.y = posY;
         for(let ent of this.layout.uiEntities){
             ent.x = this.layout.position.x + ent.getRelativePos().x;
             ent.y = this.layout.position.y + ent.getRelativePos().y;
         }
 
-        this.cropsLayout.position.x = width * 0.5 - this.halfWidth;
-        this.cropsLayout.position.y = height * 0.5 - this.halfHeight;
+        this.cropsLayout.position.x = posX;
+        this.cropsLayout.position.y = posY;
         for(let ent of this.cropsLayout.uiEntities){
             ent.x = this.cropsLayout.position.x + ent.getRelativePos().x;
             ent.y = this.cropsLayout.position.y + ent.getRelativePos().y;
         }
 
-        this.clothesLayout.position.x = width * 0.5 - this.halfWidth;
-        this.clothesLayout.position.y = height * 0.5 - this.halfHeight;
+        this.clothesLayout.position.x = posX;
+        this.clothesLayout.position.y = posY;
         for(let ent of this.clothesLayout.uiEntities){
             ent.x = this.clothesLayout.position.x + ent.getRelativePos().x;
             ent.y = this.clothesLayout.position.y + ent.getRelativePos().y;
         }
 
-        this.wikiLayout.position.x = width * 0.5 - this.halfWidth;
-        this.wikiLayout.position.y = height * 0.5 - this.halfHeight;
+        this.wikiLayout.position.x = posX;
+        this.wikiLayout.position.y = posY;
         for(let ent of this.wikiLayout.uiEntities){
             ent.x = this.wikiLayout.position.x + ent.getRelativePos().x;
             ent.y = this.wikiLayout.position.y + ent.getRelativePos().y;
         }
 
-        this.settingsLayout.position.x = width * 0.5 - this.halfWidth;
-        this.settingsLayout.position.y = height * 0.5 - this.halfHeight;
+        this.settingsLayout.position.x = posX;
+        this.settingsLayout.position.y = posY;
         for(let ent of this.settingsLayout.uiEntities){
             ent.x = this.settingsLayout.position.x + ent.getRelativePos().x;
             ent.y = this.settingsLayout.position.y + ent.getRelativePos().y;
@@ -365,7 +367,7 @@ export class Inventory{
     public togglePlanting(tile :TileEntity){
         this.farmableTile = tile;
 
-        this.layout.deactivate();
+        this.layout.activate();
 
         this.cropsLayout.activate();
 

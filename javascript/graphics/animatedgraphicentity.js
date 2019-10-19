@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import GraphicEntity from "./graphicentity.js";
 import FileLoader from "../fileloader.js";
+import GameEvent from "../gameevent.js";
 /**
  * Directorio donde se almacenan los jsons que representan las animaciones, partiendo de la raíz del
  * servidor. No es necesario añadir '/' al principio ni al final.
@@ -32,6 +33,7 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         this.walkAnimFactor = 1;
         this.paused = false;
         this.direction = "down";
+        this.onClipChange = new GameEvent();
     }
     /**
      * Genera una entidad gráfica animada a partir del archivo JSON especificado.
@@ -145,6 +147,11 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         }
         this.direction = ret;
     }
+    suscribe(instance, onClipChanged) {
+        if (onClipChanged) {
+            this.onClipChange.suscribe(onClipChanged, instance);
+        }
+    }
     update(deltaTime) {
         // Cogemos del mapa la información del clip para no tener que leer el mapa constantemente.
         var playingClip = this.clips.get(this.currentclip);
@@ -256,6 +263,7 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
      * Ejecuta la instrucción especificada como transición en los datos de la animación.
      */
     executeTransition(transition) {
+        var prevclip = this.currentclip;
         if (typeof transition == "string") {
             switch (transition) {
                 // stop: No hacer nada
@@ -266,6 +274,7 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
                     this.currentframe = 0;
                     break;
             }
+            this.onClipChange.dispatch(prevclip, prevclip);
             // {goto: "clip"}: Pasar a reproducir el clip indicado desde el principio
         }
         else if (transition.goto) {
@@ -275,6 +284,7 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
             }
             this.currentclip = nextclip;
             this.currentframe = 0;
+            this.onClipChange.dispatch(prevclip, nextclip);
         }
     }
     /**

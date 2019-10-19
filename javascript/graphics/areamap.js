@@ -371,6 +371,9 @@ export class TileEntity extends GraphicEntity {
                     enteringInventoryFromCrops(this);
                 }
             });
+            this.plant.setPercentRelPos(true);
+            this.harvest.setPercentRelPos(true);
+            this.fertilizer.setPercentRelPos(true);
             this.plant.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_plantar.png"), 0, 0, 86, 86);
             this.harvest.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_recolectar.png"), 0, 0, 86, 86);
             this.fertilizer.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_abono.png"), 0, 0, 86, 86);
@@ -399,8 +402,10 @@ export class TileEntity extends GraphicEntity {
     shouldBeCulled(scrollX, scrollY, scaleX = 1, scaleY = 1) {
         const CULL_MARGIN = 384;
         var ret = false;
-        if ((this.x + this.getWidth()) < scrollX - CULL_MARGIN / scaleX || this.x > scrollX + GraphicsRenderer.instance.getCanvas().width + CULL_MARGIN / scaleX
-            || (this.y + this.getHeight()) < scrollY - CULL_MARGIN / scaleY || this.y > scrollY + GraphicsRenderer.instance.getCanvas().height + CULL_MARGIN / scaleY) {
+
+        if ((this.x + this.getWidth()) < scrollX - CULL_MARGIN || this.x > scrollX + GraphicsRenderer.instance.getCanvas().width + CULL_MARGIN
+            || (this.y + this.getHeight()) < scrollY - CULL_MARGIN || this.y > scrollY + GraphicsRenderer.instance.getCanvas().height + CULL_MARGIN) {
+
             ret = true;
         }
         return ret;
