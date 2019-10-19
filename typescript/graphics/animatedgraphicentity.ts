@@ -1,5 +1,6 @@
 import GraphicEntity from "./graphicentity.js";
 import FileLoader from "../fileloader.js";
+import GameEvent from "../gameevent.js";
 
 /**
  * Directorio donde se almacenan los jsons que representan las animaciones, partiendo de la raíz del
@@ -49,6 +50,8 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
      */
     private direction :"up" | "down" | "left" | "right";
 
+    private onClipChange :GameEvent<(prevClip :string, nextClip :string) => void>;
+
     /**
      * El constructor de esta clase es privado. Utiliza `AnimatedGraphicEntity.load(jsonFile)` en su lugar.
      */
@@ -63,6 +66,7 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         this.walkAnimFactor = 1;
         this.paused = false;
         this.direction = "down";
+        this.onClipChange = new GameEvent();
     }
 
     /**
@@ -185,6 +189,12 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
         }
 
         this.direction = ret;
+    }
+
+    public suscribe(instance :any, onClipChanged :((prevClip :string, nextClip :string) => void) | null) {
+        if(onClipChanged) {
+            this.onClipChange.suscribe(onClipChanged, instance);
+        }
     }
 
     protected update(deltaTime :number) {
@@ -318,6 +328,8 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
      */
     private executeTransition(transition :AnimationTransition) {
 
+        var prevclip = this.currentclip;
+
         if(typeof transition == "string") {
 
             switch(transition) {
@@ -329,6 +341,8 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
                     this.currentframe = 0;
                     break;
             }
+
+            this.onClipChange.dispatch(prevclip, prevclip);
         
         // {goto: "clip"}: Pasar a reproducir el clip indicado desde el principio
         } else if(transition.goto) {
@@ -338,6 +352,7 @@ export default class AnimatedGraphicEntity extends GraphicEntity {
             }
             this.currentclip = nextclip;
             this.currentframe = 0;
+            this.onClipChange.dispatch(prevclip, nextclip);
         }
     }
 

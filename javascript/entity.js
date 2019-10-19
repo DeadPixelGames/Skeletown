@@ -12,7 +12,7 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import GameLoop from "./gameloop.js";
 import AreaMap from "./graphics/areamap.js";
 import GameEvent from "./gameevent.js";
-import { clamp, distance } from "./util.js";
+import { clamp, distance, sleep } from "./util.js";
 import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
 /**
  * Distancia mínima a la que debe encontrarse el punto de destino para que la entidad se mueva hacia él.
@@ -41,6 +41,7 @@ export default class Entity {
         this.health = this.maxHealth;
         this.onHealthChanged = new GameEvent();
         this.onDead = new GameEvent();
+        this.attacking = false;
         this.isColliding = {
             left: false,
             right: false,
@@ -64,6 +65,9 @@ export default class Entity {
     }
     getImage() {
         return this.image;
+    }
+    isAttacking() {
+        return this.attacking;
     }
     setCollider(collider, offset) {
         this.collider = collider;
@@ -93,6 +97,9 @@ export default class Entity {
         if (health == 0) {
             this.onDead.dispatch();
         }
+    }
+    setAttacking(attacking) {
+        this.attacking = attacking;
     }
     //#endregion
     //#region Sincronizar componentes
@@ -167,11 +174,30 @@ export default class Entity {
         this.isColliding.top = overlap.y < 0;
         this.isColliding.bottom = overlap.y > 0;
     }
+    blink(blinks, time) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.getImage()) {
+                return;
+            }
+            var image = this.getImage();
+            for (let i = 0; i < blinks * 2; i++) {
+                image.visible = !image.visible;
+                yield sleep(time * 1000);
+            }
+            image.visible = true;
+        });
+    }
     //#region Animaciones
     setAnimation(layer, jsonFile) {
         return __awaiter(this, void 0, void 0, function* () {
             this.image = yield AnimatedGraphicEntity.load(jsonFile);
             this.image.renderLayer = layer;
+            var imageAsAnimation = this.image;
+            imageAsAnimation.suscribe(this, function (prevClip, nextClip) {
+                if (prevClip == "attack") {
+                    this.setAttacking(false);
+                }
+            });
             this.syncImage();
         });
     }
@@ -194,20 +220,30 @@ export default class Entity {
         }
         // Si hay punto de destino pero está demasiado cerca, consideramos que la entidad
         // también está inactiva. Si no, la ponemos a andar
-        var length = distance(this.x, this.y, this.dest.x, this.dest.y);
+        var length = this.dest ? distance(this.x, this.y, this.dest.x, this.dest.y) : AreaMap.getCurrent().getTileSize().width;
         if (!this.usingOwnClip) {
-            if (length < MIN_WALKABLE_DISTANCE) {
-                anim.play("idle");
+            if (this.attacking) {
+                anim.play("attack");
+            }
+            else if (length > MIN_WALKABLE_DISTANCE) {
+                anim.play("walk");
             }
             else {
-                anim.play("walk");
+                anim.play("idle");
             }
         }
         // Ponemos la velocidad y dirección correctas
-        anim.setSpeed(length * anim.getWalkAnimFactor());
-        var offsetX = this.dest.x - this.x;
-        var offsetY = this.dest.y - this.y;
-        anim.setDirection(offsetX, offsetY);
+        if (!this.isAttacking()) {
+            anim.setSpeed(length * anim.getWalkAnimFactor());
+        }
+        else {
+            anim.setSpeed(1);
+        }
+        if (this.dest) {
+            var offsetX = this.dest.x - this.x;
+            var offsetY = this.dest.y - this.y;
+            anim.setDirection(offsetX, offsetY);
+        }
     }
     //#endregion
     /**

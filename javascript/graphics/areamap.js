@@ -371,6 +371,9 @@ export class TileEntity extends GraphicEntity {
                     enteringInventoryFromCrops(this);
                 }
             });
+            this.plant.setPercentRelPos(true);
+            this.harvest.setPercentRelPos(true);
+            this.fertilizer.setPercentRelPos(true);
             this.plant.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_plantar.png"), 0, 0, 86, 86);
             this.harvest.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_recolectar.png"), 0, 0, 86, 86);
             this.fertilizer.setImage(false, 100, yield FileLoader.loadImage("resources/interface/but_abono.png"), 0, 0, 86, 86);
