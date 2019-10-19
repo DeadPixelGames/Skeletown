@@ -1,9 +1,9 @@
-import GraphicsRenderer from "../graphics/graphicsrenderer";
-import { UILayout, ProgressBar, UIEntity } from "./uiEntity";
-import { enteringInventory } from "../main";
-import Interface from "./interface";
-import { BoxCollider, CircleCollider } from "../collider";
-import FileLoader from "../fileloader";
+import GraphicsRenderer from "../graphics/graphicsrenderer.js";
+import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
+import { enteringInventory } from "../main.js";
+import Interface from "./interface.js";
+import { BoxCollider, CircleCollider } from "../collider.js";
+import FileLoader from "../fileloader.js";
 
 
 export class Hud{

@@ -56,9 +56,13 @@ export default class GraphicsRenderer {
      * Indica el desplazamiento vertical de la pantalla.
      */
     public scrollY :number;
-
+    /**
+     * La escala horizontal de la pantalla
+     */
     public scaleX :number;
-
+    /**
+     * La escala vertical de la pantalla
+     */
     public scaleY :number;
     /**
      * Evento que se dispara al renovar el renderer descartando todas las entidades actuales. 
@@ -122,7 +126,7 @@ export default class GraphicsRenderer {
             if(!entity.visible)
                 break;
 
-            if(entity.shouldBeCulled(this.scrollX, this.scrollY, this.scaleX, this.scaleY))
+            if(entity.shouldBeCulled(this.scrollX, this.scrollY))
                 continue;
             
             entity.render(this.context, this.scrollX, this.scrollY);
@@ -269,8 +273,8 @@ export default class GraphicsRenderer {
 
     private updateScrollToFollow() {
         if(this.following) {
-            this.scrollX = this.following.x - this.canvas.width * 0.5 / this.scaleX;
-            this.scrollY = this.following.y - this.canvas.height * 0.5 / this.scaleY;
+            this.scrollX = this.following.x - this.canvas.width * 0.5;
+            this.scrollY = this.following.y - this.canvas.height * 0.5;
         }
     }
     //#endregion

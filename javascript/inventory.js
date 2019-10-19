@@ -20,6 +20,7 @@ export class Inventory {
         this.halfWidth = 512;
         /**Mitad de la altura del contenedor del inventario */
         this.halfHeight = 348;
+        this.items = [null];
         //#region Inicialización de los contenedores
         this.layout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         this.cropsLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
@@ -191,7 +192,6 @@ export class Inventory {
             var constInBetweenX = 24;
             var constInBetweenY = 20;
             var constW = 128;
-            this.items = [null];
             for (var i = 0; i < 4; i++) {
                 for (var j = 0; j < 5; j++) {
                     var item = new itemInInventory(j + i * 5 + 1, constX + j * constInBetweenX + j * constW, constY + i * constInBetweenY + i * constW, constW, constW);

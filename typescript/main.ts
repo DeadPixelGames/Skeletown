@@ -18,9 +18,9 @@ import { FarmlandManager } from "./farmland.js";
 import AudioManager from "./audiomanager.js";
 import { Hud } from "./ui/hud.js";
 
-const STANDARD_SCREEN_SIZE_X = 1366;
+const STANDARD_SCREEN_SIZE_X = 1730;
 
-const STANDARD_SCREEN_SIZE_Y = 768;
+const STANDARD_SCREEN_SIZE_Y = 875;
 
 //#region Declaración de variables
 var player :Player;
@@ -30,29 +30,59 @@ var ctx :CanvasRenderingContext2D;
 
 //#endregion
 
-var oldscaleX = 1;
-var oldscaleY = 1;
+//#region Rescalamiento
+var originalWidth = document.documentElement.clientWidth;
+var originalHeight = document.documentElement.clientHeight;
+var originalRatio = originalWidth / originalHeight;
+var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
+console.log(originalWidth, originalHeight);
 
 var resize = function() {
-    var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
-    var currentRatio = document.documentElement.clientWidth / document.documentElement.clientHeight ;
+    
+    var currentWidth = document.documentElement.clientWidth;
+    var currentHeight = document.documentElement.clientHeight;
+    var currentRatio = document.documentElement.clientWidth / document.documentElement.clientHeight;
+
+    var myScale = (originalHeight * STANDARD_SCREEN_SIZE_X) / (originalWidth * STANDARD_SCREEN_SIZE_Y);
+    ctx.canvas.style.transformOrigin = "top left";
+
+    //ctx.canvas.style.transform = "scale("+ Math.min(currentHeight  * STANDARD_SCREEN_SIZE_Y / originalHeight, currentWidth * STANDARD_SCREEN_SIZE_X / originalWidth) + ")";
+
     if(currentRatio > ratio){
-        ctx.canvas.height = document.documentElement.clientHeight * 0.95;
-        ctx.canvas.width = ctx.canvas.height * ratio;
+        ctx.canvas.style.transform = "scale("+ currentHeight / STANDARD_SCREEN_SIZE_Y + ")";
+        GraphicsRenderer.instance.scaleX = currentHeight / STANDARD_SCREEN_SIZE_Y;
+        GraphicsRenderer.instance.scaleY = currentHeight / STANDARD_SCREEN_SIZE_Y;
     }else{
-        ctx.canvas.width = document.documentElement.clientWidth * 0.95;
-        ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+        ctx.canvas.style.transform = "scale("+ currentWidth / STANDARD_SCREEN_SIZE_X + ")";
+        GraphicsRenderer.instance.scaleX = currentWidth / STANDARD_SCREEN_SIZE_X;
+        GraphicsRenderer.instance.scaleY = currentWidth / STANDARD_SCREEN_SIZE_X;
     }
-    if(GraphicsRenderer.instance) {
-        GraphicsRenderer.instance.scaleX = ctx.canvas.width / STANDARD_SCREEN_SIZE_X;
-        GraphicsRenderer.instance.scaleY = ctx.canvas.height / STANDARD_SCREEN_SIZE_Y;
-    }
-    ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
-    oldscaleX = GraphicsRenderer.instance.scaleX;
-    oldscaleY = GraphicsRenderer.instance.scaleY;
-    Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
-    Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    /*if((currentWidth / currentHeight) > (originalWidth / originalHeight)) {
+        ctx.canvas.style.transform = "scale(" + (currentHeight / originalHeight) + ")";
+    } else {
+        ctx.canvas.style.transform = "scale(" + (currentWidth / originalWidth)  + ")";
+    }*/
+    //GraphicsRenderer.instance.scaleX = currentHeight / STANDARD_SCREEN_SIZE_Y;
+    //GraphicsRenderer.instance.scaleY = (currentHeight / originalHeight) * myScale;
+
+    // if(currentRatio > ratio){
+    //     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+    //     ctx.canvas.width = ctx.canvas.height * ratio;
+    // }else{
+    //     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
+    //     ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+    // }
+    // if(GraphicsRenderer.instance) {
+    //     GraphicsRenderer.instance.scaleX = 1; /* ctx.canvas.width / STANDARD_SCREEN_SIZE_X */;
+    //     GraphicsRenderer.instance.scaleY = 1; /* ctx.canvas.height / STANDARD_SCREEN_SIZE_Y; */
+    // }
+    // ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
+    // oldscaleX = GraphicsRenderer.instance.scaleX;
+    // oldscaleY = GraphicsRenderer.instance.scaleY;
+    // Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    // Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
 }
+//#endregion
 
 window.addEventListener("resize", resize);
 
@@ -63,8 +93,8 @@ window.onload = async function() {
 
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     
-    canvas.width = innerWidth * 0.9;
-    canvas.height = innerHeight * 0.9;
+    canvas.width = STANDARD_SCREEN_SIZE_X * 0.9;
+    canvas.height = STANDARD_SCREEN_SIZE_Y * 0.9;
 
     GameLoop.initInstance();
 
@@ -286,16 +316,16 @@ function renderDebug() {
 
     ctx.lineWidth = 1;
 
-    area.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
+    area.getColliders().render(ctx, scrollX, scrollY);
 
-    ctx.scale(scaleX, scaleY);
+    // ctx.scale(scaleX, scaleY);
     player.renderDebug(ctx, scrollX, scrollY);
     if(enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
         Interface.instance.getColliders().render(ctx);
-        InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
-    ctx.scale(1 / scaleX, 1 / scaleY);
+        InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
+    // ctx.scale(1 / scaleX, 1 / scaleY);
 }
 //#endregion
 

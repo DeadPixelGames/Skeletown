@@ -61,6 +61,7 @@ export class Inventory{
 
 
     private constructor(){
+        this.items = [null];
         //#region Inicialización de los contenedores
         this.layout = new UILayout(
             GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
@@ -272,7 +273,7 @@ export class Inventory{
         var constInBetweenY = 20;
         var constW = 128;
 
-        this.items = [null];
+        
        
         for(var i = 0; i < 4; i++){
             for(var j = 0; j < 5; j++){

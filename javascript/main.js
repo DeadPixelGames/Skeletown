@@ -13,98 +13,83 @@ import AreaMap from "./graphics/areamap.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import { BoxCollider } from "./collider.js";
-import { UILayout, UIEntity, ProgressBar } from "./ui/uiEntity.js";
 import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import Enemy from "./enemy.js";
 import { distance } from "./util.js";
 import { Inventory } from "./inventory.js";
 import { FarmlandManager } from "./farmland.js";
 import AudioManager from "./audiomanager.js";
-const STANDARD_SCREEN_SIZE_X = 1366;
-const STANDARD_SCREEN_SIZE_Y = 768;
+import { Hud } from "./ui/hud.js";
+const STANDARD_SCREEN_SIZE_X = 1730;
+const STANDARD_SCREEN_SIZE_Y = 875;
 //#region Declaración de variables
 var player;
 var enemy;
 var area;
 var ctx;
-export var hud_InGame;
-var lifeBar;
-var moneyCounter;
-var time;
-var inventory;
 //#endregion
-var oldscaleX = 1;
-var oldscaleY = 1;
+//#region Rescalamiento
+var originalWidth = document.documentElement.clientWidth;
+var originalHeight = document.documentElement.clientHeight;
+var originalRatio = originalWidth / originalHeight;
+var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
+console.log(originalWidth, originalHeight);
 var resize = function () {
-    var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
+    var currentWidth = document.documentElement.clientWidth;
+    var currentHeight = document.documentElement.clientHeight;
     var currentRatio = document.documentElement.clientWidth / document.documentElement.clientHeight;
+    var myScale = (originalHeight * STANDARD_SCREEN_SIZE_X) / (originalWidth * STANDARD_SCREEN_SIZE_Y);
+    ctx.canvas.style.transformOrigin = "top left";
+    //ctx.canvas.style.transform = "scale("+ Math.min(currentHeight  * STANDARD_SCREEN_SIZE_Y / originalHeight, currentWidth * STANDARD_SCREEN_SIZE_X / originalWidth) + ")";
     if (currentRatio > ratio) {
-        ctx.canvas.height = document.documentElement.clientHeight * 0.95;
-        ctx.canvas.width = ctx.canvas.height * ratio;
+        ctx.canvas.style.transform = "scale(" + currentHeight / STANDARD_SCREEN_SIZE_Y + ")";
+        GraphicsRenderer.instance.scaleX = currentHeight / STANDARD_SCREEN_SIZE_Y;
+        GraphicsRenderer.instance.scaleY = currentHeight / STANDARD_SCREEN_SIZE_Y;
     }
     else {
-        ctx.canvas.width = document.documentElement.clientWidth * 0.95;
-        ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+        ctx.canvas.style.transform = "scale(" + currentWidth / STANDARD_SCREEN_SIZE_X + ")";
+        GraphicsRenderer.instance.scaleX = currentWidth / STANDARD_SCREEN_SIZE_X;
+        GraphicsRenderer.instance.scaleY = currentWidth / STANDARD_SCREEN_SIZE_X;
     }
-    if (GraphicsRenderer.instance) {
-        GraphicsRenderer.instance.scaleX = ctx.canvas.width / STANDARD_SCREEN_SIZE_X;
-        GraphicsRenderer.instance.scaleY = ctx.canvas.height / STANDARD_SCREEN_SIZE_Y;
-    }
-    ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
-    oldscaleX = GraphicsRenderer.instance.scaleX;
-    oldscaleY = GraphicsRenderer.instance.scaleY;
-    hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
-    Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    /*if((currentWidth / currentHeight) > (originalWidth / originalHeight)) {
+        ctx.canvas.style.transform = "scale(" + (currentHeight / originalHeight) + ")";
+    } else {
+        ctx.canvas.style.transform = "scale(" + (currentWidth / originalWidth)  + ")";
+    }*/
+    //GraphicsRenderer.instance.scaleX = currentHeight / STANDARD_SCREEN_SIZE_Y;
+    //GraphicsRenderer.instance.scaleY = (currentHeight / originalHeight) * myScale;
+    // if(currentRatio > ratio){
+    //     ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+    //     ctx.canvas.width = ctx.canvas.height * ratio;
+    // }else{
+    //     ctx.canvas.width = document.documentElement.clientWidth * 0.95;
+    //     ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+    // }
+    // if(GraphicsRenderer.instance) {
+    //     GraphicsRenderer.instance.scaleX = 1; /* ctx.canvas.width / STANDARD_SCREEN_SIZE_X */;
+    //     GraphicsRenderer.instance.scaleY = 1; /* ctx.canvas.height / STANDARD_SCREEN_SIZE_Y; */
+    // }
+    // ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
+    // oldscaleX = GraphicsRenderer.instance.scaleX;
+    // oldscaleY = GraphicsRenderer.instance.scaleY;
+    // Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    // Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
 };
+//#endregion
 window.addEventListener("resize", resize);
 window.onload = function () {
     return __awaiter(this, void 0, void 0, function* () {
         //TODO Adecentar esto
         var canvas = document.getElementById("gameCanvas");
         ctx = canvas.getContext("2d");
-        canvas.width = innerWidth * 0.9;
-        canvas.height = innerHeight * 0.9;
+        canvas.width = STANDARD_SCREEN_SIZE_X * 0.9;
+        canvas.height = STANDARD_SCREEN_SIZE_Y * 0.9;
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
         Inventory.initInstance();
         InterfaceInWorld.initInstance();
+        Hud.initInstance(ctx);
         window.gr = GraphicsRenderer.instance;
-        //#region Interfaz
-        moneyCounter = new UIEntity(true);
-        moneyCounter.setCollider(true, 0.12, 0.07, 320, 91, (x, y) => {
-        });
-        lifeBar = new ProgressBar(0.5, 0.09, 703, 128, true, (x, y) => {
-            lifeBar.setProgress(lifeBar.getProgress() - 10);
-        });
-        time = new UIEntity(false);
-        time.setCollider(true, 0.95, 0.09, 362, 128);
-        inventory = new UIEntity(true);
-        inventory.setCollider(false, 0.9, 0.85, 245, 245, (x, y) => {
-            enteringInventory();
-            lifeBar.setProgress(lifeBar.getProgress() + 10);
-        });
-        Interface.instance.addCollider(lifeBar.getCollider());
-        Interface.instance.addCollider(moneyCounter.getCollider());
-        Interface.instance.addCollider(time.getCollider());
-        Interface.instance.addCollider(inventory.getCollider());
-        hud_InGame = new UILayout(0, 0, canvas.width, canvas.height);
-        hud_InGame.addUIEntity(lifeBar);
-        hud_InGame.addUIEntity(moneyCounter);
-        hud_InGame.addUIEntity(time);
-        hud_InGame.addUIEntity(inventory);
-        lifeBar.setImage(true, 99, yield FileLoader.loadImage("resources/interface/HUD_life3.png"), 0, 0, 768, 91, 768, 91);
-        lifeBar.setIcon(true, 100, yield FileLoader.loadImage("resources/interface/HUD_life1.png"), 0, 0, 768, 91, 768, 91);
-        lifeBar.setProgressBar(true, 100, yield FileLoader.loadImage("resources/interface/HUD_life2.png"), 0, 0, 768, 91, 768, 91);
-        moneyCounter.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_money.png"));
-        time.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_time.png"));
-        inventory.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
-        inventory.image.getSource().width = 300;
-        hud_InGame.addEntitiesToRenderer();
-        moneyCounter.setText("1283902", { x: 250, y: 65 }, "45px");
-        time.setText("10:21", { x: 145, y: 80 }, "45px");
-        //hud_InGame.deactivate();
-        //hud_InGame.hide();
-        //#endregion
         //#region Jugador
         player = new Player();
         player.x = 1200;
@@ -121,8 +106,8 @@ window.onload = function () {
             });
         }
         GraphicsRenderer.instance.follow(player.getImage());
-        player.suscribe(lifeBar, (health, maxHealth) => {
-            lifeBar.setProgress(health * 100 / maxHealth);
+        player.suscribe(Hud.instance.lifeBar, (health, maxHealth) => {
+            Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
         }, () => console.log("Game Over :("));
         //#endregion
         Inventory.instance.addItem({
@@ -281,34 +266,34 @@ function renderDebug() {
     var scaleX = GraphicsRenderer.instance.scaleX;
     var scaleY = GraphicsRenderer.instance.scaleY;
     ctx.lineWidth = 1;
-    area.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
-    ctx.scale(scaleX, scaleY);
+    area.getColliders().render(ctx, scrollX, scrollY);
+    // ctx.scale(scaleX, scaleY);
     player.renderDebug(ctx, scrollX, scrollY);
     if (enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
     Interface.instance.getColliders().render(ctx);
-    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
-    ctx.scale(1 / scaleX, 1 / scaleY);
+    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
+    // ctx.scale(1 / scaleX, 1 / scaleY);
 }
 //#endregion
 //#region Inventario
 export function enteringInventory() {
     Inventory.instance.activate();
     Inventory.instance.show();
-    hud_InGame.deactivate();
+    Hud.instance.deactivate();
     FarmlandManager.instance.deactivate();
 }
 export function exitingInventory() {
     Inventory.instance.deactivate();
     Inventory.instance.hide();
-    hud_InGame.activate();
+    Hud.instance.activate();
     FarmlandManager.instance.activate();
 }
 export function enteringInventoryFromCrops(tile) {
     Inventory.instance.togglePlanting(tile);
     Inventory.instance.show();
-    hud_InGame.deactivate();
+    Hud.instance.deactivate();
     FarmlandManager.instance.deactivate();
 }
 //#endregion
