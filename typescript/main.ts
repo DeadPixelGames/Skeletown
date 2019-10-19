@@ -17,6 +17,10 @@ import { FarmlandManager } from "./farmland.js";
 
 import AudioManager from "./audiomanager.js";
 
+const STANDARD_SCREEN_SIZE_X = 1366;
+
+const STANDARD_SCREEN_SIZE_Y = 768;
+
 //#region Declaración de variables
 var player :Player;
 var enemy :Enemy | null;
@@ -30,10 +34,26 @@ var time :UIEntity;
 var inventory :UIEntity;
 //#endregion
 
+var oldscaleX = 1;
+var oldscaleY = 1;
 
 var resize = function() {
-    ctx.canvas.width = document.documentElement.clientWidth * 0.95;
-    ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+    var ratio = STANDARD_SCREEN_SIZE_X / STANDARD_SCREEN_SIZE_Y;
+    var currentRatio = document.documentElement.clientWidth / document.documentElement.clientHeight ;
+    if(currentRatio > ratio){
+        ctx.canvas.height = document.documentElement.clientHeight * 0.95;
+        ctx.canvas.width = ctx.canvas.height * ratio;
+    }else{
+        ctx.canvas.width = document.documentElement.clientWidth * 0.95;
+        ctx.canvas.height = ctx.canvas.width * STANDARD_SCREEN_SIZE_Y / STANDARD_SCREEN_SIZE_X;
+    }
+    if(GraphicsRenderer.instance) {
+        GraphicsRenderer.instance.scaleX = ctx.canvas.width / STANDARD_SCREEN_SIZE_X;
+        GraphicsRenderer.instance.scaleY = ctx.canvas.height / STANDARD_SCREEN_SIZE_Y;
+    }
+    ctx.scale(GraphicsRenderer.instance.scaleX, GraphicsRenderer.instance.scaleY);
+    oldscaleX = GraphicsRenderer.instance.scaleX;
+    oldscaleY = GraphicsRenderer.instance.scaleY;
     hud_InGame.resize(ctx.canvas.width, ctx.canvas.height);
     Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
 }
@@ -55,18 +75,20 @@ window.onload = async function() {
 
     InterfaceInWorld.initInstance();
 
+    (window as any).gr = GraphicsRenderer.instance;
+
     //#region Interfaz
     moneyCounter = new UIEntity(true)
-    moneyCounter.setCollider(true, 0.12, 0.03, 320, 91, (x :number, y :number)=>{
+    moneyCounter.setCollider(true, 0.12, 0.07, 320, 91, (x :number, y :number)=>{
 
     });
-    lifeBar = new ProgressBar(0.5, 0.03, 703, 128, true, (x :number, y :number)=>{
+    lifeBar = new ProgressBar(0.5, 0.09, 703, 128, true, (x :number, y :number)=>{
         lifeBar.setProgress(lifeBar.getProgress()-10);
     });
     time = new UIEntity(false);
-    time.setCollider(true, 0.95, 0.03, 362, 128);
+    time.setCollider(true, 0.95, 0.09, 362, 128);
     inventory = new UIEntity(true);
-    inventory.setCollider(false, 0.87, 0.7, 245, 245,(x :number, y :number)=>{
+    inventory.setCollider(false, 0.9, 0.85, 245, 245,(x :number, y :number)=>{
         enteringInventory();
         lifeBar.setProgress(lifeBar.getProgress()+10);
     })
@@ -92,7 +114,7 @@ window.onload = async function() {
     time.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_time.png"));
     inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
     inventory.image.getSource().width = 300;
-    hud_InGame.addEntitiesToRenderer();    
+    hud_InGame.addEntitiesToRenderer();
     moneyCounter.setText("1283902", {x: 250, y: 65}, "45px");
     time.setText("10:21", {x: 145, y: 80}, "45px");
     //#endregion
@@ -103,6 +125,8 @@ window.onload = async function() {
     player.x = 1200;
     player.y = 1280; 
     
+    (window as any).player = player;
+
     //// player.setImage(2.5, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
     await player.setAnimation(2.5, "skeleton.json");
     var image = player.getImage();
@@ -119,9 +143,6 @@ window.onload = async function() {
 
     player.suscribe(lifeBar, (health :number, maxHealth :number) => {
         lifeBar.setProgress(health * 100 / maxHealth);
-        if(AudioManager.instance.contextIsActive()) {
-            AudioManager.instance.playSound("sound");
-        }
     }, () => console.log("Game Over :("));
     //#endregion
 
@@ -188,6 +209,8 @@ window.onload = async function() {
         enemy = null;
     });
     GameLoop.instance.suscribe(null, null, renderDebug, null, null);
+
+    // resize();
 };
 
 //#region Generar AudioContext
@@ -196,7 +219,6 @@ function generateAudioContext() {
         AudioManager.initInstance();
     }
     AudioManager.instance.activateContext();
-    AudioManager.instance.load("sound", "sound.ogg");
     (window as any).audiomanager = AudioManager.instance;
 }
 
@@ -254,7 +276,7 @@ function dispatchClickEventToColliders(event :MouseEvent | TouchEvent) {
     }
 
     if(area) {
-        area.getColliders().sendUserClick(coordX + GraphicsRenderer.instance.scrollX, coordY + GraphicsRenderer.instance.scrollY);
+        area.getColliders().sendUserClick(coordX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX, coordY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY);
     }
 }
 
@@ -299,18 +321,25 @@ function renderDebug() {
 
     var scrollX = GraphicsRenderer.instance.scrollX;
     var scrollY = GraphicsRenderer.instance.scrollY;
+    var scaleX = GraphicsRenderer.instance.scaleX;
+    var scaleY = GraphicsRenderer.instance.scaleY;
+
     ctx.lineWidth = 1;
-    area.getColliders().render(ctx, scrollX, scrollY);
+
+    area.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
+
+    ctx.scale(scaleX, scaleY);
     player.renderDebug(ctx, scrollX, scrollY);
     if(enemy) {
         enemy.renderDebug(ctx, scrollX, scrollY);
     }
-    Interface.instance.getColliders().render(ctx);
-    InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
+        Interface.instance.getColliders().render(ctx);
+        InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY, scaleX, scaleY);
+    ctx.scale(1 / scaleX, 1 / scaleY);
 }
 //#endregion
 
-
+//#region Inventario
 export function enteringInventory(){
     Inventory.instance.activate();
     Inventory.instance.show();
@@ -331,3 +360,4 @@ export function enteringInventoryFromCrops(tile :TileEntity){
     hud_InGame.deactivate();
     FarmlandManager.instance.deactivate();
 }
+//#endregion

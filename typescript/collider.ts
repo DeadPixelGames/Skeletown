@@ -433,7 +433,7 @@ export class ColliderLayer {
     /**
      * Dibuja todos los colliders de la capa. Sólo usar para debug.
      */
-    public render(context :CanvasRenderingContext2D, scrollX = 0, scrollY = 0) {
+    public render(context :CanvasRenderingContext2D, scrollX = 0, scrollY = 0, scaleX = 1, scaleY = 1) {
         for(let collider of this.colliders) {
             collider.render(context, scrollX, scrollY);
         }
@@ -509,7 +509,7 @@ export class BoxCollider extends Collider {
     public render(context :CanvasRenderingContext2D, scrollX = 0, scrollY = 0) {
         context.beginPath();
         context.strokeStyle = this.isDynamic() ? COLLIDER_RENDER_DYNAMIC_COLOR : COLLIDER_RENDER_NONDYNAMIC_COLOR;
-        context.strokeRect(this.centerX - this.halfWidth - scrollX, this.centerY - this.halfHeight - scrollY, this.halfWidth * 2, this.halfHeight * 2);
+        context.strokeRect(this.centerX - this.halfWidth - scrollX, this.centerY - this.halfHeight - scrollY, (this.halfWidth * 2), (this.halfHeight * 2));
     }
 
     public findBorderPoint(otherX :number, otherY :number, thisX? :number, thisY? :number) {
@@ -525,7 +525,7 @@ export class BoxCollider extends Collider {
         var borderPointY = thisCenterY;
 
         if(Math.abs(otherX - thisCenterX) > Math.abs(otherY - thisCenterY)) {
-            borderPointX = otherX > thisCenterX ? thisCenterX + this.halfWidth : thisCenterX - this.halfWidth;
+            borderPointX = (otherX > thisCenterX ? thisCenterX + this.halfWidth : thisCenterX - this.halfWidth);
             borderPointY = clamp(otherY, thisCenterY - this.halfHeight, thisCenterY + this.halfHeight);
         } else if(Math.abs(otherY - thisCenterY) > Math.abs(otherX - thisCenterX)) {
             borderPointX = clamp(otherX, thisCenterX - this.halfWidth, thisCenterX + this.halfWidth);

@@ -286,7 +286,7 @@ export class ColliderLayer {
     /**
      * Dibuja todos los colliders de la capa. Sólo usar para debug.
      */
-    render(context, scrollX = 0, scrollY = 0) {
+    render(context, scrollX = 0, scrollY = 0, scaleX = 1, scaleY = 1) {
         for (let collider of this.colliders) {
             collider.render(context, scrollX, scrollY);
         }
@@ -338,7 +338,7 @@ export class BoxCollider extends Collider {
     render(context, scrollX = 0, scrollY = 0) {
         context.beginPath();
         context.strokeStyle = this.isDynamic() ? COLLIDER_RENDER_DYNAMIC_COLOR : COLLIDER_RENDER_NONDYNAMIC_COLOR;
-        context.strokeRect(this.centerX - this.halfWidth - scrollX, this.centerY - this.halfHeight - scrollY, this.halfWidth * 2, this.halfHeight * 2);
+        context.strokeRect(this.centerX - this.halfWidth - scrollX, this.centerY - this.halfHeight - scrollY, (this.halfWidth * 2), (this.halfHeight * 2));
     }
     findBorderPoint(otherX, otherY, thisX, thisY) {
         // El punto del borde de un rectángulo, es un punto que se encuentra a la misma altura que el punto objetivo
@@ -349,7 +349,7 @@ export class BoxCollider extends Collider {
         var borderPointX = thisCenterX;
         var borderPointY = thisCenterY;
         if (Math.abs(otherX - thisCenterX) > Math.abs(otherY - thisCenterY)) {
-            borderPointX = otherX > thisCenterX ? thisCenterX + this.halfWidth : thisCenterX - this.halfWidth;
+            borderPointX = (otherX > thisCenterX ? thisCenterX + this.halfWidth : thisCenterX - this.halfWidth);
             borderPointY = clamp(otherY, thisCenterY - this.halfHeight, thisCenterY + this.halfHeight);
         }
         else if (Math.abs(otherY - thisCenterY) > Math.abs(otherX - thisCenterX)) {
