@@ -412,14 +412,15 @@ export class TileEntity extends GraphicEntity {
     public harvest :UIEntity;
     public fertilizer :UIEntity;
 
-    private fertilizerStrength :number;
+    public fertilizerStrength :number;
     public fertilizerType :number;
-    private fertilizerBanner :GraphicEntity;
-    private crop :GraphicEntity;
-    private currentCrop :number;
-    private growthState :number;
-    private timeOfPlanting :number;
-    private timeOfGrowthState = TIME_GROWTH_SPAN;
+    public fertilizerBanner :GraphicEntity;
+    public crop :GraphicEntity;
+    public currentCrop :number;
+    public growthState :number;
+    public timeOfPlanting :number;
+    public timeOfGrowthState = TIME_GROWTH_SPAN;
+
 
     public planted :boolean;
 

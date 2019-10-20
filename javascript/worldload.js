@@ -18,20 +18,38 @@ import { Hud } from "./ui/hud.js";
 import Interface, { InterfaceInWorld } from "./ui/interface.js";
 import { distance } from "./util.js";
 import AudioManager from "./audiomanager.js";
+import { FarmlandManager } from "./farmland.js";
 const BLINK_PROPERTIES = {
     blink: 2,
     time: 0.1
 };
 var player;
-var enemy;
+var enemies = [];
 var area;
 var ctx;
+var enemiesSpawnpoints = [
+    { x: 22272, y: 19712, source: "enemy_1.json" },
+    { x: 24064, y: 19584, source: "enemy_1.json" },
+    { x: 23936, y: 18944, source: "enemy_1.json" },
+    { x: 23268, y: 18560, source: "enemy_1.json" },
+    { x: 24192, y: 18176, source: "enemy_1.json" },
+    { x: 24832, y: 17920, source: "enemy_1.json" },
+    { x: 28160, y: 17920, source: "enemy_1.json" },
+    { x: 29696, y: 19072, source: "enemy_1.json" },
+    { x: 29184, y: 13952, source: "enemy_1.json" },
+    { x: 30720, y: 14464, source: "enemy_1.json" },
+    { x: 29440, y: 15616, source: "enemy_2.json" },
+    { x: 29440, y: 14848, source: "enemy_2.json" },
+    { x: 28416, y: 14080, source: "enemy_2.json" },
+    { x: 29568, y: 14280, source: "enemy_2.json" },
+    { x: 30464, y: 14080, source: "enemy_2.json" }
+];
 export default function loadWorld() {
     return __awaiter(this, void 0, void 0, function* () {
         ctx = GraphicsRenderer.instance.getCanvasContext();
         //#region Jugador
         player = new Player();
-        player.x = 14592;
+        player.x = 14500;
         player.y = 17152;
         //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
         yield player.setAnimation(3.5, "skeleton.json");
@@ -93,13 +111,20 @@ export default function loadWorld() {
         }, 6, 2);
         //#endregion
         yield loadArea();
-        enemy = yield generateEnemy(() => {
-            if (enemy) {
-                enemy.dispose();
-                console.log("Enemy: :(");
-            }
-            enemy = null;
-        });
+        for (let e of enemiesSpawnpoints) {
+            yield (function (e) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    var ret = yield generateEnemy(e.x, e.y, e.source, () => {
+                        if (ret) {
+                            ret.dispose();
+                            console.log("Enemy: :(");
+                            enemies.remove(ret);
+                        }
+                    });
+                    enemies.push(ret);
+                });
+            })(e);
+        }
         GameLoop.instance.suscribe(null, null, renderDebug, null, null);
     });
 }
@@ -107,11 +132,9 @@ function loadArea() {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(resolve => {
             area = AreaMap.load("farmland.json", () => {
-                if (enemy) {
-                    var collider = player.getCollider();
-                    if (collider) {
-                        area.getColliders().add(collider);
-                    }
+                var collider = player.getCollider();
+                if (collider) {
+                    area.getColliders().add(collider);
                 }
                 resolve();
             });
@@ -119,13 +142,13 @@ function loadArea() {
     });
 }
 //#region Crear enemigo
-function generateEnemy(onDead) {
+function generateEnemy(x, y, source, onDead) {
     return __awaiter(this, void 0, void 0, function* () {
         var enemy = new Enemy();
-        enemy.x = 2176;
-        enemy.y = 1280;
+        enemy.x = x;
+        enemy.y = y;
         //// enemy.setImage(2.5, await FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
-        yield enemy.setAnimation(2.5, "enemy_1.json");
+        yield enemy.setAnimation(3.5, source);
         var image = enemy.getImage();
         if (image) {
             GraphicsRenderer.instance.addExistingEntity(image);
@@ -133,6 +156,12 @@ function generateEnemy(onDead) {
                 x: 0,
                 y: image.getHeight() * 0.3
             });
+        }
+        if (source == "enemy_1.json") {
+            enemy.setMaxHealth(2);
+        }
+        else {
+            enemy.setMaxHealth(4);
         }
         enemy.setAttack(target => {
             enemy.setAttacking(true);
@@ -143,7 +172,9 @@ function generateEnemy(onDead) {
         enemy.suscribe(enemy, null, onDead);
         var collider = enemy.getCollider();
         if (collider) {
-            collider.addUserInteraction(null, attackEnemy, null, null);
+            (function (enemy) {
+                collider.addUserInteraction(null, () => attackEnemy(enemy), null, null);
+            })(enemy);
             area.getColliders().add(collider);
         }
         enemy.setColliderLayer(area.getColliders());
@@ -169,13 +200,13 @@ function dispatchClickEventToColliders(event) {
         area.getColliders().sendUserClick(coordX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX, coordY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY);
     }
 }
-function attackEnemy() {
+function attackEnemy(enemy) {
     const ATTACK_RADIUS = 200;
     if (enemy)
         if (distance(player.x, player.y, enemy.x, enemy.y) < ATTACK_RADIUS) {
             player.setAttacking(true);
             enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
-            enemy.setHealth(enemy.getHealth() - 10);
+            enemy.setHealth(enemy.getHealth() - 1);
             console.log("Enemy: ouch");
         }
 }
@@ -187,15 +218,26 @@ document.addEventListener("keydown", (event) => __awaiter(void 0, void 0, void 0
         enableRenderDebug = !enableRenderDebug;
     }
     else if (event.key == "e") {
-        if (!enemy) {
-            enemy = yield generateEnemy(() => {
-                if (enemy) {
-                    enemy.dispose();
-                    console.log("Enemy: :(");
-                }
-                enemy = null;
-            });
-        }
+        var enemy = new Enemy();
+        enemy = yield generateEnemy(23936, 18944, "enemy_1.json", () => {
+            if (enemy) {
+                enemy.dispose();
+                console.log("Enemy: :(");
+            }
+            enemy = null;
+        });
+        enemies.push(enemy);
+    }
+    else if (event.key == "E") {
+        var enemy = new Enemy();
+        enemy = yield generateEnemy(29568, 14280, "enemy_2.json", () => {
+            if (enemy) {
+                enemy.dispose();
+                console.log("Enemy: :(");
+            }
+            enemy = null;
+        });
+        enemies.push(enemy);
     }
     else if (event.key == "h") {
         player.setHealth(100);
@@ -207,13 +249,13 @@ function renderDebug() {
     }
     var scrollX = GraphicsRenderer.instance.scrollX;
     var scrollY = GraphicsRenderer.instance.scrollY;
-    var scaleX = GraphicsRenderer.instance.scaleX;
-    var scaleY = GraphicsRenderer.instance.scaleY;
     ctx.lineWidth = 1;
     area.getColliders().render(ctx, scrollX, scrollY);
     player.renderDebug(ctx, scrollX, scrollY);
-    if (enemy) {
-        enemy.renderDebug(ctx, scrollX, scrollY);
+    for (let enemy of enemies) {
+        if (enemy) {
+            enemy.renderDebug(ctx, scrollX, scrollY);
+        }
     }
     Interface.instance.getColliders().render(ctx);
     InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
@@ -230,4 +272,37 @@ function generateAudioContext() {
 window.addEventListener("mouseover", generateAudioContext);
 window.addEventListener("touchstart", generateAudioContext);
 //#endregion
+export function saveWorldInfo() {
+    var infoPlayer = {
+        x: player.x,
+        y: player.y,
+        health: player.getHealth()
+    };
+    var infoEnemies = [];
+    var items = [];
+    var crops = [];
+    var maxScores = [];
+    for (let e of enemies) {
+        infoEnemies.push({
+            x: e.x,
+            y: e.y,
+            health: e.getHealth(),
+            type: e.getImage().getSource().src
+        });
+    }
+    for (let i of Inventory.instance.items) {
+        items.push(i.item);
+    }
+    for (let f of FarmlandManager.instance.farmlands) {
+        crops.push({
+            id: FarmlandManager.instance.farmlands.indexOf(f),
+            planted: f.planted,
+            crop: f.currentCrop,
+            fertilizer: f.fertilizerType,
+            fertilizerStrength: f.fertilizerStrength,
+            growthState: f.growthState,
+            timeOfPlanting: f.timeOfPlanting
+        });
+    }
+}
 //# sourceMappingURL=worldload.js.map

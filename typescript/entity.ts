@@ -80,6 +80,9 @@ export default class Entity{
         this.speed = {x: 20, y: 20};
         this.dest = null;
 
+        this.x = 0;
+        this.y = 0;
+
         this.image = null;
         this.usingOwnClip = false;
         this.collider = null;
@@ -155,6 +158,11 @@ export default class Entity{
         if(health == 0) {
             this.onDead.dispatch();
         }
+    }
+
+    public setMaxHealth(maxHealth :number){
+        this.maxHealth = maxHealth;
+        this.health = clamp(this.health, 0, this.maxHealth)
     }
 
     public setAttacking(attacking :boolean) {

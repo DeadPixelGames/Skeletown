@@ -28,9 +28,6 @@ const STANDARD_SCREEN_SIZE_Y = 1080;
 
 
 //#region Declaración de variables
-var player :Player;
-var enemy :Enemy | null;
-var area :AreaMap;
 var ctx :CanvasRenderingContext2D;
 
 //#endregion

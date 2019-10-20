@@ -13,7 +13,7 @@ export class Inventory{
     public static instance :Inventory;
 
     /**Objetos en el inventario de cultivos */
-    public items :[null, ... itemInInventory[]];
+    public items :itemInInventory[];
 
     /**Contenedor de los elementos de interfaz del inventario */
     public layout :UILayout;
@@ -69,7 +69,7 @@ export class Inventory{
 
 
     private constructor(){
-        this.items = [null];
+        this.items = [];
         //#region Inicialización de los contenedores
         this.layout = new UILayout(
             this.standardX * 0.5 - this.halfWidth, 
@@ -139,7 +139,7 @@ export class Inventory{
         
     }
 
-    public addItem(item :Item, count :number, strength? :number){
+    public addItem(item :Item){
         var found = false;
         var i = 1;
         while(!found || i == this.items.length){
@@ -148,15 +148,15 @@ export class Inventory{
                 if(it.blocked) found = true;
                 if(it.type == item.type){
                     if(it.id == item.id){
-                        it.addItem(count);
+                        it.addItem(item.count);
                         found = true;
                     }
                 }else if(it.count <= 0){
                     it.setItem(item);
-                    it.addItem(count);
+                    it.addItem(item.count);
                     if(item.type == "fertilizer"){
-                        if(strength){
-                            it.fertStrength = strength
+                        if(item.strength){
+                            it.fertStrength = item.strength
                         }else{
                             console.log("No se ha incluido potencia en el abono: "+item.name)
                         }
@@ -332,7 +332,7 @@ export class Inventory{
             var aux = new UIEntity(false);
             aux.setImage(true, 104, await FileLoader.loadImage("resources/interface/"+ en.image));
             aux.setCollider(true, 0, 0, this.halfWidth * 2, this.halfHeight * 2);
-            aux.setText(en.name + '\n\n\n' + en.description, {x: 745, y: 145}, 20, "center");
+            aux.setText(en.name + '\n\n' + en.description, {x: 745, y: 145}, 18, "center");
             //aux.setText(en.description, {x: 745, y: 204}, "15px", "center");
             this.wikiLayout.addUIEntity(aux);
             enemyPages.push(aux);
@@ -341,7 +341,7 @@ export class Inventory{
             var aux = new UIEntity(false);
             aux.setImage(true, 104, await FileLoader.loadImage("resources/interface/"+veg.image));
             aux.setCollider(true, 0, 0, this.halfWidth * 2, this.halfHeight * 2);
-            aux.setText(veg.name + "\n\n\n" + veg.description, {x: 745, y: 145}, 20, "center");
+            aux.setText(veg.name + "\n\n" + veg.description, {x: 745, y: 145}, 18, "center");
             //aux.setText(veg.description, {x: 745, y: 204}, "15px", "center");
             this.wikiLayout.addUIEntity(aux);
             cropPages.push(aux);
@@ -557,6 +557,8 @@ class itemInInventory{
     public image :UIEntity;
     public fertStrength :number;
 
+    public item :Item;
+
     public blocked :boolean;
 
     private pos :number;
@@ -626,6 +628,8 @@ class itemInInventory{
         this.name = item.name;
         this.type = item.type;
 
+        this.item = item;
+
     }
 
     public addItem(count :number){
@@ -653,9 +657,11 @@ class itemInInventory{
     }
 }
 
-type Item = {
+export type Item = {
     id :number,
     name :string,
     description :string,
-    type :string
+    type :string,
+    count :number,
+    strength? :number
 }
