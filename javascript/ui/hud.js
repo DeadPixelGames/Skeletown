@@ -21,14 +21,14 @@ export class Hud {
         this.moneyCounter = new UIEntity(true);
         this.time = new UIEntity(false);
         this.inventory = new UIEntity(true);
-        this.lifeBar = new ProgressBar(this.width * 0.5 - 295, 78, 703, 128, true, (x, y) => {
+        this.lifeBar = new ProgressBar(this.width * 0.5 - 365, 33, 703, 128, true, (x, y) => {
             this.lifeBar.setProgress(this.lifeBar.getProgress() - 10);
         });
         //#region Colliders
-        this.moneyCounter.setCollider(true, 100, 77, 320, 91, (x, y) => {
+        this.moneyCounter.setCollider(true, 30, 32, 320, 91, (x, y) => {
         });
-        this.time.setCollider(true, this.width - 235, 60, 362, 128);
-        this.inventory.setCollider(false, this.width - 165, this.height - 215, 245, 245, (x, y) => {
+        this.time.setCollider(true, this.width - 315, 15, 362, 128);
+        this.inventory.setCollider(false, this.width - 205, this.height - 215, 245, 245, (x, y) => {
             enteringInventory();
             this.lifeBar.setProgress(this.lifeBar.getProgress() + 10);
         });

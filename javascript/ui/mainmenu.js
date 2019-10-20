@@ -18,6 +18,8 @@ import { Hud } from "./hud.js";
 export class MainMenu {
     //#endregion
     constructor() {
+        this.backgrounds = ["resources/interface/menu/base_orange.png", "resources/interface/menu/base_blue.png"];
+        this.currentBg = 0;
         this.width = GraphicsRenderer.instance.getCanvas().width;
         this.height = GraphicsRenderer.instance.getCanvas().height;
         this.menu_layout = new UILayout(0, 0, this.width, this.height);
@@ -29,10 +31,17 @@ export class MainMenu {
         this.maxScore = new UIEntity(true);
         //#region Collider
         this.background.setCollider(true, 0, 0, this.width, this.height);
-        this.settings.setCollider(true, 1189, 27, 130, 130, (x, y) => {
+        this.settings.setCollider(true, 1737, 49, 149, 149, (x, y) => __awaiter(this, void 0, void 0, function* () {
             console.log("SETTINGS");
-        });
-        this.play.setCollider(true, 575, 522, 214, 119, (x, y) => {
+            if (this.currentBg >= this.backgrounds.length - 1) {
+                this.currentBg = 0;
+            }
+            else {
+                this.currentBg++;
+            }
+            this.background.image.sourceElement = yield FileLoader.loadImage(this.backgrounds[this.currentBg]);
+        }));
+        this.play.setCollider(true, 830, 750, 345, 205, (x, y) => {
             console.log("PLAY");
             GraphicsRenderer.instance.fadeOutAndIn(0.5, () => __awaiter(this, void 0, void 0, function* () {
                 this.deactivate();
@@ -42,17 +51,17 @@ export class MainMenu {
                 Hud.instance.show();
             }));
         });
-        this.contact.setCollider(true, 921, 519, 347, 119, (x, y) => {
+        this.contact.setCollider(true, 1395, 880, 465, 172, (x, y) => {
             console.log("CONTACT");
         });
-        this.continue.setCollider(true, 121, 501, 284, 146, (x, y) => {
+        this.continue.setCollider(true, 198, 815, 413, 220, (x, y) => {
             console.log("CONTINUE");
             this.deactivate();
             this.hide();
             GameOver.instance.activate();
             GameOver.instance.show();
         });
-        this.maxScore.setCollider(true, 68, 77, 141, 200, (x, y) => {
+        this.maxScore.setCollider(true, 71, 60, 208, 287, (x, y) => {
             console.log("MAXSCORE");
             MaxScore.instance.activate();
             MaxScore.instance.show();
@@ -108,11 +117,11 @@ export class MainMenu {
     initImage() {
         return __awaiter(this, void 0, void 0, function* () {
             this.background.setImage(true, 99, yield FileLoader.loadImage("resources/interface/menu/base_orange.png"));
-            this.settings.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/ajustes.png"), 1189, 27, 130, 130);
-            this.play.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/jugar.png"), 575, 522, 214, 119);
-            this.contact.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/contactar.png"), 921, 519, 347, 119);
-            this.continue.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/continuar.png"), 121, 501, 284, 146);
-            this.maxScore.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/max_scores.png"), 68, 77, 141, 200);
+            this.settings.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/ajustes.png"), 1737, 49, 149, 149);
+            this.play.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/jugar.png"), 830, 750, 345, 205);
+            this.contact.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/contactar.png"), 1395, 880, 465, 172);
+            this.continue.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/continuar.png"), 198, 815, 413, 220);
+            this.maxScore.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/max_scores.png"), 71, 60, 208, 287);
             this.menu_layout.addEntitiesToRenderer();
         });
     }

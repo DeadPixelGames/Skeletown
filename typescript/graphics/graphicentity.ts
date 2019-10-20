@@ -8,7 +8,7 @@ export default class GraphicEntity {
     /**
      * Elemento del DOM que representa la imagen de la que procede esta entidad gráfica.
      */
-    protected sourceElement :HTMLImageElement;
+    public sourceElement :HTMLImageElement;
 
     /** 
      * Sección de la imagen original que se va a utilizar para renderizar esta entidad.

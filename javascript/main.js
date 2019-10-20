@@ -81,8 +81,8 @@ window.onload = function () {
         //#region Inicialización
         var canvas = document.getElementById("gameCanvas");
         ctx = canvas.getContext("2d");
-        canvas.width = STANDARD_SCREEN_SIZE_X * 0.9;
-        canvas.height = STANDARD_SCREEN_SIZE_Y * 0.9;
+        canvas.width = STANDARD_SCREEN_SIZE_X;
+        canvas.height = STANDARD_SCREEN_SIZE_Y;
         GameLoop.initInstance();
         GraphicsRenderer.initInstance(ctx);
         Inventory.initInstance(STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);

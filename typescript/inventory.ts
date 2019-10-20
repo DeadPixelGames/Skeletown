@@ -177,7 +177,7 @@ export class Inventory{
         this.crops.setImage(true, 103, await FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
         this.clothes.setImage(true, 103, await FileLoader.loadImage("resources/interface/cos_inv_button.png"), 58, 211, 103, 103);
         this.wiki.setImage(true, 103, await FileLoader.loadImage("resources/interface/bok_inv_button.png"), 57, 360, 110, 110);
-        this.settings.setImage(true, 103, await FileLoader.loadImage("resources/interface/exit_inv_button.png"), 58, 509, 110, 110);
+        this.settings.setImage(true, 103, await FileLoader.loadImage("resources/interface/exit_inv_button.png"), 58, 509, 115, 130);
         this.closeInventory.setImage(true, 102, await FileLoader.loadImage("resources/interface/but_cerrar.png"), 0, 0, 86, 86);
         this.layout.addEntitiesToRenderer();
         this.layout.hide();
@@ -219,7 +219,7 @@ export class Inventory{
             console.log("WIKI");
         })
 
-        this.settings.setCollider(true, 58, 509, 101, 101, (x,y)=>{
+        this.settings.setCollider(true, 58, 509, 115, 115, (x,y)=>{
             this.cropsLayout.hide();
             this.cropsLayout.deactivate();
             this.clothesLayout.hide();
@@ -474,15 +474,19 @@ export class Inventory{
         var background = new UIEntity(false);
         var exit = new UIEntity(true);
         background.setImage(true, 102, await FileLoader.loadImage("resources/interface/exit_inv_page.png"));
-        exit.setImage(true, 103, await FileLoader.loadImage("resources/interface/exit_inv_button.png"), 481, 547, 176, 77);
+        exit.setImage(true, 104, await FileLoader.loadImage("resources/interface/exitgame_inv_button.png"), 481, 547, 176, 77);
         background.setCollider(true, 0, 0, 1024, 696);
         exit.setCollider(true, 481, 547, 176, 77, (x,y)=>{
             console.log("SALIR AL MENÚ AL PRINCIPAL");
             // TODO Hacer lo de salir al menú principal
         })
-        background.setPercentRelPos(false);
+
+
+        Interface.instance.addCollider(exit.getCollider() as BoxCollider);
+
         this.settingsLayout.addUIEntity(background);
         this.settingsLayout.addUIEntity(exit);
+
         this.settingsLayout.addEntitiesToRenderer();
         this.settingsLayout.hide();
         this.settingsLayout.deactivate();

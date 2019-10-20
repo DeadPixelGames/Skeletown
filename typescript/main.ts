@@ -103,8 +103,8 @@ window.onload = async function() {
 
     ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     
-    canvas.width = STANDARD_SCREEN_SIZE_X * 0.9;
-    canvas.height = STANDARD_SCREEN_SIZE_Y * 0.9;
+    canvas.width = STANDARD_SCREEN_SIZE_X;
+    canvas.height = STANDARD_SCREEN_SIZE_Y;
 
     GameLoop.initInstance();
 

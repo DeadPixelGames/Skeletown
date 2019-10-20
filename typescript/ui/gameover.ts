@@ -59,41 +59,49 @@ export class GameOver {
 
 
     private constructor(){
-        this.width = this.standardX;
-        this.height = this.standardY;
+        this.width = GraphicsRenderer.instance.getCanvas().width;
+        this.height = GraphicsRenderer.instance.getCanvas().height;
 
         this.gameOver_layout = new UILayout(0, 0, this.width, this.height);
 
         this.background = new UIEntity(false);
         this.money = new UIEntity(true);
         this.moneyQuantity = new UIEntity(false);
+        this.backToMenu = new UIEntity(true);
 
         //#region Colliders
         this.background.setCollider(true, 0, 0, this.width, this.height);
 
-        this.money.setCollider(true, 550, 658, 247, 72, (x,y)=>{
+        this.money.setCollider(true, 770, 920, 359, 109, (x,y)=>{
+            
+        })
+
+        this.moneyQuantity.setCollider(true, 0, 0, 254, 87);
+
+        this.backToMenu.setCollider(true, 65, 936, 92, 84, (x,y)=>{
             this.deactivate();
             this.hide();
             MainMenu.instance.activate();
             MainMenu.instance.show();
         })
 
-        this.moneyQuantity.setCollider(true, 0, 0, 254, 87);
-
         Interface.instance.addCollider(this.money.getCollider() as BoxCollider);
+        Interface.instance.addCollider(this.backToMenu.getCollider() as BoxCollider);
         //#endregion
 
         this.gameOver_layout.addUIEntity(this.background);
         this.gameOver_layout.addUIEntity(this.money);
         this.gameOver_layout.addUIEntity(this.moneyQuantity);
+        this.gameOver_layout.addUIEntity(this.backToMenu);
 
         this.initImages();
     }
 
     public async initImages(){
         this.background.setImage(true, 99, await FileLoader.loadImage("resources/interface/menu/gameover_page.png"));
-        this.money.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_button.png"), 550, 658, 247, 72);
+        this.money.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_button.png"), 770, 920, 359, 109);
         this.moneyQuantity.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"), 0, 0, 254, 87);
+        this.backToMenu.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_back.png"), 65, 936, 92, 84)
 
         this.gameOver_layout.addEntitiesToRenderer();
 
@@ -117,8 +125,8 @@ export class GameOver {
     }
 
     public resize(canvasWidth :number, canvasHeight :number){
-        var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
-        var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
+        var w = canvasWidth * 0.5 ;
+        var h = canvasHeight * 0.5;
         this.gameOver_layout.position.x = w - this.standardX * 0.5;
         this.gameOver_layout.position.y = h - this.standardY * 0.5;
         for(let ent of this.gameOver_layout.uiEntities){

@@ -58,8 +58,8 @@ export class MaxScore{
 
 
     private constructor(){
-        this.width = this.standardX;
-        this.height = this.standardY;
+        this.width = GraphicsRenderer.instance.getCanvas().width;
+        this.height = GraphicsRenderer.instance.getCanvas().height;
 
         this.maxScore_layout = new UILayout(0, 0, this.width, this.height);
 
@@ -68,7 +68,7 @@ export class MaxScore{
 
         //#region Colliders
         this.background.setCollider(true, 0, 0, this.width, this.height);
-        this.back.setCollider(true, 63, 67, 125, 117, (x, y)=>{
+        this.back.setCollider(true, 88, 93, 157, 146, (x, y)=>{
             MainMenu.instance.show();
             MainMenu.instance.activate();
             this.deactivate();
@@ -88,7 +88,7 @@ export class MaxScore{
 
     private async initImages(){
         this.background.setImage(true, 99, await FileLoader.loadImage("resources/interface/menu/max_scores_page.png"));
-        this.back.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/max_scores_button.png"), 63, 67, 125, 117);
+        this.back.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/max_scores_button.png"), 88, 93, 157, 146);
 
         this.maxScore_layout.addEntitiesToRenderer();
 
@@ -110,8 +110,8 @@ export class MaxScore{
     }
 
     public resize(canvasWidth :number, canvasHeight :number){
-        var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
-        var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
+        var w = canvasWidth * 0.5;
+        var h = canvasHeight * 0.5;
         this.maxScore_layout.position.x = w - this.standardX * 0.5;
         this.maxScore_layout.position.y = h - this.standardY * 0.5;
         for(let ent of this.maxScore_layout.uiEntities){

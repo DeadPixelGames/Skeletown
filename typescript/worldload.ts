@@ -31,7 +31,7 @@ export default async function loadWorld() {
     player = new Player();   
 
     player.x = 14592;
-    player.y = 4352; 
+    player.y = 17152; 
 
     //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
     await player.setAnimation(3.5, "skeleton.json");
