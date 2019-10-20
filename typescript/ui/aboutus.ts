@@ -4,6 +4,7 @@ import Interface from "./interface.js";
 import { BoxCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
+import AudioManager from "../audiomanager.js";
 
 export default class AboutUs {
 
@@ -82,22 +83,40 @@ export default class AboutUs {
             MainMenu.instance.show();
             this.deactivate();
             this.hide();
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         this.FB.setCollider(true, 1370, 490, 264, 254, (x,y)=>{
             window.open("https://www.facebook.com/caronte.huertas.3", "_blank");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         this.IG.setCollider(true, 880, 447, 276, 270,(x,y)=>{
             window.open("https://www.instagram.com/deadpixelgames_/", "_blank");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         this.twitter.setCollider(true, 467, 812, 273, 252,(x,y)=>{
             window.open("https://twitter.com/DeadPixelGames_", "_blank");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         this.YT.setCollider(true, 230, 520, 264, 272,(x,y)=>{
             window.open("https://www.youtube.com/channel/UCOBoLIFFDwMA2fXG-Wwz23w", "_blank");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         this.itchio.setCollider(true, 1158, 794, 296, 280,(x,y)=>{
             window.open("https://deadpixelgames.itch.io/skeletown", "_blank");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         Interface.instance.addCollider(this.back.getCollider() as BoxCollider);  

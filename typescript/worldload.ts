@@ -49,6 +49,10 @@ export default async function loadWorld() {
 
     ctx = GraphicsRenderer.instance.getCanvasContext();
 
+    if(AudioManager.instance.contextIsActive){
+        AudioManager.instance.playMusic("music_town");
+    }
+
     //#region Jugador
     player = new Player();   
 
@@ -229,6 +233,10 @@ async function generateEnemy(x :number, y :number, source :string, onDead :() =>
         target.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
         target.setHealth(target.getHealth()-10);
         console.log(target.constructor.name + ": \"ouch\"");
+        if(AudioManager.instance.contextIsActive){
+            AudioManager.instance.playSound("bite");
+            AudioManager.instance.playSound("getHit");
+        }
     });
 
     enemy.suscribe(enemy, null, onDead);
@@ -277,9 +285,32 @@ function attackEnemy(enemy :Enemy) {
         enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
         enemy.setHealth(enemy.getHealth() - 1);
         console.log("Enemy: ouch");
+        if(AudioManager.instance.contextIsActive){
+            AudioManager.instance.playSound("headHit");
+        }
     }
 }
 //#endregion
+
+export async function loadAudioFiles() {
+    if(!AudioManager.instance.contextIsActive()) {
+        return;
+    }
+
+    await Promise.all([
+        AudioManager.instance.load("fertilizer", "abono.wav"),
+        AudioManager.instance.load("click", "button.mp3"),
+        AudioManager.instance.load("bite", "enemy_bite.mp3"),
+        AudioManager.instance.load("getHit", "get_hit.mp3"),
+        AudioManager.instance.load("headHit", "head_hit.mp3"),
+        AudioManager.instance.load("plant", "plantar.wav"),
+        AudioManager.instance.load("harvest", "recolectar.wav"),
+        AudioManager.instance.load("music_danger","Skeletown_the_outskirts.ogg"),
+        AudioManager.instance.load("music_town","Skeletown_the_town.ogg"),
+        AudioManager.instance.load("stepA", "step_a.mp3"),
+        AudioManager.instance.load("stepB", "step_b.mp3")
+    ]);    
+}
 
 //#region Render Debug
 var enableRenderDebug = false;
@@ -351,6 +382,8 @@ function generateAudioContext() {
     }
     AudioManager.instance.activateContext();
     (window as any).audiomanager = AudioManager.instance;
+
+    loadAudioFiles();
 }
 
 window.addEventListener("mouseover", generateAudioContext);
@@ -445,17 +478,29 @@ export function loadWorldInfo() {
     }
 }
 
-export function loadWorldFromLocalStorage() {
+export async function loadWorldFromLocalStorage() {
+
+    if(!localStorage.getItem("player")) {
+        return;
+    }
     
     ctx = GraphicsRenderer.instance.getCanvasContext();
 
-    //#region Jugador
-    player = new Player();   
 
+    if(AudioManager.instance.contextIsActive){
+        AudioManager.instance.playMusic("music_town");
+    }
+    //#region Jugador
+
+    var infoPlayer = JSON.parse(localStorage.getItem("player") as string) as InfoPlayer;
+    
+    player = new Player();
+
+    player.x = infoPlayer.x;
+    player.y = infoPlayer.y;
 
     //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
     await player.setAnimation(3.5, "skeleton.json");
-
 
     var image = player.getImage();
     if(image){
@@ -485,77 +530,46 @@ export function loadWorldFromLocalStorage() {
     //#endregion
     
     //#region Inventario
-    Inventory.instance.addItem({
-        id: 0,
-        name: "Skullpkin",
-        description: "Skulled Pumpkin",
-        type: "crop",
-        count: 3
-    });
-    Inventory.instance.addItem({
-        id: 1,
-        name: "Ghost Pepper",
-        description: "Peppers' immortal souls",
-        type: "crop",
-        count: 4
-    });
-    Inventory.instance.addItem({
-        id: 2,
-        name: "SoulCorn",
-        description: "Corn Cub with souls",
-        type: "crop",
-        count: 2
-    });
-    Inventory.instance.addItem({
-        id: 3,
-        name: "Zombihorias",
-        description: "The undead tubercule",
-        type: "crop",
-        count: 5
-    });
-    Inventory.instance.addItem({
-        id: 4,
-        name: "Demonions",
-        description: "So evil, they will make you cry",
-        type: "crop",
-        count: 5
-    });
-    Inventory.instance.addItem({
-        id: 0,
-        name: "Speeder",
-        description: "Grow in a blink",
-        type: "fertilizer",
-        count: 6,
-        strength: 2
-    });
-    Inventory.instance.addItem({
-        id: 1,
-        name: "Quantity",
-        description: "Quantity over quality",
-        type: "fertilizer",
-        count: 6,
-        strength: 2
-    });
+    var infoItems = JSON.parse(localStorage.getItem("items") as string) as Item[];
+    for(let i of infoItems) {
+        if(i) {
+            Inventory.instance.addItem(i);
+        }
+    }
     //#endregion
 
     await loadArea();
-    for(let e of enemiesSpawnpoints){
+
+    var infoEnemies = JSON.parse(localStorage.getItem("enemies") as string) as InfoEnemy[];
+    for(let e of infoEnemies){
         
-       await(async function(e :{x :number, y :number, source :string}){
-            var ret = await generateEnemy(e.x, e.y, e.source, () => {
-                if(ret) {
-                    ret.dispose();
-                    console.log("Enemy: :(");
-                    enemies.remove(ret);
-                }
-            });
-            enemies.push(ret);
-        }) (e);
-    }
+        await(async function(e :{x :number, y :number, type :string}, health :number){
+             var ret = await generateEnemy(e.x, e.y, e.type, () => {
+                 if(ret) {
+                     ret.dispose();
+                     console.log("Enemy: :(");
+                     enemies.remove(ret);
+                     Hud.instance.gold += 10;
+                 }
+             });
+             ret.setHealth(health);
+             enemies.push(ret);
+         }) (e, e.health);
+        
+     }
     
 
     GameLoop.instance.suscribe(null, null, renderDebug, null, null);
-}
+    
+    var infoCrops = JSON.parse(localStorage.getItem("crops") as string) as InfoCrop[];
+
+    for(let c of infoCrops) {
+        let crop = FarmlandManager.instance.farmlands[c.id];
+        crop.plantCrop(c.crop);
+        crop.timeOfPlanting = c.timeOfPlanting + ((Date.now() - c.lastMillis) * 0.001);
+        crop.growthState = c.growthState;
+        crop.fertilize(c.fertilizer, c.fertilizerStrength);
+    }
 }
 
 type InfoPlayer = {

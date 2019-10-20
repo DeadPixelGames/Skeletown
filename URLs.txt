@@ -1,0 +1,9 @@
+Portfolio: 
+	Repositorio -> https://github.com/DeadPixelGames/deadpixelgames.github.io
+	Pages	    -> https://deadpixelgames.github.io/
+
+Videojuego:
+	Itch.io	    -> https://deadpixelgames.itch.io/skeletown
+	Itch.io abv -> https://bit.ly/32tj7rg
+	Repositorio -> https://github.com/DeadPixelGames/Skeletown
+	GDD	    -> Se encuentra dentro de la carpeta Documents en el repositorio del videojuego

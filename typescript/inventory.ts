@@ -9,6 +9,7 @@ import { unloadGame, saveWorldInfo } from "./worldload.js";
 import { MainMenu } from "./ui/mainmenu.js";
 import { Hud } from "./ui/hud.js";
 import { sleep } from "./util.js";
+import AudioManager from "./audiomanager.js";
 
 
 export class Inventory{
@@ -198,6 +199,9 @@ export class Inventory{
             this.settingsLayout.hide();
             this.settingsLayout.deactivate();
             console.log("CROPS");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         this.clothes.setCollider(true, 58, 207, 101, 101, (x,y)=>{
@@ -209,6 +213,9 @@ export class Inventory{
             this.settingsLayout.hide();
             this.settingsLayout.deactivate();
             console.log("CLOTHES");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         this.wiki.setCollider(true, 58, 358, 101, 101, (x,y)=>{
@@ -220,6 +227,9 @@ export class Inventory{
             this.wikiLayout.activate();
             this.settingsLayout.deactivate();
             console.log("WIKI");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         this.settings.setCollider(true, 58, 509, 115, 115, (x,y)=>{
@@ -231,10 +241,16 @@ export class Inventory{
             this.settingsLayout.show();
             this.settingsLayout.activate();
             console.log("SETTINGS");
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         this.closeInventory.setCollider(false, 981, -43, 100, 100, (x,y)=>{
             exitingInventory();
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         
@@ -389,6 +405,9 @@ export class Inventory{
                     enemySelected.show();
                 }
             }
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         prev.setCollider(true, 587, 255, 26, 302, (x,y)=>{
             if(that.pageSelected == "crops") {
@@ -412,6 +431,9 @@ export class Inventory{
                     enemySelected.show();
                 }
             }
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         cr.setCollider(true, 661, 550, 50, 95, (x, y)=>{
             that.pageSelected = "crops";
@@ -421,6 +443,9 @@ export class Inventory{
                 cropSelected.show();
             if(enemySelected)
                 enemySelected.hide();
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         enemy.setCollider(true, 748, 549, 50, 95, (x, y)=>{
             that.pageSelected = "enemies";
@@ -430,6 +455,9 @@ export class Inventory{
             var enemySelected = enemyPages[that.enemySelected]
             if(enemySelected)
             enemySelected.show();
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         Interface.instance.addCollider(next.getCollider() as BoxCollider);
@@ -480,8 +508,8 @@ export class Inventory{
         var exit = new UIEntity(true);
         background.setImage(true, 102, await FileLoader.loadImage("resources/interface/exit_inv_page.png"));
         exit.setImage(true, 104, await FileLoader.loadImage("resources/interface/exitgame_inv_button.png"), 481, 547, 176, 77);
-        tuto1.setImage(true, 104, await FileLoader.loadImage("resources/interface/exit_inv_tutorial_1.png"), 189, 0);
-        tuto2.setImage(true, 104, await FileLoader.loadImage("resources/interface/exit_inv_tutorial_2.png"), 189, 0);
+        tuto1.setImage(true, 104, await FileLoader.loadImage("resources/interface/exit_inv_tutorial_1.png"), 189, 0, 800, 600);
+        tuto2.setImage(true, 104, await FileLoader.loadImage("resources/interface/exit_inv_tutorial_2.png"), 189, 0, 800, 600);
 
         background.setCollider(true, 0, 0, 1024, 696);
         exit.setCollider(true, 481, 547, 176, 77, (x,y)=>{
@@ -497,6 +525,9 @@ export class Inventory{
                 MainMenu.instance.activate();
                 MainMenu.instance.show();
             });
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         });
 
         tuto1.setCollider(true, 189, 0, 800, 600, (x,y)=>{
@@ -506,10 +537,20 @@ export class Inventory{
             if(col) col.active = true;
             var col2 = tuto1.getCollider();
             if(col2) col2.active = false;
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         tuto2.setCollider(true, 189, 0, 800, 600, (x,y)=>{
             tuto2.hide();
             tuto1.show();
+            var col = tuto2.getCollider();
+            if(col) col.active = false;
+            var col2 = tuto1.getCollider();
+            if(col2) col2.active = true;
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         Interface.instance.addCollider(exit.getCollider() as BoxCollider);
@@ -657,6 +698,9 @@ class itemInInventory{
                         }
                         
                     }
+                }
+                if(AudioManager.instance.contextIsActive){
+                    AudioManager.instance.playSound("click");
                 }
             }
 

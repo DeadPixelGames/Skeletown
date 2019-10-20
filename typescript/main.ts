@@ -21,6 +21,7 @@ import { MainMenu } from "./ui/mainmenu.js";
 import { MaxScore } from "./ui/maxscores.js";
 import { GameOver } from "./ui/gameover.js";
 import AboutUs from "./ui/aboutus.js";
+import { loadAudioFiles } from "./worldload.js";
 
 
 const STANDARD_SCREEN_SIZE_X = 1920;
@@ -60,12 +61,12 @@ var resize = function() {
         GraphicsRenderer.instance.scaleX = currentWidth / STANDARD_SCREEN_SIZE_X;
         GraphicsRenderer.instance.scaleY = currentWidth / STANDARD_SCREEN_SIZE_X;
     }
-  
     Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
     Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
     MainMenu.instance.resize(ctx.canvas.width, ctx.canvas.height);
     MaxScore.instance.resize(ctx.canvas.width, ctx.canvas.height);
     GameOver.instance.resize(ctx.canvas.width, ctx.canvas.height);
+    
     /*if((currentWidth / currentHeight) > (originalWidth / originalHeight)) {
         ctx.canvas.style.transform = "scale(" + (currentHeight / originalHeight) + ")";
     } else {

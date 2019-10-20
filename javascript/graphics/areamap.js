@@ -17,6 +17,7 @@ import { UILayout, UIEntity } from "../ui/uiEntity.js";
 import Interface, { enteringInventoryFromCrops, InterfaceInWorld } from "../ui/interface.js";
 import { Inventory } from "../inventory.js";
 import { FarmlandManager } from "../farmland.js";
+import AudioManager from "../audiomanager.js";
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere
  * añadir '/' al principio ni al final.
@@ -326,6 +327,9 @@ export class TileEntity extends GraphicEntity {
                 if (that.plant.image.visible) {
                     console.log("PLANTAR");
                     enteringInventoryFromCrops(this);
+                    if (AudioManager.instance.contextIsActive) {
+                        AudioManager.instance.playSound("plant");
+                    }
                 }
             });
             this.harvest.setCollider(false, 0.15, 0, 86, 86, (x, y) => {
@@ -376,12 +380,18 @@ export class TileEntity extends GraphicEntity {
                         count: count
                     });
                     this.uiLayout.visible = false;
+                    if (AudioManager.instance.contextIsActive) {
+                        AudioManager.instance.playSound("harvest");
+                    }
                 }
             });
             this.fertilizer.setCollider(false, 0.85, 0, 86, 86, (x, y) => {
                 if (that.fertilizer.image.visible) {
                     console.log("ABONAR");
                     enteringInventoryFromCrops(this);
+                    if (AudioManager.instance.contextIsActive) {
+                        AudioManager.instance.playSound("fertilizer");
+                    }
                 }
             });
             this.plant.setPercentRelPos(true);

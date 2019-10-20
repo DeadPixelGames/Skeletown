@@ -12,6 +12,7 @@ import { UILayout, UIEntity } from "./uiEntity.js";
 import Interface from "./interface.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
+import AudioManager from "../audiomanager.js";
 export class MaxScore {
     //#endregion
     constructor() {
@@ -27,6 +28,9 @@ export class MaxScore {
             MainMenu.instance.activate();
             this.deactivate();
             this.hide();
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         Interface.instance.addCollider(this.back.getCollider());
         //#endregion

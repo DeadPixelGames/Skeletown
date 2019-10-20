@@ -12,6 +12,7 @@ import { UILayout, UIEntity } from "./uiEntity.js";
 import Interface from "./interface.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
+import AudioManager from "../audiomanager.js";
 export class GameOver {
     //#endregion
     constructor() {
@@ -32,6 +33,9 @@ export class GameOver {
             this.hide();
             MainMenu.instance.activate();
             MainMenu.instance.show();
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         Interface.instance.addCollider(this.money.getCollider());
         Interface.instance.addCollider(this.backToMenu.getCollider());

@@ -4,6 +4,7 @@ import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
+import AudioManager from "../audiomanager.js";
 
 export class GameOver {
 
@@ -83,6 +84,9 @@ export class GameOver {
             this.hide();
             MainMenu.instance.activate();
             MainMenu.instance.show();
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
 
         Interface.instance.addCollider(this.money.getCollider() as BoxCollider);

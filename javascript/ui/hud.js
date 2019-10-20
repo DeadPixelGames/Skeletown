@@ -12,17 +12,19 @@ import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
 import Interface, { enteringInventory } from "./interface.js";
 import FileLoader from "../fileloader.js";
 import GameLoop from "../gameloop.js";
+import AudioManager from "../audiomanager.js";
 export class Hud {
     //#endregion
     constructor() {
         this.width = GraphicsRenderer.instance.getCanvas().width;
         this.height = GraphicsRenderer.instance.getCanvas().height;
         this.hud_InGame = new UILayout(0, 0, this.width, this.height);
+        this.gold = 0;
         this.moneyCounter = new UIEntity(true);
         this.time = new UIEntity(false);
         this.inventory = new UIEntity(true);
         this.lifeBar = new ProgressBar(this.width * 0.5 - 365, 33, 703, 128, true, (x, y) => {
-            this.lifeBar.setProgress(this.lifeBar.getProgress() - 10);
+            //this.lifeBar.setProgress(this.lifeBar.getProgress()-10);
         });
         //#region Colliders
         this.moneyCounter.setCollider(true, 30, 32, 320, 91, (x, y) => {
@@ -30,7 +32,10 @@ export class Hud {
         this.time.setCollider(true, this.width - 315, 15, 362, 128);
         this.inventory.setCollider(false, this.width - 205, this.height - 215, 245, 245, (x, y) => {
             enteringInventory();
-            this.lifeBar.setProgress(this.lifeBar.getProgress() + 10);
+            //this.lifeBar.setProgress(this.lifeBar.getProgress()+10);
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         Interface.instance.addCollider(this.lifeBar.getCollider());
         Interface.instance.addCollider(this.moneyCounter.getCollider());
@@ -84,7 +89,7 @@ export class Hud {
             this.time.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_time.png"), 0, 0, 362, 128);
             this.inventory.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
             this.hud_InGame.addEntitiesToRenderer();
-            this.moneyCounter.setText("999999999", { x: 250, y: 61 }, 36);
+            this.setGoldText();
             var date = new Date();
             this.setTimeText("");
             GameLoop.instance.suscribe(this, null, this.update, null, null);
@@ -120,9 +125,13 @@ export class Hud {
         var minute = date.getMinutes();
         var separator = date.getSeconds() % 2 == 0 ? ":" : ".";
         this.setTimeText((hour < 10 ? "0" + hour : hour) + separator + (minute < 10 ? "0" + minute : minute));
+        this.setGoldText();
     }
     setTimeText(time) {
         this.time.setText(time, { x: 230, y: 80 }, 45);
+    }
+    setGoldText() {
+        this.moneyCounter.setText(this.gold + "", { x: 250, y: 61 }, 36);
     }
 }
 //# sourceMappingURL=hud.js.map

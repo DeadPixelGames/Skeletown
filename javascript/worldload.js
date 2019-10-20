@@ -48,6 +48,9 @@ var enemiesSpawnpoints = [
 export default function loadWorld() {
     return __awaiter(this, void 0, void 0, function* () {
         ctx = GraphicsRenderer.instance.getCanvasContext();
+        if (AudioManager.instance.contextIsActive) {
+            AudioManager.instance.playMusic("music_town");
+        }
         //#region Jugador
         player = new Player();
         player.x = 14500;
@@ -213,6 +216,10 @@ function generateEnemy(x, y, source, onDead) {
             target.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
             target.setHealth(target.getHealth() - 10);
             console.log(target.constructor.name + ": \"ouch\"");
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("bite");
+                AudioManager.instance.playSound("getHit");
+            }
         });
         enemy.suscribe(enemy, null, onDead);
         var collider = enemy.getCollider();
@@ -255,9 +262,32 @@ function attackEnemy(enemy) {
             enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
             enemy.setHealth(enemy.getHealth() - 1);
             console.log("Enemy: ouch");
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("headHit");
+            }
         }
 }
 //#endregion
+export function loadAudioFiles() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!AudioManager.instance.contextIsActive()) {
+            return;
+        }
+        yield Promise.all([
+            AudioManager.instance.load("fertilizer", "abono.wav"),
+            AudioManager.instance.load("click", "button.mp3"),
+            AudioManager.instance.load("bite", "enemy_bite.mp3"),
+            AudioManager.instance.load("getHit", "get_hit.mp3"),
+            AudioManager.instance.load("headHit", "head_hit.mp3"),
+            AudioManager.instance.load("plant", "plantar.wav"),
+            AudioManager.instance.load("harvest", "recolectar.wav"),
+            AudioManager.instance.load("music_danger", "Skeletown_the_outskirts.ogg"),
+            AudioManager.instance.load("music_town", "Skeletown_the_town.ogg"),
+            AudioManager.instance.load("stepA", "step_a.mp3"),
+            AudioManager.instance.load("stepB", "step_b.mp3")
+        ]);
+    });
+}
 //#region Render Debug
 var enableRenderDebug = false;
 document.addEventListener("keydown", (event) => __awaiter(void 0, void 0, void 0, function* () {
@@ -317,6 +347,7 @@ function generateAudioContext() {
     }
     AudioManager.instance.activateContext();
     window.audiomanager = AudioManager.instance;
+    loadAudioFiles();
 }
 window.addEventListener("mouseover", generateAudioContext);
 window.addEventListener("touchstart", generateAudioContext);
@@ -393,5 +424,80 @@ export function loadWorldInfo() {
     for (let i of items) {
         Inventory.instance.addItem(i);
     }
+}
+export function loadWorldFromLocalStorage() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!localStorage.getItem("player")) {
+            return;
+        }
+        ctx = GraphicsRenderer.instance.getCanvasContext();
+        if (AudioManager.instance.contextIsActive) {
+            AudioManager.instance.playMusic("music_town");
+        }
+        //#region Jugador
+        var infoPlayer = JSON.parse(localStorage.getItem("player"));
+        player = new Player();
+        player.x = infoPlayer.x;
+        player.y = infoPlayer.y;
+        //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+        yield player.setAnimation(3.5, "skeleton.json");
+        var image = player.getImage();
+        if (image) {
+            GraphicsRenderer.instance.addExistingEntity(image);
+            player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.5, image.getWidth() * 0.5, true), {
+                x: 0,
+                y: image.getHeight() * 0.3
+            });
+        }
+        GraphicsRenderer.instance.follow(player.getImage());
+        player.suscribe(Hud.instance.lifeBar, (health, maxHealth) => {
+            Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
+        }, () => GraphicsRenderer.instance.fadeOutAndIn(0.3, () => __awaiter(this, void 0, void 0, function* () {
+            Inventory.instance.deactivate();
+            Inventory.instance.hide();
+            Hud.instance.deactivate();
+            Hud.instance.hide();
+            yield sleep(50);
+            yield unloadGame();
+            GameOver.instance.activate();
+            GameOver.instance.show();
+        })));
+        //#endregion
+        //#region Inventario
+        var infoItems = JSON.parse(localStorage.getItem("items"));
+        for (let i of infoItems) {
+            if (i) {
+                Inventory.instance.addItem(i);
+            }
+        }
+        //#endregion
+        yield loadArea();
+        var infoEnemies = JSON.parse(localStorage.getItem("enemies"));
+        for (let e of infoEnemies) {
+            yield (function (e, health) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    var ret = yield generateEnemy(e.x, e.y, e.type, () => {
+                        if (ret) {
+                            ret.dispose();
+                            console.log("Enemy: :(");
+                            enemies.remove(ret);
+                            Hud.instance.gold += 10;
+                        }
+                    });
+                    ret.setHealth(health);
+                    enemies.push(ret);
+                });
+            })(e, e.health);
+        }
+        GameLoop.instance.suscribe(null, null, renderDebug, null, null);
+        var infoCrops = JSON.parse(localStorage.getItem("crops"));
+        for (let c of infoCrops) {
+            let crop = FarmlandManager.instance.farmlands[c.id];
+            crop.plantCrop(c.crop);
+            crop.timeOfPlanting = c.timeOfPlanting + ((Date.now() - c.lastMillis) * 0.001);
+            crop.growthState = c.growthState;
+            crop.fertilize(c.fertilizer, c.fertilizerStrength);
+        }
+    });
 }
 //# sourceMappingURL=worldload.js.map

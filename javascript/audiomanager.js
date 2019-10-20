@@ -13,7 +13,7 @@ import { sleep } from "./util.js";
  * Directorio a partir del cual leer las rutas para los archivos de audio, partiendo de la raíz del proyecto.
  * No es necesario incluir '/' al principio ni al final.
  */
-const AUDIO_FOLDER = "resources/audio";
+const AUDIO_FOLDER = "resources/sounds";
 /**
  * Constante de tiempo utilizada en las transiciones para desvanecer la música. Ver https://developer.mozilla.org/en-US/docs/Web/API/AudioParam/setTargetAtTime
  * para más información.

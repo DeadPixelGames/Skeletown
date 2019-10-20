@@ -12,10 +12,10 @@ import { UILayout, UIEntity } from "./uiEntity.js";
 import Interface from "./interface.js";
 import FileLoader from "../fileloader.js";
 import { MaxScore } from "./maxscores.js";
-import { GameOver } from "./gameover.js";
-import loadWorld from "../worldload.js";
+import loadWorld, { loadWorldFromLocalStorage } from "../worldload.js";
 import { Hud } from "./hud.js";
 import AboutUs from "./aboutus.js";
+import AudioManager from "../audiomanager.js";
 export class MainMenu {
     //#endregion
     constructor() {
@@ -41,6 +41,9 @@ export class MainMenu {
                 this.currentBg++;
             }
             this.background.image.sourceElement = yield FileLoader.loadImage(this.backgrounds[this.currentBg]);
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         }));
         this.play.setCollider(true, 830, 750, 345, 205, (x, y) => {
             console.log("PLAY");
@@ -51,6 +54,9 @@ export class MainMenu {
                 Hud.instance.activate();
                 Hud.instance.show();
             }));
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         this.contact.setCollider(true, 1395, 880, 465, 172, (x, y) => {
             console.log("CONTACT");
@@ -58,13 +64,25 @@ export class MainMenu {
             AboutUs.instance.activate();
             this.deactivate();
             this.hide();
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         this.continue.setCollider(true, 198, 815, 413, 220, (x, y) => {
             console.log("CONTINUE");
-            this.deactivate();
-            this.hide();
-            GameOver.instance.activate();
-            GameOver.instance.show();
+            if (!localStorage.getItem("player")) {
+                return;
+            }
+            GraphicsRenderer.instance.fadeOutAndIn(0.5, () => __awaiter(this, void 0, void 0, function* () {
+                this.deactivate();
+                this.hide();
+                yield loadWorldFromLocalStorage();
+                Hud.instance.activate();
+                Hud.instance.show();
+            }));
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         this.maxScore.setCollider(true, 71, 60, 250, 287, (x, y) => {
             console.log("MAXSCORE");
@@ -72,6 +90,9 @@ export class MainMenu {
             MaxScore.instance.show();
             this.deactivate();
             this.hide();
+            if (AudioManager.instance.contextIsActive) {
+                AudioManager.instance.playSound("click");
+            }
         });
         Interface.instance.addCollider(this.settings.getCollider());
         Interface.instance.addCollider(this.play.getCollider());
@@ -132,6 +153,9 @@ export class MainMenu {
     }
     activate() {
         this.menu_layout.activate();
+        if (AudioManager.instance.contextIsActive) {
+            AudioManager.instance.playMusic("music_danger");
+        }
     }
     deactivate() {
         this.menu_layout.deactivate();

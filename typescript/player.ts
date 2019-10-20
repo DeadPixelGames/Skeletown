@@ -1,6 +1,7 @@
 import Entity from "./entity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import AnimatedGraphicEntity from "./graphics/animatedgraphicentity.js";
+import AudioManager from "./audiomanager.js";
 
 /** Velocidad de desplazamiento del jugador. */
 const PLAYER_SPEED = 500;
@@ -16,6 +17,8 @@ const MOUSE_DISTANCE_SPEED_FACTOR = 1 / 800;
  */
 const TIME_UNTIL_IDLE = 3;
 
+const STEP_SOUND_TIME = 0.2;
+
 /**
  * Clase que representa al jugador
  */
@@ -29,6 +32,9 @@ export default class Player extends Entity{
 
     private Inventory :{};
 
+    private stepSoundCounter :number;
+
+    private useStepSoundB :boolean;
 
     /**
      * Constructor
@@ -58,6 +64,9 @@ export default class Player extends Entity{
         this.speed.y = PLAYER_SPEED;
 
         this.idleTimer = 0;
+
+        this.stepSoundCounter = 0;
+        this.useStepSoundB = false;
     }
 
     /**
@@ -131,6 +140,28 @@ export default class Player extends Entity{
         }
 
         super.update(deltaTime);   
+
+        if(AudioManager.instance.contextIsActive) {
+            if(this.x > 21376){
+                AudioManager.instance.playMusic("music_danger");
+            }else{
+                AudioManager.instance.playMusic("music_town");
+            }
+
+            if(this.dest != null) {
+                if(this.stepSoundCounter > STEP_SOUND_TIME) {
+                    if(!this.useStepSoundB) {
+                        AudioManager.instance.playSound("stepA");
+                    } else {
+                        AudioManager.instance.playSound("stepB");
+                    }
+                    this.stepSoundCounter = 0;
+                    this.useStepSoundB = !this.useStepSoundB;
+                } else {
+                    this.stepSoundCounter += deltaTime;
+                }
+            }
+        }
     }
 
 }

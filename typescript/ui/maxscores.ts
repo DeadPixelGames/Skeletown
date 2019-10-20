@@ -4,6 +4,7 @@ import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
+import AudioManager from "../audiomanager.js";
 
 export class MaxScore{
 
@@ -73,6 +74,9 @@ export class MaxScore{
             MainMenu.instance.activate();
             this.deactivate();
             this.hide();
+            if(AudioManager.instance.contextIsActive){
+                AudioManager.instance.playSound("click");
+            }
         })
         
         
