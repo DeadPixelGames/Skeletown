@@ -14,17 +14,17 @@
     "vegetables": [
         {
             "name": "Calaveraza",
-            "description": "Calaveraza",
+            "description": "Es la hortaliza más \n utilizada en Skeletown. \n Muy útil para hacer \n lámparas, espantapajaros, \n compañia, jugar al \n fútbol. Su sabor es \n casi desconocido ya \n que la gente la utiliza \n para tantas cosas que \n casi se han olvidado \n de que es un alimento.",
             "image": "pag_veg1.png"
         },
         {
             "name": "Zombihoria",
-            "description": "Zombihoria",
+            "description": "Las zombihorias son \n el resultado fallido \n de los primeros \n experimentos de la \n Oficina de Resurreción \n pública cuando \n buscaban un modo de \n resucitar a la gente. \n Su sabor es tan intenso \n que despertaria a \n un muerto. Figuradamente. ",
             "image": "pag_veg2.png"
         },
         {
             "name": "Ghost Pepper",
-            "description": "Ghost Pepper",
+          "description": "Estas pequeñas \n hortalizas disfrutan \n asustando a las \n demás verduras. \n Son muy traviesas \n en solitario, pero \n cuando se juntan \n sus 3 variedades \n (rojo, verde y \n amarillo) mas te vale \n no ponerte en su \n camino. De sabor \n muy ligero, ideales \n para ensaladas  \n y guarniciones.",
             "image": "pag_veg3.png"
         }
     ]
