@@ -1,20 +1,20 @@
 {
     "enemies": [
         {
-            "name": "Enemigo 1",
-            "description": "Descripción enemigo 1",
+            "name": "Errante Gelatinoso",
+            "description": "Que no te engañe \n su cara de inocente. \n A pesar de no ser \n grandes combatientes \n sus potentes mordiscos \n pueden hacer mucho \n daño. Descartados \n por Caronte por no usar \n auriculares en el \n transporte público \n y por bloquear el paso \n en las escales  \n mecánicas",
             "image": "pag_en1.png"
         },
         {
-            "name": "Enemigo 2",
-            "description": "Descripción enemigo 2",
+            "name": "Errante Vertebrado",
+            "description": "Este imponente \n errante esconde unas \n afiladas y poderosas \n fauses bajo su máscara \n que no dudará en usar \n para acabar contigo. \n Fueron descartados por \n Caronte por hablar \n por el móvil en el \n cine y por colarse \n en las cola de los \n supermercados. ",
             "image": "pag_en2.png"
         }
     ],
     "vegetables": [
         {
             "name": "Calaveraza",
-            "description": "Es la hortaliza más \n utilizada en Skeletown. \n Muy útil para hacer \n lámparas, espantapajaros, \n compañia, jugar al \n fútbol. Su sabor es \n casi desconocido ya \n que la gente la utiliza \n para tantas cosas que \n casi se han olvidado \n de que es un alimento.",
+            "description": "Es la hortaliza \n más  utilizada en  \n Skeletown. Muy útil para hacer  lámparas,\n espantapajaros, \n compañia, jugar al \n fútbol. Su sabor es \n casi desconocido ya \n que la gente la utiliza \n para tantas cosas que \n casi se han olvidado \n de que es un alimento.",
             "image": "pag_veg1.png"
         },
         {
