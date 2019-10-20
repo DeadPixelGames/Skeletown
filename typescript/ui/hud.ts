@@ -1,15 +1,12 @@
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
-
-import { enteringInventory } from "../main.js";
-
-import Interface from "./interface.js";
+import Interface, { enteringInventory } from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
 import GameLoop from "../gameloop.js";
 
 
-export class Hud{
+export class Hud {
 
     private hud_InGame :UILayout;
     public lifeBar :ProgressBar;
@@ -58,7 +55,7 @@ export class Hud{
         ret.standardX = standardX;
         ret.standardY = standardY;
 
-        GameLoop.instance.suscribe(ret, null, ret.update, null, null);
+        
         return ret;
     }
     //#endregion
@@ -81,7 +78,7 @@ export class Hud{
 
         //#region Colliders
 
-        this.moneyCounter.setCollider(true, 95, 77, 320, 91, (x :number, y :number)=>{
+        this.moneyCounter.setCollider(true, 100, 77, 320, 91, (x :number, y :number)=>{
 
         });
         this.time.setCollider(true, this.width - 235, 60, 362, 128);
@@ -120,12 +117,12 @@ export class Hud{
         this.inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
         
         this.hud_InGame.addEntitiesToRenderer();
-        this.moneyCounter.setText("999999999", {x: 250, y: 61}, "36px");
+        this.moneyCounter.setText("999999999", {x: 250, y: 61}, 36);
         var date = new Date();
         this.setTimeText("");
-
-        //this.deactivate();
-        //this.hide();
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
+        this.deactivate();
+        this.hide();
 
 
     }
@@ -167,6 +164,6 @@ export class Hud{
     }
 
     private setTimeText(time :string) {
-        this.time.setText(time, {x: 230, y: 80}, "45px");
+        this.time.setText(time, {x: 230, y: 80}, 45);
     }
 }

@@ -126,7 +126,6 @@ export default class GraphicsRenderer {
             if(!entity.visible)
                 break;
 
-
             if(entity.shouldBeCulled(this.scrollX, this.scrollY))
                 continue;
             

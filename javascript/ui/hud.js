@@ -9,8 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
-import { enteringInventory } from "../main.js";
-import Interface from "./interface.js";
+import Interface, { enteringInventory } from "./interface.js";
 import FileLoader from "../fileloader.js";
 import GameLoop from "../gameloop.js";
 export class Hud {
@@ -26,7 +25,7 @@ export class Hud {
             this.lifeBar.setProgress(this.lifeBar.getProgress() - 10);
         });
         //#region Colliders
-        this.moneyCounter.setCollider(true, 95, 77, 320, 91, (x, y) => {
+        this.moneyCounter.setCollider(true, 100, 77, 320, 91, (x, y) => {
         });
         this.time.setCollider(true, this.width - 235, 60, 362, 128);
         this.inventory.setCollider(false, this.width - 165, this.height - 215, 245, 245, (x, y) => {
@@ -74,7 +73,6 @@ export class Hud {
         Hud.initSingleton(ret);
         ret.standardX = standardX;
         ret.standardY = standardY;
-        GameLoop.instance.suscribe(ret, null, ret.update, null, null);
         return ret;
     }
     initImages() {
@@ -86,11 +84,12 @@ export class Hud {
             this.time.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_time.png"), 0, 0, 362, 128);
             this.inventory.setImage(true, 100, yield FileLoader.loadImage("resources/interface/HUD_inventory.png"));
             this.hud_InGame.addEntitiesToRenderer();
-            this.moneyCounter.setText("999999999", { x: 250, y: 61 }, "36px");
+            this.moneyCounter.setText("999999999", { x: 250, y: 61 }, 36);
             var date = new Date();
             this.setTimeText("");
-            //this.deactivate();
-            //this.hide();
+            GameLoop.instance.suscribe(this, null, this.update, null, null);
+            this.deactivate();
+            this.hide();
         });
     }
     activate() {
@@ -123,7 +122,7 @@ export class Hud {
         this.setTimeText((hour < 10 ? "0" + hour : hour) + separator + (minute < 10 ? "0" + minute : minute));
     }
     setTimeText(time) {
-        this.time.setText(time, { x: 230, y: 80 }, "45px");
+        this.time.setText(time, { x: 230, y: 80 }, 45);
     }
 }
 //# sourceMappingURL=hud.js.map

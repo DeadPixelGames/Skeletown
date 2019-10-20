@@ -22,9 +22,9 @@ import { MaxScore } from "./ui/maxscores.js";
 import { GameOver } from "./ui/gameover.js";
 
 
-const STANDARD_SCREEN_SIZE_X = 1730;
+const STANDARD_SCREEN_SIZE_X = 1920;
 
-const STANDARD_SCREEN_SIZE_Y = 875;
+const STANDARD_SCREEN_SIZE_Y = 1080;
 
 
 //#region Declaración de variables
@@ -92,14 +92,7 @@ var resize = function() {
     //// oldscaleY = GraphicsRenderer.instance.scaleY;
     //// Hud.instance.resize(ctx.canvas.width, ctx.canvas.height);
     //// Inventory.instance.resize(ctx.canvas.width, ctx.canvas.height);
-
 }
-//#endregion
-
-const BLINK_PROPERTIES = {
-    blink: 2,
-    time: 0.1
-};
 
 window.addEventListener("resize", resize);
 
@@ -127,263 +120,12 @@ window.onload = async function() {
 
     GameOver.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
 
-    (window as any).gr = GraphicsRenderer.instance;
-    
     Hud.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
     //#endregion
- 
-    //#region Jugador
-    player = new Player();   
-
-    player.x = 14592;
-    player.y = 4352; 
     
-    (window as any).player = player;
-
-
-    //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
-    await player.setAnimation(3.5, "skeleton.json");
-
-    (window as any).sleep = sleep;
-
-
-    var image = player.getImage();
-    if(image){
-        GraphicsRenderer.instance.addExistingEntity(image);
-        player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.5, image.getWidth() * 0.5, true),
-        {
-            x: 0,
-            y: image.getHeight() * 0.3
-        });
-    }
-    
-    GraphicsRenderer.instance.follow(player.getImage());
-
-    player.suscribe(Hud.instance.lifeBar, (health :number, maxHealth :number) => {
-        Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
-    }, () => console.log("Game Over :("));
-    //#endregion
-
-    Inventory.instance.addItem({
-        id: 0,
-        name: "Skullpkin",
-        description: "Skulled Pumpkin",
-        type: "crop"
-    }, 3);
-    Inventory.instance.addItem({
-        id: 1,
-        name: "Ghost Pepper",
-        description: "Peppers' immortal souls",
-        type: "crop"
-    }, 4);
-    Inventory.instance.addItem({
-        id: 2,
-        name: "SoulCorn",
-        description: "Corn Cub with souls",
-        type: "crop"
-    }, 2);
-    Inventory.instance.addItem({
-        id: 3,
-        name: "Zombihorias",
-        description: "The undead tubercule",
-        type: "crop"
-    }, 5);
-    Inventory.instance.addItem({
-        id: 4,
-        name: "Demonions",
-        description: "So evil, they will make you cry",
-        type: "crop"
-    }, 5);
-    Inventory.instance.addItem({
-        id: 0,
-        name: "Speeder",
-        description: "Grow in a blink",
-        type: "fertilizer"
-    }, 6, 2);
-    Inventory.instance.addItem({
-        id: 1,
-        name: "Quantity",
-        description: "Quantity over quality",
-        type: "fertilizer"
-    }, 6, 2);
-
-    //#region Área
-    area = AreaMap.load("farmland.json", () => {
-        if(enemy){
-            area.getColliders().add(player.getCollider() as BoxCollider);
-            GameLoop.instance.start();
-        }
-        
-    });
-    //#endregion
-    
-    enemy = await generateEnemy(() => {
-        if(enemy) {
-            enemy.dispose();
-            console.log("Enemy: :(");
-        }
-        enemy = null;
-    });
-    GameLoop.instance.suscribe(null, null, renderDebug, null, null);
+    GameLoop.instance.start();
 
     resize();
 
 };
 
-//#region Generar AudioContext
-function generateAudioContext() {
-    if(!AudioManager.instance) {
-        AudioManager.initInstance();
-    }
-    AudioManager.instance.activateContext();
-    (window as any).audiomanager = AudioManager.instance;
-}
-
-window.addEventListener("mouseover", generateAudioContext);
-window.addEventListener("touchstart", generateAudioContext);
-//#endregion
-
-//#region Crear enemigo
-async function generateEnemy(onDead :() => void) {
-    var enemy = new Enemy();
-    enemy.x = 2176;
-    enemy.y = 1280;
-    
-    //// enemy.setImage(2.5, await FileLoader.loadImage("resources/sprites/pharaoh.png"), 0, 0, 100, 150, 50, 75);
-    await enemy.setAnimation(2.5, "enemy_1.json");
-    
-    var image = enemy.getImage();
-    if(image) {
-        GraphicsRenderer.instance.addExistingEntity(image);
-        
-        enemy.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.6, image.getWidth() * 0.6, true),
-        {
-            x: 0,
-            y: image.getHeight() * 0.3
-        });  
-    }
-    
-    enemy.setAttack(target => {
-        enemy.setAttacking(true);
-        target.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
-        target.setHealth(target.getHealth()-10);
-        console.log(target.constructor.name + ": \"ouch\"");
-    });
-    (enemy.getCollider() as BoxCollider).addUserInteraction(null, attackEnemy, null, null);
-
-    enemy.suscribe(enemy, null, onDead);
-
-    area.getColliders().add(enemy.getCollider() as BoxCollider);
-    enemy.setColliderLayer(area.getColliders());
-    return enemy;
-}
-//#endregion
-
-//#region Atacar enemigo
-document.addEventListener("mousedown", dispatchClickEventToColliders);
-document.addEventListener("touchstart", dispatchClickEventToColliders);
-
-function dispatchClickEventToColliders(event :MouseEvent | TouchEvent) {
-    var coordX :number;
-    var coordY :number;
-
-    if(window.TouchEvent && event instanceof TouchEvent && event.touches[0]) {
-        coordX = event.touches[0].clientX;
-        coordY = event.touches[0].clientY;
-    } else {
-        coordX = (event as MouseEvent).clientX;
-        coordY = (event as MouseEvent).clientY;
-    }
-
-    if(area) {
-        area.getColliders().sendUserClick(coordX / GraphicsRenderer.instance.scaleX + GraphicsRenderer.instance.scrollX, coordY / GraphicsRenderer.instance.scaleY + GraphicsRenderer.instance.scrollY);
-    }
-}
-
-function attackEnemy() {
-    const ATTACK_RADIUS = 200;
-
-    if(enemy)
-    if(distance(player.x, player.y, enemy.x, enemy.y) < ATTACK_RADIUS) {
-        player.setAttacking(true);
-        enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
-        enemy.setHealth(enemy.getHealth() - 10);
-        console.log("Enemy: ouch");
-    }
-
-}
-//#endregion
-
-//#region Render Debug
-var enableRenderDebug = false;
-
-document.addEventListener("keydown", async (event) => {
-    if(event.key == "F2") {
-        enableRenderDebug = !enableRenderDebug;
-    }else if(event.key == "e"){
-        if(!enemy){
-            enemy = await generateEnemy(() => {
-                if(enemy) {
-                    enemy.dispose();
-                    console.log("Enemy: :(");
-                }
-                enemy = null;
-            });
-        }
-            
-    }else if(event.key == "h"){
-        player.setHealth(100);
-    }
-});
-
-function renderDebug() {
-    if(!enableRenderDebug) {
-        return;
-    }
-
-    var scrollX = GraphicsRenderer.instance.scrollX;
-    var scrollY = GraphicsRenderer.instance.scrollY;
-    var scaleX = GraphicsRenderer.instance.scaleX;
-    var scaleY = GraphicsRenderer.instance.scaleY;
-
-    ctx.lineWidth = 1;
-
-
-    area.getColliders().render(ctx, scrollX, scrollY);
-
-    // ctx.scale(scaleX, scaleY);
-
-    player.renderDebug(ctx, scrollX, scrollY);
-    if(enemy) {
-        enemy.renderDebug(ctx, scrollX, scrollY);
-    }
-        Interface.instance.getColliders().render(ctx);
-
-        InterfaceInWorld.instance.getColliders().render(ctx, scrollX, scrollY);
-    // ctx.scale(1 / scaleX, 1 / scaleY);
-
-}
-//#endregion
-
-//#region Inventario
-export function enteringInventory(){
-    Inventory.instance.activate();
-    Inventory.instance.show();
-    Hud.instance.deactivate();
-    FarmlandManager.instance.deactivate();
-}
-
-export function exitingInventory(){
-    Inventory.instance.deactivate();
-    Inventory.instance.hide();
-    Hud.instance.activate();
-    FarmlandManager.instance.activate();
-}
-
-export function enteringInventoryFromCrops(tile :TileEntity){
-    Inventory.instance.togglePlanting(tile);
-    Inventory.instance.show();
-    Hud.instance.deactivate();
-    FarmlandManager.instance.deactivate();
-}
-//#endregion

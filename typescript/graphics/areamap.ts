@@ -5,9 +5,8 @@ import GameEvent from "../gameevent.js";
 import { ColliderLayer, Collider, BoxCollider, CircleCollider } from "../collider.js";
 import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
-import Interface, { InterfaceInWorld } from "../ui/interface.js";
+import Interface, {  enteringInventory, enteringInventoryFromCrops, InterfaceInWorld } from "../ui/interface.js";
 import { Inventory } from "../inventory.js";
-import { enteringInventory, enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 
 /**

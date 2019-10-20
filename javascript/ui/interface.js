@@ -1,5 +1,8 @@
 import { ColliderLayer } from "../collider.js";
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
+import { Inventory } from "../inventory.js";
+import { Hud } from "./hud.js";
+import { FarmlandManager } from "../farmland.js";
 /**Controlador de los colliders de la interfaz gráfica en coordenadas del canvas*/
 export default class Interface {
     constructor() {
@@ -63,4 +66,24 @@ export class InterfaceInWorld {
         this.colliders.add(collider);
     }
 }
+//#region Inventario
+export function enteringInventory() {
+    Inventory.instance.activate();
+    Inventory.instance.show();
+    Hud.instance.deactivate();
+    FarmlandManager.instance.deactivate();
+}
+export function exitingInventory() {
+    Inventory.instance.deactivate();
+    Inventory.instance.hide();
+    Hud.instance.activate();
+    FarmlandManager.instance.activate();
+}
+export function enteringInventoryFromCrops(tile) {
+    Inventory.instance.togglePlanting(tile);
+    Inventory.instance.show();
+    Hud.instance.deactivate();
+    FarmlandManager.instance.deactivate();
+}
+//#endregion
 //# sourceMappingURL=interface.js.map

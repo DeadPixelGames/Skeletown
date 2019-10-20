@@ -75,7 +75,7 @@ export class GameOver {
             this.money.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/gameover_button.png"), 550, 658, 247, 72);
             this.moneyQuantity.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/gameover_money.png"), 0, 0, 254, 87);
             this.gameOver_layout.addEntitiesToRenderer();
-            this.moneyQuantity.setText("999999999", { x: 200, y: 55 }, "35px");
+            this.moneyQuantity.setText("999999999", { x: 200, y: 55 }, 35);
             this.deactivate();
             this.hide();
         });

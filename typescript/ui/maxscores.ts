@@ -1,6 +1,5 @@
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
-import { enteringInventory} from "../main.js";
 import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";

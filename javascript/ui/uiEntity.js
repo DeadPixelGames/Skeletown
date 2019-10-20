@@ -9,7 +9,6 @@ export class UIEntity {
     constructor(clickable) {
         this.clickable = clickable;
         this.ctx = GraphicsRenderer.instance.getCanvasContext();
-        GameLoop.instance.suscribe(this, null, this.update, null, null);
         this.colliderOffset = { x: 0, y: 0 };
         this.relativePos = { x: 0, y: 0 };
         this.dimension = { w: 0, h: 0 };
@@ -25,10 +24,11 @@ export class UIEntity {
     setRealtivePos(relativePos) {
         this.relativePos = relativePos;
     }
-    setText(text, textPos, fontSize) {
+    setText(text, textPos, fontSize, textAlign = "end") {
         this.image.text = text;
         this.image.textPos = textPos;
         this.image.fontSize = fontSize;
+        this.image.textAlign = textAlign;
     }
     /**Sobreescribir el setImage de Entity para usar UIGraphicEtity y no una GraphicEntity */
     setImage(useCanvasCoords, layer, source, sX, sY, sWidth, sHeight, pivotX, pivotY) {
@@ -80,7 +80,7 @@ export class UIEntity {
         else {
             this.collider = new CircleCollider(left, top, w * 0.5, false);
         }
-        this.colliderOffset = { x: 0, y: 0 };
+        this.colliderOffset = { x: w * 0.5, y: h * 0.5 };
         if (this.clickable && onClick) {
             this.collider.addUserInteraction(this, onClick, null, null);
         }
@@ -172,6 +172,7 @@ export class UILayout {
     addEntitiesToRenderer() {
         for (let ent of this.uiEntities) {
             ent.addToGraphicRenderer();
+            GameLoop.instance.suscribe(ent, null, ent.update, null, null);
         }
     }
     resize(w, h) {
@@ -234,13 +235,18 @@ export class UIGraphicEntity extends GraphicEntity {
     }
     drawText() {
         if (this.text && this.textPos) {
-            GraphicsRenderer.instance.getCanvasContext().font = this.fontSize + " Arco";
-            GraphicsRenderer.instance.getCanvasContext().textAlign = "end";
-            GraphicsRenderer.instance.getCanvasContext().strokeStyle = 'white';
-            GraphicsRenderer.instance.getCanvasContext().lineWidth = 5;
-            GraphicsRenderer.instance.getCanvasContext().strokeText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
-            GraphicsRenderer.instance.getCanvasContext().fillStyle = "#000000";
-            GraphicsRenderer.instance.getCanvasContext().fillText(this.text, this.x + this.textPos.x, this.y + this.textPos.y);
+            var lines = this.text.split("\n");
+            var y = this.y + this.textPos.y;
+            GraphicsRenderer.instance.getCanvasContext().font = this.fontSize + "px Arco";
+            GraphicsRenderer.instance.getCanvasContext().textAlign = this.textAlign;
+            for (let line of lines) {
+                GraphicsRenderer.instance.getCanvasContext().strokeStyle = 'white';
+                GraphicsRenderer.instance.getCanvasContext().lineWidth = 5;
+                GraphicsRenderer.instance.getCanvasContext().strokeText(line, this.x + this.textPos.x, y);
+                GraphicsRenderer.instance.getCanvasContext().fillStyle = "#000000";
+                GraphicsRenderer.instance.getCanvasContext().fillText(line, this.x + this.textPos.x, y);
+                y += this.fontSize;
+            }
         }
     }
 }

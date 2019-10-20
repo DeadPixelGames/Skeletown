@@ -1,10 +1,9 @@
 import { UIGraphicEntity, UILayout, UIEntity } from "./ui/uiEntity.js";
 import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import FileLoader from "./fileloader.js";
-import Interface from "./ui/interface.js";
 import { BoxCollider, CircleCollider } from "./collider.js";
 import GameLoop from "./gameloop.js";
-import { exitingInventory } from "./main.js";
+import Interface, { exitingInventory} from "./ui/interface.js";
 import { FarmlandManager } from "./farmland.js";
 import { TileEntity } from "./graphics/areamap.js";
 
@@ -51,6 +50,10 @@ export class Inventory{
 
     private standardX :number;
     private standardY :number;
+
+    public pageSelected :string = "crops";
+    public cropSelected :number = 0;
+    public enemySelected :number = 0;
 
     /**
      * Inicializa la instancia Singleton de `Inventory` del programa y la asocia al contexto de canvas especificado.
@@ -185,32 +188,40 @@ export class Inventory{
 
         this.crops.setCollider(true, 58, 56, 101, 101, (x,y)=>{
             this.cropsLayout.show();
+            this.cropsLayout.activate();
             this.clothesLayout.hide();
             this.wikiLayout.hide();
+            this.wikiLayout.deactivate();
             this.settingsLayout.hide();
             console.log("CROPS");
         })
 
         this.clothes.setCollider(true, 58, 207, 101, 101, (x,y)=>{
             this.cropsLayout.hide();
+            this.cropsLayout.deactivate();
             this.clothesLayout.show();
             this.wikiLayout.hide();
+            this.wikiLayout.deactivate();
             this.settingsLayout.hide();
             console.log("CLOTHES");
         })
 
         this.wiki.setCollider(true, 58, 358, 101, 101, (x,y)=>{
             this.cropsLayout.hide();
+            this.cropsLayout.deactivate();
             this.clothesLayout.hide();
             this.wikiLayout.show();
             this.settingsLayout.hide();
+            this.wikiLayout.activate();
             console.log("WIKI");
         })
 
         this.settings.setCollider(true, 58, 509, 101, 101, (x,y)=>{
             this.cropsLayout.hide();
+            this.cropsLayout.deactivate();
             this.clothesLayout.hide();
             this.wikiLayout.hide();
+            this.wikiLayout.deactivate();
             this.settingsLayout.show();
             console.log("SETTINGS");
         })
@@ -309,13 +320,151 @@ export class Inventory{
     }
     private async initWikiLayout(){
         var background = new UIEntity(false);
+        var cropPages :UIEntity[] = [];
+        var enemyPages :UIEntity[] = [];
+        
+        var book = await FileLoader.loadJSON("resources/interface/book.json") as InventoryBook
+        for(let en of book.enemies){
+            var aux = new UIEntity(false);
+            aux.setImage(true, 104, await FileLoader.loadImage("resources/interface/"+ en.image));
+            aux.setCollider(true, 0, 0, this.halfWidth * 2, this.halfHeight * 2);
+            aux.setText(en.name + '\n\n\n' + en.description, {x: 745, y: 145}, 20, "center");
+            //aux.setText(en.description, {x: 745, y: 204}, "15px", "center");
+            this.wikiLayout.addUIEntity(aux);
+            enemyPages.push(aux);
+        }
+        for(let veg of book.vegetables){
+            var aux = new UIEntity(false);
+            aux.setImage(true, 104, await FileLoader.loadImage("resources/interface/"+veg.image));
+            aux.setCollider(true, 0, 0, this.halfWidth * 2, this.halfHeight * 2);
+            aux.setText(veg.name + "\n\n\n" + veg.description, {x: 745, y: 145}, 20, "center");
+            //aux.setText(veg.description, {x: 745, y: 204}, "15px", "center");
+            this.wikiLayout.addUIEntity(aux);
+            cropPages.push(aux);
+        }
+
+    
+        var next = new UIEntity(true);
+        var prev = new UIEntity(true);
+        var cr = new UIEntity(true);
+        var enemy = new UIEntity(true);
 
         background.setImage(true, 102, await FileLoader.loadImage("resources/interface/bok_inv_page.png"));
+        next.setImage(true, 103, await FileLoader.loadImage("resources/interface/bok_inv_next.png"), 870, 255, 26, 302);
+        prev.setImage(true, 103, await FileLoader.loadImage("resources/interface/bok_inv_back.png"), 587, 255, 26, 302);
+        cr.setImage(true, 103, await FileLoader.loadImage("resources/interface/bok_inv_orbutton.png"), 661, 550, 50, 95);
+        enemy.setImage(true, 103, await FileLoader.loadImage("resources/interface/bok_inv_enebutton.png"), 748, 549, 50, 95);
+
+        
+
+        var that = this;
+
         background.setCollider(true, 0, 0, 1024, 696);
-        background.setPercentRelPos(false);
+        next.setCollider(true, 870, 255, 26, 302, (x,y)=>{
+            if(that.pageSelected == "crops") {
+                var cropSelected = cropPages[that.cropSelected];
+                if(cropSelected) {
+                    cropSelected.hide();
+                    if(that.cropSelected < cropPages.length - 1) {
+                        that.cropSelected++;
+                    }
+                    cropSelected = cropPages[that.cropSelected];
+                    cropSelected.show();
+                }
+            }else if(that.pageSelected == "enemies") {
+                var enemySelected = enemyPages[that.enemySelected];
+                if(enemySelected){
+                    enemySelected.image.visible = false;
+                    if(that.enemySelected < enemyPages.length - 1) {
+                        that.enemySelected++;
+                    }
+                    enemySelected = enemyPages[that.enemySelected];
+                    enemySelected.show();
+                }
+            }
+        })
+        prev.setCollider(true, 587, 255, 26, 302, (x,y)=>{
+            if(that.pageSelected == "crops") {
+                var cropSelected = cropPages[that.cropSelected];
+                if(cropSelected) {
+                    cropSelected.hide();
+                    if(that.cropSelected > 0){
+                        that.cropSelected--;
+                    }
+                    cropSelected = cropPages[that.cropSelected];
+                    cropSelected.show();
+                }
+            }else if(that.pageSelected == "enemies") {
+                var enemySelected = enemyPages[that.enemySelected];
+                if(enemySelected){
+                    enemySelected.hide();
+                    if(that.enemySelected > 0) {
+                        that.enemySelected--;
+                    }
+                    enemySelected = enemyPages[that.enemySelected];
+                    enemySelected.show();
+                }
+            }
+        })
+        cr.setCollider(true, 661, 550, 50, 95, (x, y)=>{
+            that.pageSelected = "crops";
+            var cropSelected = cropPages[that.cropSelected];
+            var enemySelected = enemyPages[that.enemySelected];
+            if(cropSelected)
+                cropSelected.show();
+            if(enemySelected)
+                enemySelected.hide();
+        })
+        enemy.setCollider(true, 748, 549, 50, 95, (x, y)=>{
+            that.pageSelected = "enemies";
+            var cropSelected = cropPages[that.cropSelected]
+            if(cropSelected)
+            cropSelected.hide();
+            var enemySelected = enemyPages[that.enemySelected]
+            if(enemySelected)
+            enemySelected.show();
+        })
+
+        Interface.instance.addCollider(next.getCollider() as BoxCollider);
+        Interface.instance.addCollider(prev.getCollider() as BoxCollider);
+        Interface.instance.addCollider(cr.getCollider() as BoxCollider);
+        Interface.instance.addCollider(enemy.getCollider() as BoxCollider);
+
         this.wikiLayout.addUIEntity(background);
+        this.wikiLayout.addUIEntity(next);
+        this.wikiLayout.addUIEntity(prev);
+        this.wikiLayout.addUIEntity(cr);
+        this.wikiLayout.addUIEntity(enemy);
         this.wikiLayout.addEntitiesToRenderer();
+        this.wikiLayout.show = function() {
+            background.show();
+            for(let en of enemyPages){
+                if(en)
+                    en.hide();
+            }
+            for(let crop of cropPages){
+                if(crop)
+                    crop.hide();
+            }
+            if(that.pageSelected == "crops"){
+                var cropSelected = cropPages[that.cropSelected];
+                if(cropSelected)
+                    cropSelected.image.visible = true;
+            } else if(that.pageSelected == "enemies"){
+                var enemySelected = enemyPages[that.enemySelected]
+                if(enemySelected)
+                    enemySelected.image.visible = true;
+            }
+            console.log("SHOW");
+            next.show();
+            prev.show();
+            cr.show();
+            enemy.show();
+
+
+        };
         this.wikiLayout.hide();
+        this.wikiLayout.deactivate();
     }
     private async initSettingsLayout(){
         var background = new UIEntity(false);
@@ -403,7 +552,7 @@ class itemInInventory{
         this.initImage(left, top, width, height);
         this.pos = pos;
 
-        GameLoop.instance.suscribe(this, null, this.update, null, null);
+        
     }
 
     private async initImage(left :number, top :number, width :number, height :number){
@@ -454,7 +603,7 @@ class itemInInventory{
         this.image.setImage(true, 105, await FileLoader.loadImage("resources/sprites/harvest_spritesheet.png"),512,0,128,128);
         this.image.hide();
         GraphicsRenderer.instance.addExistingEntity(this.image.image);
-        
+        GameLoop.instance.suscribe(this, null, this.update, null, null);
     }
 
     public setItem(item :Item){
@@ -480,7 +629,7 @@ class itemInInventory{
                 this.image.image.setSection( 640 + this.fertStrength * 128, this.id * 128, 128, 128);
             }
             
-            this.image.setText(this.count.toString(), {x: 110, y: 110}, "30px");
+            this.image.setText(this.count.toString(), {x: 110, y: 110}, 30);
         }else{
             this.image.image.setSection( 1, 1, 1, 1);
             this.image.hide();

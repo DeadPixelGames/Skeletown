@@ -45,3 +45,16 @@ type ClickEvent = {
     clientX :number,
     clientY :number
 }
+
+declare type InventoryBook = {
+    enemies: {
+        name :string,
+        description :string,
+        image :string
+    }[],
+    vegetables : {
+        name :string,
+        description :string,
+        image :string
+    }[]
+}

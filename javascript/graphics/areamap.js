@@ -14,9 +14,8 @@ import GameEvent from "../gameevent.js";
 import { ColliderLayer, BoxCollider } from "../collider.js";
 import GameLoop from "../gameloop.js";
 import { UILayout, UIEntity } from "../ui/uiEntity.js";
-import Interface, { InterfaceInWorld } from "../ui/interface.js";
+import Interface, { enteringInventoryFromCrops, InterfaceInWorld } from "../ui/interface.js";
 import { Inventory } from "../inventory.js";
-import { enteringInventoryFromCrops } from "../main.js";
 import { FarmlandManager } from "../farmland.js";
 /**
  * Directorio donde se almacenan los mapas de tiles en formato JSON. La dirección parte de la raíz del programa; no se requiere

@@ -1,11 +1,14 @@
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
-import { enteringInventory} from "../main.js";
 import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
 import { MaxScore } from "./maxscores.js";
 import { GameOver } from "./gameover.js";
+import loadWorld from "../worldload.js";
+import { Hud } from "./hud.js";
+import AnimatedGraphicEntity from "../graphics/animatedgraphicentity.js";
+import { sleep } from "../util.js";
 
 
 export class MainMenu {
@@ -64,8 +67,8 @@ export class MainMenu {
 
 
     private constructor(){
-        this.width = this.standardX;
-        this.height = this.standardY;
+        this.width = GraphicsRenderer.instance.getCanvas().width;
+        this.height = GraphicsRenderer.instance.getCanvas().height;
 
         this.menu_layout = new UILayout(0, 0, this.width, this.height);
 
@@ -83,6 +86,13 @@ export class MainMenu {
         })
         this.play.setCollider(true, 575, 522, 214, 119, (x :number, y :number)=>{
             console.log("PLAY");
+            GraphicsRenderer.instance.fadeOutAndIn(0.5, async () => {
+                this.deactivate();
+                this.hide();
+                await loadWorld();
+                Hud.instance.activate();
+                Hud.instance.show();
+            });
         })
         this.contact.setCollider(true, 921, 519, 347, 119, (x :number, y :number)=>{
             console.log("CONTACT");
@@ -131,8 +141,7 @@ export class MainMenu {
 
         this.menu_layout.addEntitiesToRenderer();
 
-        this.deactivate();
-        this.hide();
+
     }
 
     public activate(){
@@ -149,8 +158,8 @@ export class MainMenu {
     }
 
     public resize(canvasWidth :number, canvasHeight :number){
-        var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
-        var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
+        var w = canvasWidth * 0.5;
+        var h = canvasHeight * 0.5;
         this.menu_layout.position.x = w - this.standardX * 0.5;
         this.menu_layout.position.y = h - this.standardY * 0.5;
         for(let ent of this.menu_layout.uiEntities){

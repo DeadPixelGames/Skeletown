@@ -1,0 +1,31 @@
+{
+    "enemies": [
+        {
+            "name": "Enemigo 1",
+            "description": "Descripción enemigo 1",
+            "image": "pag_en1.png"
+        },
+        {
+            "name": "Enemigo 2",
+            "description": "Descripción enemigo 2",
+            "image": "pag_en2.png"
+        }
+    ],
+    "vegetables": [
+        {
+            "name": "Calaveraza",
+            "description": "Calaveraza",
+            "image": "pag_veg1.png"
+        },
+        {
+            "name": "Zombihoria",
+            "description": "Zombihoria",
+            "image": "pag_veg2.png"
+        },
+        {
+            "name": "Ghost Pepper",
+            "description": "Ghost Pepper",
+            "image": "pag_veg3.png"
+        }
+    ]
+}
