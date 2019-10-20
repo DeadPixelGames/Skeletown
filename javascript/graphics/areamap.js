@@ -402,10 +402,8 @@ export class TileEntity extends GraphicEntity {
     shouldBeCulled(scrollX, scrollY, scaleX = 1, scaleY = 1) {
         const CULL_MARGIN = 384;
         var ret = false;
-
         if ((this.x + this.getWidth()) < scrollX - CULL_MARGIN || this.x > scrollX + GraphicsRenderer.instance.getCanvas().width + CULL_MARGIN
             || (this.y + this.getHeight()) < scrollY - CULL_MARGIN || this.y > scrollY + GraphicsRenderer.instance.getCanvas().height + CULL_MARGIN) {
-
             ret = true;
         }
         return ret;

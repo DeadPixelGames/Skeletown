@@ -22,11 +22,11 @@ export class Inventory {
         this.halfHeight = 348;
         this.items = [null];
         //#region Inicialización de los contenedores
-        this.layout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
-        this.cropsLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
-        this.clothesLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
-        this.wikiLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
-        this.settingsLayout = new UILayout(GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
+        this.layout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
+        this.cropsLayout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
+        this.clothesLayout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
+        this.wikiLayout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
+        this.settingsLayout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         //#endregion
         //#region Inicialización elementos del layout base
         this.background = new UIEntity(false);
@@ -59,11 +59,13 @@ export class Inventory {
     /**
      * Inicializa la instancia Singleton de `Inventory` del programa y la asocia al contexto de canvas especificado.
      */
-    static initInstance() {
+    static initInstance(standardX, standardY) {
         if (!GraphicsRenderer.instance) {
             throw new Error("GraphicsRenderer no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
         }
         this.instance = new Inventory();
+        this.instance.standardX = standardX;
+        this.instance.standardY = standardY;
     }
     addItem(item, count, strength) {
         var found = false;
@@ -244,8 +246,8 @@ export class Inventory {
     }
     //#endregion
     resize(width, height) {
-        var posX = width * 0.5 / GraphicsRenderer.instance.scaleX - this.halfWidth;
-        var posY = height * 0.5 / GraphicsRenderer.instance.scaleY - this.halfHeight;
+        var posX = width * 0.5 - this.halfWidth;
+        var posY = height * 0.5 - this.halfHeight;
         this.layout.position.x = posX;
         this.layout.position.y = posY;
         for (let ent of this.layout.uiEntities) {

@@ -1,6 +1,6 @@
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
-import { enteringInventory, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y } from "../main.js";
+import { enteringInventory} from "../main.js";
 import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
@@ -9,6 +9,21 @@ import { GameOver } from "./gameover.js";
 
 
 export class MainMenu {
+
+    private menu_layout :UILayout;
+    private background :UIEntity;
+    private settings :UIEntity;
+    private play :UIEntity;
+    private contact :UIEntity;
+    private continue :UIEntity;
+    private maxScore :UIEntity;
+
+    private width :number;
+    private height :number;
+
+    private standardX :number;
+    private standardY :number;
+
     //#region Singleton
     private static _instance :MainMenu;
 
@@ -35,30 +50,22 @@ export class MainMenu {
     /**
      * Inicializa la instancia Singleton de `MainMenu` del programa y la asocia al contexto de canvas especificado.
      */
-    public static initInstance(context :CanvasRenderingContext2D) {
+    public static initInstance(context :CanvasRenderingContext2D, standardX :number, standardY :number) {
         if(!GraphicsRenderer.instance) {
             throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar MainMenu.");
         }
         var ret = new MainMenu();
         MainMenu.initSingleton(ret);
+        ret.standardX = standardX;
+        ret.standardY = standardY;
         return ret;
     }
     //#endregion
-    private menu_layout :UILayout;
-    private background :UIEntity;
-    private settings :UIEntity;
-    private play :UIEntity;
-    private contact :UIEntity;
-    private continue :UIEntity;
-    private maxScore :UIEntity;
-
-    private width :number;
-    private height :number;
 
 
     private constructor(){
-        this.width = GraphicsRenderer.instance.getCanvas().width;
-        this.height = GraphicsRenderer.instance.getCanvas().height;
+        this.width = this.standardX;
+        this.height = this.standardY;
 
         this.menu_layout = new UILayout(0, 0, this.width, this.height);
 
@@ -144,8 +151,8 @@ export class MainMenu {
     public resize(canvasWidth :number, canvasHeight :number){
         var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
         var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
-        this.menu_layout.position.x = w - STANDARD_SCREEN_SIZE_X * 0.5;
-        this.menu_layout.position.y = h - STANDARD_SCREEN_SIZE_Y * 0.5;
+        this.menu_layout.position.x = w - this.standardX * 0.5;
+        this.menu_layout.position.y = h - this.standardY * 0.5;
         for(let ent of this.menu_layout.uiEntities){
             ent.x = this.menu_layout.position.x + ent.getRelativePos().x;
             ent.y = this.menu_layout.position.y + ent.getRelativePos().y;

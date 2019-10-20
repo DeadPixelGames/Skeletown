@@ -9,6 +9,7 @@ export default class Interface{
 
     private colliders :ColliderLayer;
 
+    
 
     private constructor(){
 
@@ -16,8 +17,8 @@ export default class Interface{
         var that = this;
         /**Añadir a los colliders un evento de escucha de clicks */
         var listenerCallback = (e :MouseEvent | TouchEvent)=>{
-            var scaleX = 1; // GraphicsRenderer.instance.scaleX;
-            var scaleY = 1; // GraphicsRenderer.instance.scaleY;
+            var scaleX =  GraphicsRenderer.instance.scaleX;
+            var scaleY =  GraphicsRenderer.instance.scaleY;
             
             if(e instanceof MouseEvent){
                 that.colliders.sendUserClick(e.clientX / scaleX, e.clientY / scaleY);

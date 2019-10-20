@@ -49,14 +49,19 @@ export class Inventory{
     /**Tile de cultivo asociada para abonar / plantar */
     public farmableTile? :TileEntity;
 
+    private standardX :number;
+    private standardY :number;
+
     /**
      * Inicializa la instancia Singleton de `Inventory` del programa y la asocia al contexto de canvas especificado.
      */
-    public static initInstance() {
+    public static initInstance(standardX :number, standardY :number) {
         if(!GraphicsRenderer.instance) {
             throw new Error("GraphicsRenderer no se ha iniciado todavía. Por favor inicia GameLoop antes de instanciar GraphicsRenderer.");
         }
         this.instance = new Inventory();
+        this.instance.standardX = standardX;
+        this.instance.standardY = standardY;
     }
 
 
@@ -64,32 +69,32 @@ export class Inventory{
         this.items = [null];
         //#region Inicialización de los contenedores
         this.layout = new UILayout(
-            GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
-            GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, 
+            this.standardX * 0.5 - this.halfWidth, 
+            this.standardY * 0.5 - this.halfHeight, 
             this.halfWidth * 2, 
             this.halfHeight * 2
         );
         this.cropsLayout = new UILayout(
-            GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
-            GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, 
+            this.standardX* 0.5 - this.halfWidth, 
+            this.standardY * 0.5 - this.halfHeight, 
             this.halfWidth*2, 
             this.halfHeight*2
         );
         this.clothesLayout = new UILayout(
-            GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
-            GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, 
+            this.standardX* 0.5 - this.halfWidth, 
+            this.standardY * 0.5 - this.halfHeight, 
             this.halfWidth*2, 
             this.halfHeight*2
         );
         this.wikiLayout = new UILayout(
-            GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
-            GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, 
+            this.standardX* 0.5 - this.halfWidth, 
+            this.standardY * 0.5 - this.halfHeight, 
             this.halfWidth*2, 
             this.halfHeight*2
         );
         this.settingsLayout = new UILayout(
-            GraphicsRenderer.instance.getCanvas().width * 0.5 - this.halfWidth, 
-            GraphicsRenderer.instance.getCanvas().height * 0.5 - this.halfHeight, 
+            this.standardX* 0.5 - this.halfWidth, 
+            this.standardY * 0.5 - this.halfHeight, 
             this.halfWidth*2, 
             this.halfHeight*2
         );
@@ -325,8 +330,8 @@ export class Inventory{
     //#endregion
     
     public resize(width :number, height :number){
-        var posX = width * 0.5  / GraphicsRenderer.instance.scaleX - this.halfWidth;
-        var posY = height * 0.5 / GraphicsRenderer.instance.scaleY - this.halfHeight ;
+        var posX = width * 0.5  - this.halfWidth;
+        var posY = height * 0.5 - this.halfHeight ;
         this.layout.position.x = posX;
         this.layout.position.y = posY;
         for(let ent of this.layout.uiEntities){
@@ -456,6 +461,7 @@ class itemInInventory{
         this.id = item.id;
         this.name = item.name;
         this.type = item.type;
+
     }
 
     public addItem(count :number){

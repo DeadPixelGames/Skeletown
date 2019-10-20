@@ -6,9 +6,23 @@ import { enteringInventory } from "../main.js";
 import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
+import GameLoop from "../gameloop.js";
 
 
 export class Hud{
+
+    private hud_InGame :UILayout;
+    public lifeBar :ProgressBar;
+    private moneyCounter :UIEntity;
+    private time :UIEntity;
+    private inventory :UIEntity;
+
+
+    private width :number;
+    private height :number;
+
+    private standardX :number;
+    private standardY :number;
     //#region Singleton
     private static _instance :Hud;
 
@@ -35,27 +49,21 @@ export class Hud{
     /**
      * Inicializa la instancia Singleton de `Hud` del programa y la asocia al contexto de canvas especificado.
      */
-    public static initInstance(context :CanvasRenderingContext2D) {
+    public static initInstance(context :CanvasRenderingContext2D, standardX :number, standardY :number) {
         if(!GraphicsRenderer.instance) {
-
-            throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar Hud.");
-
+            throw new Error("GraphicsRenderer no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar Hud.");
         }
         var ret = new Hud();
         Hud.initSingleton(ret);
+        ret.standardX = standardX;
+        ret.standardY = standardY;
+
+        GameLoop.instance.suscribe(ret, null, ret.update, null, null);
         return ret;
     }
     //#endregion
 
-    private hud_InGame :UILayout;
-    public lifeBar :ProgressBar;
-    private moneyCounter :UIEntity;
-    private time :UIEntity;
-    private inventory :UIEntity;
 
-
-    private width :number;
-    private height :number;
 
     private constructor(){
         this.width = GraphicsRenderer.instance.getCanvas().width;
@@ -67,17 +75,17 @@ export class Hud{
         this.time = new UIEntity(false);
         this.inventory = new UIEntity(true);
 
-        this.lifeBar = new ProgressBar(this.width * 0.5 - 351, 5, 703, 128, true, (x :number, y :number)=>{
+        this.lifeBar = new ProgressBar(this.width * 0.5 - 295, 78, 703, 128, true, (x :number, y :number)=>{
             this.lifeBar.setProgress(this.lifeBar.getProgress()-10);
         });
 
         //#region Colliders
 
-        this.moneyCounter.setCollider(true, 5, 5, 320, 91, (x :number, y :number)=>{
+        this.moneyCounter.setCollider(true, 95, 77, 320, 91, (x :number, y :number)=>{
 
         });
-        this.time.setCollider(true, this.width - 265, 5, 362, 128);
-        this.inventory.setCollider(false, this.width - 245, this.height - 245, 245, 245,(x :number, y :number)=>{
+        this.time.setCollider(true, this.width - 235, 60, 362, 128);
+        this.inventory.setCollider(false, this.width - 165, this.height - 215, 245, 245,(x :number, y :number)=>{
 
             enteringInventory();
             this.lifeBar.setProgress(this.lifeBar.getProgress()+10);
@@ -112,11 +120,12 @@ export class Hud{
         this.inventory.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_inventory.png"));
         
         this.hud_InGame.addEntitiesToRenderer();
-        this.moneyCounter.setText("1283902", {x: 250, y: 65}, "45px");
-        this.time.setText("10:21", {x: 145, y: 80}, "45px");
+        this.moneyCounter.setText("999999999", {x: 250, y: 61}, "36px");
+        var date = new Date();
+        this.setTimeText("");
 
-        this.deactivate();
-        this.hide();
+        //this.deactivate();
+        //this.hide();
 
 
     }
@@ -137,10 +146,10 @@ export class Hud{
 
     public resize(canvasWidth :number, canvasHeight :number){
 
-        var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
-        var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
-        this.hud_InGame.position.x = w - STANDARD_SCREEN_SIZE_X * 0.5;
-        this.hud_InGame.position.y = h - STANDARD_SCREEN_SIZE_Y * 0.5;
+        var w = canvasWidth * 0.5;
+        var h = canvasHeight * 0.5;
+        this.hud_InGame.position.x = w - this.standardX * 0.5;
+        this.hud_InGame.position.y = h - this.standardY * 0.5;
         for(let ent of this.hud_InGame.uiEntities){
             ent.x = this.hud_InGame.position.x + ent.getRelativePos().x;
             ent.y = this.hud_InGame.position.y + ent.getRelativePos().y;
@@ -148,5 +157,16 @@ export class Hud{
 
     }
 
+    private update(deltaTime :number) {
+        var date = new Date();
+        var hour = date.getHours();
+        var minute = date.getMinutes();
+        var separator = date.getSeconds() % 2 == 0 ? ":" : ".";
 
+        this.setTimeText((hour < 10 ? "0" + hour : hour) + separator + (minute < 10 ? "0" + minute : minute));
+    }
+
+    private setTimeText(time :string) {
+        this.time.setText(time, {x: 230, y: 80}, "45px");
+    }
 }

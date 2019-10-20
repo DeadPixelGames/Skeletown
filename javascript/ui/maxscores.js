@@ -9,14 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, UIEntity } from "./uiEntity.js";
-import { STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y } from "../main.js";
 import Interface from "./interface.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
 export class MaxScore {
+    //#endregion
     constructor() {
-        this.width = GraphicsRenderer.instance.getCanvas().width;
-        this.height = GraphicsRenderer.instance.getCanvas().height;
+        this.width = this.standardX;
+        this.height = this.standardY;
         this.maxScore_layout = new UILayout(0, 0, this.width, this.height);
         this.background = new UIEntity(false);
         this.back = new UIEntity(true);
@@ -56,12 +56,14 @@ export class MaxScore {
     /**
      * Inicializa la instancia Singleton de `MaxScore` del programa y la asocia al contexto de canvas especificado.
      */
-    static initInstance(context) {
+    static initInstance(context, standardX, standardY) {
         if (!GraphicsRenderer.instance) {
             throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar MaxScore.");
         }
         var ret = new MaxScore();
         MaxScore.initSingleton(ret);
+        ret.standardX = standardX;
+        ret.standardY = standardY;
         return ret;
     }
     initImages() {
@@ -88,8 +90,8 @@ export class MaxScore {
     resize(canvasWidth, canvasHeight) {
         var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
         var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
-        this.maxScore_layout.position.x = w - STANDARD_SCREEN_SIZE_X * 0.5;
-        this.maxScore_layout.position.y = h - STANDARD_SCREEN_SIZE_Y * 0.5;
+        this.maxScore_layout.position.x = w - this.standardX * 0.5;
+        this.maxScore_layout.position.y = h - this.standardY * 0.5;
         for (let ent of this.maxScore_layout.uiEntities) {
             ent.x = this.maxScore_layout.position.x + ent.getRelativePos().x;
             ent.y = this.maxScore_layout.position.y + ent.getRelativePos().y;

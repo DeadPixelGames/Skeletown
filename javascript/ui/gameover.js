@@ -9,14 +9,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, UIEntity } from "./uiEntity.js";
-import { STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y } from "../main.js";
 import Interface from "./interface.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
 export class GameOver {
+    //#endregion
     constructor() {
-        this.width = GraphicsRenderer.instance.getCanvas().width;
-        this.height = GraphicsRenderer.instance.getCanvas().height;
+        this.width = this.standardX;
+        this.height = this.standardY;
         this.gameOver_layout = new UILayout(0, 0, this.width, this.height);
         this.background = new UIEntity(false);
         this.money = new UIEntity(true);
@@ -59,12 +59,14 @@ export class GameOver {
     /**
      * Inicializa la instancia Singleton de `GameOver` del programa y la asocia al contexto de canvas especificado.
      */
-    static initInstance(context) {
+    static initInstance(context, standardX, standardY) {
         if (!GraphicsRenderer.instance) {
             throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar GameOver.");
         }
         var ret = new GameOver();
         GameOver.initSingleton(ret);
+        ret.standardX = standardX;
+        ret.standardY = standardY;
         return ret;
     }
     initImages() {
@@ -93,8 +95,8 @@ export class GameOver {
     resize(canvasWidth, canvasHeight) {
         var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
         var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
-        this.gameOver_layout.position.x = w - STANDARD_SCREEN_SIZE_X * 0.5;
-        this.gameOver_layout.position.y = h - STANDARD_SCREEN_SIZE_Y * 0.5;
+        this.gameOver_layout.position.x = w - this.standardX * 0.5;
+        this.gameOver_layout.position.y = h - this.standardY * 0.5;
         for (let ent of this.gameOver_layout.uiEntities) {
             ent.x = this.gameOver_layout.position.x + ent.getRelativePos().x;
             ent.y = this.gameOver_layout.position.y + ent.getRelativePos().y;

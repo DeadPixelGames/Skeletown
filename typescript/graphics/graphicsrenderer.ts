@@ -56,10 +56,6 @@ export default class GraphicsRenderer {
      * Indica el desplazamiento vertical de la pantalla.
      */
     public scrollY :number;
-
-    public scaleX :number;
-
-    public scaleY :number;
     /**
      * La escala horizontal de la pantalla
      */
@@ -278,8 +274,8 @@ export default class GraphicsRenderer {
 
     private updateScrollToFollow() {
         if(this.following) {
-            this.scrollX = this.following.x - this.canvas.width * 0.5 / this.scaleX;
-            this.scrollY = this.following.y - this.canvas.height * 0.5 / this.scaleY;
+            this.scrollX = this.following.x - this.canvas.width * 0.5;
+            this.scrollY = this.following.y - this.canvas.height * 0.5;
         }
     }
     //#endregion

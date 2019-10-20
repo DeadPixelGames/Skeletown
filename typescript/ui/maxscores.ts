@@ -1,12 +1,22 @@
 import GraphicsRenderer from "../graphics/graphicsrenderer.js";
 import { UILayout, ProgressBar, UIEntity } from "./uiEntity.js";
-import { enteringInventory, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y } from "../main.js";
+import { enteringInventory} from "../main.js";
 import Interface from "./interface.js";
 import { BoxCollider, CircleCollider } from "../collider.js";
 import FileLoader from "../fileloader.js";
 import { MainMenu } from "./mainmenu.js";
 
 export class MaxScore{
+
+    private maxScore_layout :UILayout;
+    private background :UIEntity;
+    private back :UIEntity;
+
+    private width :number;
+    private height :number;
+    
+    private standardX :number;
+    private standardY :number;
     //#region Singleton
     private static _instance :MaxScore;
 
@@ -33,27 +43,24 @@ export class MaxScore{
     /**
      * Inicializa la instancia Singleton de `MaxScore` del programa y la asocia al contexto de canvas especificado.
      */
-    public static initInstance(context :CanvasRenderingContext2D) {
+    public static initInstance(context :CanvasRenderingContext2D, standardX :number, standardY :number) {
         if(!GraphicsRenderer.instance) {
             throw new Error("GraphicsRenderes no se ha iniciado todavía. Por favor inicia GraphicsRenderer antes de instanciar MaxScore.");
         }
         var ret = new MaxScore();
         MaxScore.initSingleton(ret);
+        ret.standardX = standardX;
+        ret.standardY = standardY;
         return ret;
     }
     //#endregion
 
 
-    private maxScore_layout :UILayout;
-    private background :UIEntity;
-    private back :UIEntity;
 
-    private width :number;
-    private height :number;
 
     private constructor(){
-        this.width = GraphicsRenderer.instance.getCanvas().width;
-        this.height = GraphicsRenderer.instance.getCanvas().height;
+        this.width = this.standardX;
+        this.height = this.standardY;
 
         this.maxScore_layout = new UILayout(0, 0, this.width, this.height);
 
@@ -106,8 +113,8 @@ export class MaxScore{
     public resize(canvasWidth :number, canvasHeight :number){
         var w = canvasWidth * 0.5 / GraphicsRenderer.instance.scaleX;
         var h = canvasHeight * 0.5 / GraphicsRenderer.instance.scaleY;
-        this.maxScore_layout.position.x = w - STANDARD_SCREEN_SIZE_X * 0.5;
-        this.maxScore_layout.position.y = h - STANDARD_SCREEN_SIZE_Y * 0.5;
+        this.maxScore_layout.position.x = w - this.standardX * 0.5;
+        this.maxScore_layout.position.y = h - this.standardY * 0.5;
         for(let ent of this.maxScore_layout.uiEntities){
             ent.x = this.maxScore_layout.position.x + ent.getRelativePos().x;
             ent.y = this.maxScore_layout.position.y + ent.getRelativePos().y;

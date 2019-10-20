@@ -74,9 +74,7 @@ export default class GraphicsRenderer {
         for (let entity of this.entities) {
             if (!entity.visible)
                 break;
-
             if (entity.shouldBeCulled(this.scrollX, this.scrollY))
-
                 continue;
             entity.render(this.context, this.scrollX, this.scrollY);
         }
@@ -203,8 +201,8 @@ export default class GraphicsRenderer {
     }
     updateScrollToFollow() {
         if (this.following) {
-            this.scrollX = this.following.x - this.canvas.width * 0.5 / this.scaleX;
-            this.scrollY = this.following.y - this.canvas.height * 0.5 / this.scaleY;
+            this.scrollX = this.following.x - this.canvas.width * 0.5;
+            this.scrollY = this.following.y - this.canvas.height * 0.5;
         }
     }
 }
