@@ -9,11 +9,11 @@ import { TileEntity } from "./graphics/areamap.js";
 export class FarmlandManager{
     public static instance = new FarmlandManager;
 
-    private farmlands :[null, ...TileEntity[]];
+    public farmlands :TileEntity[];
 
 
     private constructor(){
-        this.farmlands = [null];
+        this.farmlands = [];
     }
 
     public addFarmland(tile :TileEntity){

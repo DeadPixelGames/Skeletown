@@ -26,7 +26,7 @@ export class Inventory {
         this.pageSelected = "crops";
         this.cropSelected = 0;
         this.enemySelected = 0;
-        this.items = [null];
+        this.items = [];
         //#region Inicialización de los contenedores
         this.layout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
         this.cropsLayout = new UILayout(this.standardX * 0.5 - this.halfWidth, this.standardY * 0.5 - this.halfHeight, this.halfWidth * 2, this.halfHeight * 2);
@@ -250,7 +250,7 @@ export class Inventory {
                 var aux = new UIEntity(false);
                 aux.setImage(true, 104, yield FileLoader.loadImage("resources/interface/" + en.image));
                 aux.setCollider(true, 0, 0, this.halfWidth * 2, this.halfHeight * 2);
-                aux.setText(en.name + '\n\n\n' + en.description, { x: 745, y: 145 }, 20, "center");
+                aux.setText(en.name + '\n\n' + en.description, { x: 745, y: 145 }, 18, "center");
                 //aux.setText(en.description, {x: 745, y: 204}, "15px", "center");
                 this.wikiLayout.addUIEntity(aux);
                 enemyPages.push(aux);
@@ -259,7 +259,7 @@ export class Inventory {
                 var aux = new UIEntity(false);
                 aux.setImage(true, 104, yield FileLoader.loadImage("resources/interface/" + veg.image));
                 aux.setCollider(true, 0, 0, this.halfWidth * 2, this.halfHeight * 2);
-                aux.setText(veg.name + "\n\n\n" + veg.description, { x: 745, y: 145 }, 20, "center");
+                aux.setText(veg.name + "\n\n" + veg.description, { x: 745, y: 145 }, 18, "center");
                 //aux.setText(veg.description, {x: 745, y: 204}, "15px", "center");
                 this.wikiLayout.addUIEntity(aux);
                 cropPages.push(aux);
@@ -515,6 +515,7 @@ class itemInInventory {
         this.id = item.id;
         this.name = item.name;
         this.type = item.type;
+        this.item = item;
     }
     addItem(count) {
         this.count += count;

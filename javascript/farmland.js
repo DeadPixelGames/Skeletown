@@ -1,6 +1,6 @@
 export class FarmlandManager {
     constructor() {
-        this.farmlands = [null];
+        this.farmlands = [];
     }
     addFarmland(tile) {
         this.farmlands.push(tile);

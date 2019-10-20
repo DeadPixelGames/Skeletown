@@ -18,9 +18,6 @@ import { GameOver } from "./ui/gameover.js";
 const STANDARD_SCREEN_SIZE_X = 1920;
 const STANDARD_SCREEN_SIZE_Y = 1080;
 //#region Declaración de variables
-var player;
-var enemy;
-var area;
 var ctx;
 //#endregion
 //#region Rescalamiento

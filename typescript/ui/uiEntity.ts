@@ -337,7 +337,7 @@ export class UIGraphicEntity extends GraphicEntity{
                 GraphicsRenderer.instance.getCanvasContext().strokeText(line, this.x + this.textPos.x, y);
                 GraphicsRenderer.instance.getCanvasContext().fillStyle = "#000000";
                 GraphicsRenderer.instance.getCanvasContext().fillText(line, this.x + this.textPos.x, y);
-                y += this.fontSize;
+                y += this.fontSize + 2;
             }
         }
     }

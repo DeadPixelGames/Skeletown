@@ -7,7 +7,7 @@ import AIPath from "./aipath.js";
 /**
  * Alcance del ataque. Si el enemigo está a menos de esta distancia de su objetivo, le atacará.
  */
-const ATTACK_RADIUS = 200;
+const ATTACK_RADIUS = 150;
 /**
  * Tiempo en segundos que debe pasar entre ataque y ataque.
  */
