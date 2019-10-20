@@ -76,7 +76,7 @@ export class GameOver {
             
         })
 
-        this.moneyQuantity.setCollider(true, 0, 0, 254, 87);
+        this.moneyQuantity.setCollider(true, 5, 5, 254, 87);
 
         this.backToMenu.setCollider(true, 65, 936, 92, 84, (x,y)=>{
             this.deactivate();
@@ -100,12 +100,12 @@ export class GameOver {
     public async initImages(){
         this.background.setImage(true, 99, await FileLoader.loadImage("resources/interface/menu/gameover_page.png"));
         this.money.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_button.png"), 770, 920, 359, 109);
-        this.moneyQuantity.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"), 0, 0, 254, 87);
+        this.moneyQuantity.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"), 0, 0);
         this.backToMenu.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_back.png"), 65, 936, 92, 84)
 
         this.gameOver_layout.addEntitiesToRenderer();
 
-        this.moneyQuantity.setText("999999999", {x: 200, y: 55}, 35);
+        this.moneyQuantity.setText("999999999", {x: 250, y: 61}, 36);
 
         this.deactivate();
         this.hide();

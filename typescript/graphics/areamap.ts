@@ -509,7 +509,8 @@ export class TileEntity extends GraphicEntity {
                     id: this.currentCrop,
                     name: "",
                     description: "",
-                    type: "crop"}, count);
+                    type: "crop",
+                    count: count});
                 this.uiLayout.visible = false;
             }
         })

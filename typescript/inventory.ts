@@ -5,7 +5,7 @@ import { BoxCollider, CircleCollider } from "./collider.js";
 import GameLoop from "./gameloop.js";
 import Interface, { exitingInventory} from "./ui/interface.js";
 import { TileEntity } from "./graphics/areamap.js";
-import { unloadArea } from "./worldload.js";
+import { unloadGame, saveWorldInfo } from "./worldload.js";
 import { MainMenu } from "./ui/mainmenu.js";
 import { Hud } from "./ui/hud.js";
 import { sleep } from "./util.js";
@@ -144,8 +144,8 @@ export class Inventory{
 
     public addItem(item :Item){
         var found = false;
-        var i = 1;
-        while(!found || i == this.items.length){
+        var i = 0;
+        while(!found && i < this.items.length){
             var it = this.items[i]
             if(it){
                 if(it.blocked) found = true;
@@ -233,7 +233,7 @@ export class Inventory{
             console.log("SETTINGS");
         })
 
-        this.closeInventory.setCollider(false, 981, -43, 86, 86, (x,y)=>{
+        this.closeInventory.setCollider(false, 981, -43, 100, 100, (x,y)=>{
             exitingInventory();
         })
 
@@ -475,9 +475,14 @@ export class Inventory{
     }
     private async initSettingsLayout(){
         var background = new UIEntity(false);
+        var tuto1 = new UIEntity(true);
+        var tuto2 = new UIEntity(true);
         var exit = new UIEntity(true);
         background.setImage(true, 102, await FileLoader.loadImage("resources/interface/exit_inv_page.png"));
         exit.setImage(true, 104, await FileLoader.loadImage("resources/interface/exitgame_inv_button.png"), 481, 547, 176, 77);
+        tuto1.setImage(true, 104, await FileLoader.loadImage("resources/interface/exit_inv_tutorial_1.png"), 189, 0);
+        tuto2.setImage(true, 104, await FileLoader.loadImage("resources/interface/exit_inv_tutorial_2.png"), 189, 0);
+
         background.setCollider(true, 0, 0, 1024, 696);
         exit.setCollider(true, 481, 547, 176, 77, (x,y)=>{
             console.log("SALIR AL MENÚ AL PRINCIPAL");
@@ -487,19 +492,50 @@ export class Inventory{
                 Hud.instance.deactivate();
                 Hud.instance.hide();
                 await sleep(50);
-                await unloadArea();
+                saveWorldInfo();
+                await unloadGame();
                 MainMenu.instance.activate();
                 MainMenu.instance.show();
             });
+        });
+
+        tuto1.setCollider(true, 189, 0, 800, 600, (x,y)=>{
+            tuto2.show();
+            tuto1.hide();
+            var col = tuto2.getCollider();
+            if(col) col.active = true;
+            var col2 = tuto1.getCollider();
+            if(col2) col2.active = false;
+        })
+        tuto2.setCollider(true, 189, 0, 800, 600, (x,y)=>{
+            tuto2.hide();
+            tuto1.show();
         })
 
-
         Interface.instance.addCollider(exit.getCollider() as BoxCollider);
+        Interface.instance.addCollider(tuto1.getCollider() as BoxCollider);
+        Interface.instance.addCollider(tuto2.getCollider() as BoxCollider);
 
         this.settingsLayout.addUIEntity(background);
         this.settingsLayout.addUIEntity(exit);
+        this.settingsLayout.addUIEntity(tuto1);
+        this.settingsLayout.addUIEntity(tuto2);
 
         this.settingsLayout.addEntitiesToRenderer();
+
+        this.settingsLayout.show = function(){
+            background.show();
+            exit.show();
+
+        }
+        this.settingsLayout.activate = function(){
+            var col = exit.getCollider()
+            if(col) col.active = true;
+            var col2 = tuto1.getCollider();
+            if(col2) col2.active = true;
+            var col3 = tuto2.getCollider();
+            if(col3) col3.active = false;
+        }
         this.settingsLayout.hide();
         this.settingsLayout.deactivate();
     }

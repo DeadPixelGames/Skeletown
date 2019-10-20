@@ -7,11 +7,12 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import { BoxCollider, Collider } from "./collider.js";
 import { Hud } from "./ui/hud.js";
 import Interface, { InterfaceInWorld } from "./ui/interface.js";
-import { distance } from "./util.js";
+import { distance, sleep } from "./util.js";
 import AudioManager from "./audiomanager.js";
 import GraphicEntity from "./graphics/graphicentity.js";
 import { FarmlandManager } from "./farmland.js";
 import FileLoader from "./fileloader.js";
+import { GameOver } from "./ui/gameover.js";
 
 const BLINK_PROPERTIES = {
     blink: 2,
@@ -72,7 +73,17 @@ export default async function loadWorld() {
 
     player.suscribe(Hud.instance.lifeBar, (health :number, maxHealth :number) => {
         Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
-    }, () => console.log("Game Over :("));
+    }, () => GraphicsRenderer.instance.fadeOutAndIn(0.3, async () => {
+                Inventory.instance.deactivate();
+                Inventory.instance.hide();
+                Hud.instance.deactivate();
+                Hud.instance.hide();
+                await sleep(50);
+                await unloadGame();
+                GameOver.instance.activate();
+                GameOver.instance.show();
+        })
+    );
     //#endregion
     
     //#region Inventario
@@ -164,22 +175,28 @@ async function loadArea() {
 
 export async function unloadArea() {
 
-    for(let entity of [player, enemy]) {
+    for(let entity of [player, ... enemies]) {
         if(entity) {
-            var collider = entity.getCollider()
-            if(collider) {
-                collider.discarded = true;
-            }
-            GraphicsRenderer.instance.removeEntity(entity.getImage());
+            entity.dispose();
         }
     }
+    console.log("Entidades eliminadas");
 
     player = null;
-    enemy = null;
+    enemies = [];
 
     if(area) {
         area.unload();
+        console.log("Área eliminada");
+        area = null;
     }
+}
+
+export async function unloadGame() {
+    await unloadArea();
+
+    FarmlandManager.instance.farmlands = [];
+    Inventory.instance.items = [];
 }
 
 //#region Crear enemigo
@@ -221,7 +238,8 @@ async function generateEnemy(x :number, y :number, source :string, onDead :() =>
         (function(enemy :Enemy) {
             collider.addUserInteraction(null, ()=>attackEnemy(enemy), null, null);
         })(enemy);
-        area.getColliders().add(collider);
+        if(area)
+            area.getColliders().add(collider);
     }
     if(area)
         enemy.setColliderLayer(area.getColliders());
@@ -291,7 +309,7 @@ document.addEventListener("keydown", async (event) => {
         });
         enemies.push(enemy);
     
-    }else if(event.key == "h"){
+    }else if(event.key == "h" && player){
         player.setHealth(100);
     }
 });
@@ -340,6 +358,11 @@ window.addEventListener("touchstart", generateAudioContext);
 //#endregion
 
 export function saveWorldInfo(){
+    if(!player) {
+        console.warn("Es necesario que el jugador esté en el mundo para guardar los datos.");
+        return;
+    }
+
     var infoPlayer = {
         x: player.x,
         y: player.y,
@@ -393,9 +416,11 @@ export function loadWorldInfo() {
     var crops = JSON.parse(localStorage.getItem("crops") as string) as InfoCrop[];
     var items = JSON.parse(localStorage.getItem("items") as string) as Item[];
 
-    player.x = infoPlayer.x;
-    player.y = infoPlayer.y;
-    player.setHealth(infoPlayer.health);
+    if(player) {
+        player.x = infoPlayer.x;
+        player.y = infoPlayer.y;
+        player.setHealth(infoPlayer.health);
+    }
 
     for(let e of infoEnemies) {
         let enemy = new Enemy();
@@ -418,6 +443,119 @@ export function loadWorldInfo() {
     for(let i of items){
         Inventory.instance.addItem(i)
     }
+}
+
+export function loadWorldFromLocalStorage() {
+    
+    ctx = GraphicsRenderer.instance.getCanvasContext();
+
+    //#region Jugador
+    player = new Player();   
+
+
+    //// player.setImage(4, await FileLoader.loadImage("resources/sprites/front_sprite.png"), 0, 0, 128, 256, 64, 128);
+    await player.setAnimation(3.5, "skeleton.json");
+
+
+    var image = player.getImage();
+    if(image){
+        GraphicsRenderer.instance.addExistingEntity(image);
+        player.setCollider(new BoxCollider(0, 0, image.getWidth() * 0.5, image.getWidth() * 0.5, true),
+        {
+            x: 0,
+            y: image.getHeight() * 0.3
+        });
+    }
+    
+    GraphicsRenderer.instance.follow(player.getImage());
+
+    player.suscribe(Hud.instance.lifeBar, (health :number, maxHealth :number) => {
+        Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
+    }, () => GraphicsRenderer.instance.fadeOutAndIn(0.3, async () => {
+                Inventory.instance.deactivate();
+                Inventory.instance.hide();
+                Hud.instance.deactivate();
+                Hud.instance.hide();
+                await sleep(50);
+                await unloadGame();
+                GameOver.instance.activate();
+                GameOver.instance.show();
+        })
+    );
+    //#endregion
+    
+    //#region Inventario
+    Inventory.instance.addItem({
+        id: 0,
+        name: "Skullpkin",
+        description: "Skulled Pumpkin",
+        type: "crop",
+        count: 3
+    });
+    Inventory.instance.addItem({
+        id: 1,
+        name: "Ghost Pepper",
+        description: "Peppers' immortal souls",
+        type: "crop",
+        count: 4
+    });
+    Inventory.instance.addItem({
+        id: 2,
+        name: "SoulCorn",
+        description: "Corn Cub with souls",
+        type: "crop",
+        count: 2
+    });
+    Inventory.instance.addItem({
+        id: 3,
+        name: "Zombihorias",
+        description: "The undead tubercule",
+        type: "crop",
+        count: 5
+    });
+    Inventory.instance.addItem({
+        id: 4,
+        name: "Demonions",
+        description: "So evil, they will make you cry",
+        type: "crop",
+        count: 5
+    });
+    Inventory.instance.addItem({
+        id: 0,
+        name: "Speeder",
+        description: "Grow in a blink",
+        type: "fertilizer",
+        count: 6,
+        strength: 2
+    });
+    Inventory.instance.addItem({
+        id: 1,
+        name: "Quantity",
+        description: "Quantity over quality",
+        type: "fertilizer",
+        count: 6,
+        strength: 2
+    });
+    //#endregion
+
+    await loadArea();
+    for(let e of enemiesSpawnpoints){
+        
+       await(async function(e :{x :number, y :number, source :string}){
+            var ret = await generateEnemy(e.x, e.y, e.source, () => {
+                if(ret) {
+                    ret.dispose();
+                    console.log("Enemy: :(");
+                    enemies.remove(ret);
+                }
+            });
+            enemies.push(ret);
+        }) (e);
+    }
+    
+
+    GameLoop.instance.suscribe(null, null, renderDebug, null, null);
+}
 }
 
 type InfoPlayer = {

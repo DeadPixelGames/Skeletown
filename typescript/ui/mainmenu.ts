@@ -9,6 +9,7 @@ import loadWorld from "../worldload.js";
 import { Hud } from "./hud.js";
 import AnimatedGraphicEntity from "../graphics/animatedgraphicentity.js";
 import { sleep } from "../util.js";
+import AboutUs from "./aboutus.js";
 
 
 export class MainMenu {
@@ -106,6 +107,10 @@ export class MainMenu {
         })
         this.contact.setCollider(true, 1395, 880, 465, 172, (x :number, y :number)=>{
             console.log("CONTACT");
+            AboutUs.instance.show();
+            AboutUs.instance.activate();
+            this.deactivate();
+            this.hide();
         })
         this.continue.setCollider(true, 198, 815, 413, 220, (x :number, y :number)=>{
             console.log("CONTINUE");
@@ -114,7 +119,7 @@ export class MainMenu {
             GameOver.instance.activate();
             GameOver.instance.show();
         })
-        this.maxScore.setCollider(true, 71, 60, 208, 287, (x :number, y :number)=>{
+        this.maxScore.setCollider(true, 71, 60, 250, 287, (x :number, y :number)=>{
             console.log("MAXSCORE");
             MaxScore.instance.activate();
             MaxScore.instance.show();

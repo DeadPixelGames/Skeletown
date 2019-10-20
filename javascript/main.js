@@ -15,6 +15,7 @@ import { Hud } from "./ui/hud.js";
 import { MainMenu } from "./ui/mainmenu.js";
 import { MaxScore } from "./ui/maxscores.js";
 import { GameOver } from "./ui/gameover.js";
+import AboutUs from "./ui/aboutus.js";
 const STANDARD_SCREEN_SIZE_X = 1920;
 const STANDARD_SCREEN_SIZE_Y = 1080;
 //#region Declaración de variables
@@ -87,6 +88,7 @@ window.onload = function () {
         MainMenu.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
         MaxScore.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
         GameOver.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
+        AboutUs.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
         Hud.initInstance(ctx, STANDARD_SCREEN_SIZE_X, STANDARD_SCREEN_SIZE_Y);
         //#endregion
         GameLoop.instance.start();

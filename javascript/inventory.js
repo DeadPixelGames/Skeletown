@@ -12,7 +12,7 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import Interface, { exitingInventory } from "./ui/interface.js";
-import { unloadArea } from "./worldload.js";
+import { unloadGame, saveWorldInfo } from "./worldload.js";
 import { MainMenu } from "./ui/mainmenu.js";
 import { Hud } from "./ui/hud.js";
 import { sleep } from "./util.js";
@@ -73,26 +73,26 @@ export class Inventory {
         this.instance.standardX = standardX;
         this.instance.standardY = standardY;
     }
-    addItem(item, count, strength) {
+    addItem(item) {
         var found = false;
-        var i = 1;
-        while (!found || i == this.items.length) {
+        var i = 0;
+        while (!found && i < this.items.length) {
             var it = this.items[i];
             if (it) {
                 if (it.blocked)
                     found = true;
                 if (it.type == item.type) {
                     if (it.id == item.id) {
-                        it.addItem(count);
+                        it.addItem(item.count);
                         found = true;
                     }
                 }
                 else if (it.count <= 0) {
                     it.setItem(item);
-                    it.addItem(count);
+                    it.addItem(item.count);
                     if (item.type == "fertilizer") {
-                        if (strength) {
-                            it.fertStrength = strength;
+                        if (item.strength) {
+                            it.fertStrength = item.strength;
                         }
                         else {
                             console.log("No se ha incluido potencia en el abono: " + item.name);
@@ -159,7 +159,7 @@ export class Inventory {
             this.settingsLayout.activate();
             console.log("SETTINGS");
         });
-        this.closeInventory.setCollider(false, 981, -43, 86, 86, (x, y) => {
+        this.closeInventory.setCollider(false, 981, -43, 100, 100, (x, y) => {
             exitingInventory();
         });
         Interface.instance.addCollider(this.crops.getCollider());
@@ -384,9 +384,13 @@ export class Inventory {
     initSettingsLayout() {
         return __awaiter(this, void 0, void 0, function* () {
             var background = new UIEntity(false);
+            var tuto1 = new UIEntity(true);
+            var tuto2 = new UIEntity(true);
             var exit = new UIEntity(true);
             background.setImage(true, 102, yield FileLoader.loadImage("resources/interface/exit_inv_page.png"));
             exit.setImage(true, 104, yield FileLoader.loadImage("resources/interface/exitgame_inv_button.png"), 481, 547, 176, 77);
+            tuto1.setImage(true, 104, yield FileLoader.loadImage("resources/interface/exit_inv_tutorial_1.png"), 189, 0);
+            tuto2.setImage(true, 104, yield FileLoader.loadImage("resources/interface/exit_inv_tutorial_2.png"), 189, 0);
             background.setCollider(true, 0, 0, 1024, 696);
             exit.setCollider(true, 481, 547, 176, 77, (x, y) => {
                 console.log("SALIR AL MENÚ AL PRINCIPAL");
@@ -396,14 +400,27 @@ export class Inventory {
                     Hud.instance.deactivate();
                     Hud.instance.hide();
                     yield sleep(50);
-                    yield unloadArea();
+                    saveWorldInfo();
+                    yield unloadGame();
                     MainMenu.instance.activate();
                     MainMenu.instance.show();
                 }));
             });
+            tuto1.setCollider(true, 189, 0, 800, 600, (x, y) => {
+                tuto2.show();
+                tuto1.hide();
+            });
+            tuto2.setCollider(true, 189, 0, 800, 600, (x, y) => {
+                tuto2.hide();
+                tuto1.show();
+            });
             Interface.instance.addCollider(exit.getCollider());
+            Interface.instance.addCollider(tuto1.getCollider());
+            Interface.instance.addCollider(tuto2.getCollider());
             this.settingsLayout.addUIEntity(background);
             this.settingsLayout.addUIEntity(exit);
+            this.settingsLayout.addUIEntity(tuto1);
+            this.settingsLayout.addUIEntity(tuto2);
             this.settingsLayout.addEntitiesToRenderer();
             this.settingsLayout.hide();
             this.settingsLayout.deactivate();

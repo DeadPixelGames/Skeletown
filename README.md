@@ -16,7 +16,7 @@ Juego 2D de simulación de vida para navegador, Facebook y móvil ambientado en 
 - Para cultivar es necesario plantar, regar y esperar un tiempo determinado. Después podremos recolectar los recursos.
 
 *Enemigos:*
-- Distintos niveles de doficultad.
+- Distintos niveles de dificultad.
 - Mecánica sencilla para atacar, click/tap sobre enemigo.
 - Para recuperar vida podremos comer de nuestras plantaciones.
 
