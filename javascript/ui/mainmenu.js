@@ -107,7 +107,7 @@ export class MainMenu {
     }
     initImage() {
         return __awaiter(this, void 0, void 0, function* () {
-            this.background.setImage(true, 99, yield FileLoader.loadImage("resources/interface/menu/base.png"));
+            this.background.setImage(true, 99, yield FileLoader.loadImage("resources/interface/menu/base_orange.png"));
             this.settings.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/ajustes.png"), 1189, 27, 130, 130);
             this.play.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/jugar.png"), 575, 522, 214, 119);
             this.contact.setImage(true, 100, yield FileLoader.loadImage("resources/interface/menu/contactar.png"), 921, 519, 347, 119);

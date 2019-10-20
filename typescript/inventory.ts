@@ -177,7 +177,7 @@ export class Inventory{
         this.crops.setImage(true, 103, await FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
         this.clothes.setImage(true, 103, await FileLoader.loadImage("resources/interface/cos_inv_button.png"), 58, 211, 103, 103);
         this.wiki.setImage(true, 103, await FileLoader.loadImage("resources/interface/bok_inv_button.png"), 57, 360, 110, 110);
-        this.settings.setImage(true, 103, await FileLoader.loadImage("resources/interface/or_inv_button.png"), 58, 56, 101, 101);
+        this.settings.setImage(true, 103, await FileLoader.loadImage("resources/interface/exit_inv_button.png"), 58, 509, 110, 110);
         this.closeInventory.setImage(true, 102, await FileLoader.loadImage("resources/interface/but_cerrar.png"), 0, 0, 86, 86);
         this.layout.addEntitiesToRenderer();
         this.layout.hide();
@@ -193,6 +193,7 @@ export class Inventory{
             this.wikiLayout.hide();
             this.wikiLayout.deactivate();
             this.settingsLayout.hide();
+            this.settingsLayout.deactivate();
             console.log("CROPS");
         })
 
@@ -203,6 +204,7 @@ export class Inventory{
             this.wikiLayout.hide();
             this.wikiLayout.deactivate();
             this.settingsLayout.hide();
+            this.settingsLayout.deactivate();
             console.log("CLOTHES");
         })
 
@@ -213,6 +215,7 @@ export class Inventory{
             this.wikiLayout.show();
             this.settingsLayout.hide();
             this.wikiLayout.activate();
+            this.settingsLayout.deactivate();
             console.log("WIKI");
         })
 
@@ -223,6 +226,7 @@ export class Inventory{
             this.wikiLayout.hide();
             this.wikiLayout.deactivate();
             this.settingsLayout.show();
+            this.settingsLayout.activate();
             console.log("SETTINGS");
         })
 
@@ -468,13 +472,20 @@ export class Inventory{
     }
     private async initSettingsLayout(){
         var background = new UIEntity(false);
-
-        background.setImage(true, 102, await FileLoader.loadImage("resources/interface/or_inv_page.png"));
+        var exit = new UIEntity(true);
+        background.setImage(true, 102, await FileLoader.loadImage("resources/interface/exit_inv_page.png"));
+        exit.setImage(true, 103, await FileLoader.loadImage("resources/interface/exit_inv_button.png"), 481, 547, 176, 77);
         background.setCollider(true, 0, 0, 1024, 696);
+        exit.setCollider(true, 481, 547, 176, 77, (x,y)=>{
+            console.log("SALIR AL MENÚ AL PRINCIPAL");
+            // TODO Hacer lo de salir al menú principal
+        })
         background.setPercentRelPos(false);
         this.settingsLayout.addUIEntity(background);
+        this.settingsLayout.addUIEntity(exit);
         this.settingsLayout.addEntitiesToRenderer();
         this.settingsLayout.hide();
+        this.settingsLayout.deactivate();
     }
     //#endregion
     

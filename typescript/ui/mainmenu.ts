@@ -132,7 +132,7 @@ export class MainMenu {
     }
 
     private async initImage(){
-        this.background.setImage(true, 99, await FileLoader.loadImage("resources/interface/menu/base.png"));
+        this.background.setImage(true, 99, await FileLoader.loadImage("resources/interface/menu/base_orange.png"));
         this.settings.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/ajustes.png"), 1189, 27, 130, 130);
         this.play.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/jugar.png"), 575, 522, 214, 119);
         this.contact.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/contactar.png"), 921, 519, 347, 119);

@@ -93,7 +93,7 @@ export class GameOver {
     public async initImages(){
         this.background.setImage(true, 99, await FileLoader.loadImage("resources/interface/menu/gameover_page.png"));
         this.money.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_button.png"), 550, 658, 247, 72);
-        this.moneyQuantity.setImage(true, 100, await FileLoader.loadImage("resources/interface/menu/gameover_money.png"), 0, 0, 254, 87);
+        this.moneyQuantity.setImage(true, 100, await FileLoader.loadImage("resources/interface/HUD_money.png"), 0, 0, 254, 87);
 
         this.gameOver_layout.addEntitiesToRenderer();
 
