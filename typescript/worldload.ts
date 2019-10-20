@@ -18,11 +18,11 @@ const BLINK_PROPERTIES = {
     time: 0.1
 };
 
-var player :Player;
+var player :Player | null;
 
 var enemies : Enemy[] = [];
 
-var area :AreaMap;
+var area :AreaMap | null;
 
 var ctx :CanvasRenderingContext2D;
 
@@ -74,7 +74,6 @@ export default async function loadWorld() {
         Hud.instance.lifeBar.setProgress(health * 100 / maxHealth);
     }, () => console.log("Game Over :("));
     //#endregion
-
     
     //#region Inventario
     Inventory.instance.addItem({
@@ -152,13 +151,35 @@ export default async function loadWorld() {
 async function loadArea() {
     return new Promise<void>(resolve => {
         area = AreaMap.load("farmland.json", () => {
-            var collider = player.getCollider();
-            if(collider) {
-                area.getColliders().add(collider);
+            if(player) {
+                var collider = player.getCollider();
+                if(collider && area) {
+                    area.getColliders().add(collider);
+                }
             }
             resolve();
         });
     });
+}
+
+export async function unloadArea() {
+
+    for(let entity of [player, enemy]) {
+        if(entity) {
+            var collider = entity.getCollider()
+            if(collider) {
+                collider.discarded = true;
+            }
+            GraphicsRenderer.instance.removeEntity(entity.getImage());
+        }
+    }
+
+    player = null;
+    enemy = null;
+
+    if(area) {
+        area.unload();
+    }
 }
 
 //#region Crear enemigo
@@ -202,7 +223,8 @@ async function generateEnemy(x :number, y :number, source :string, onDead :() =>
         })(enemy);
         area.getColliders().add(collider);
     }
-    enemy.setColliderLayer(area.getColliders());
+    if(area)
+        enemy.setColliderLayer(area.getColliders());
     return enemy;
 }
 //#endregion
@@ -231,7 +253,7 @@ function dispatchClickEventToColliders(event :MouseEvent | TouchEvent) {
 function attackEnemy(enemy :Enemy) {
     const ATTACK_RADIUS = 200;
 
-    if(enemy)
+    if(player && enemy)
     if(distance(player.x, player.y, enemy.x, enemy.y) < ATTACK_RADIUS) {
         player.setAttacking(true);
         enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
@@ -285,9 +307,13 @@ function renderDebug() {
 
     ctx.lineWidth = 1;
 
-    area.getColliders().render(ctx, scrollX, scrollY);
+    if(area)
+        area.getColliders().render(ctx, scrollX, scrollY);
 
-    player.renderDebug(ctx, scrollX, scrollY);
+    if(player)
+        player.renderDebug(ctx, scrollX, scrollY);
+
+
     for(let enemy of enemies){
         if(enemy) {
             enemy.renderDebug(ctx, scrollX, scrollY);

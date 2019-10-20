@@ -12,6 +12,10 @@ import GraphicsRenderer from "./graphics/graphicsrenderer.js";
 import FileLoader from "./fileloader.js";
 import GameLoop from "./gameloop.js";
 import Interface, { exitingInventory } from "./ui/interface.js";
+import { unloadArea } from "./worldload.js";
+import { MainMenu } from "./ui/mainmenu.js";
+import { Hud } from "./ui/hud.js";
+import { sleep } from "./util.js";
 export class Inventory {
     constructor() {
         //#endregion
@@ -386,7 +390,16 @@ export class Inventory {
             background.setCollider(true, 0, 0, 1024, 696);
             exit.setCollider(true, 481, 547, 176, 77, (x, y) => {
                 console.log("SALIR AL MENÚ AL PRINCIPAL");
-                // TODO Hacer lo de salir al menú principal
+                GraphicsRenderer.instance.fadeOutAndIn(0.3, () => __awaiter(this, void 0, void 0, function* () {
+                    Inventory.instance.deactivate();
+                    Inventory.instance.hide();
+                    Hud.instance.deactivate();
+                    Hud.instance.hide();
+                    yield sleep(50);
+                    yield unloadArea();
+                    MainMenu.instance.activate();
+                    MainMenu.instance.show();
+                }));
             });
             Interface.instance.addCollider(exit.getCollider());
             this.settingsLayout.addUIEntity(background);

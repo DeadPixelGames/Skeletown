@@ -132,13 +132,33 @@ function loadArea() {
     return __awaiter(this, void 0, void 0, function* () {
         return new Promise(resolve => {
             area = AreaMap.load("farmland.json", () => {
-                var collider = player.getCollider();
-                if (collider) {
-                    area.getColliders().add(collider);
+                if (player) {
+                    var collider = player.getCollider();
+                    if (collider && area) {
+                        area.getColliders().add(collider);
+                    }
                 }
                 resolve();
             });
         });
+    });
+}
+export function unloadArea() {
+    return __awaiter(this, void 0, void 0, function* () {
+        for (let entity of [player, enemy]) {
+            if (entity) {
+                var collider = entity.getCollider();
+                if (collider) {
+                    collider.discarded = true;
+                }
+                GraphicsRenderer.instance.removeEntity(entity.getImage());
+            }
+        }
+        player = null;
+        enemy = null;
+        if (area) {
+            area.unload();
+        }
     });
 }
 //#region Crear enemigo
@@ -172,12 +192,12 @@ function generateEnemy(x, y, source, onDead) {
         enemy.suscribe(enemy, null, onDead);
         var collider = enemy.getCollider();
         if (collider) {
-            (function (enemy) {
-                collider.addUserInteraction(null, () => attackEnemy(enemy), null, null);
-            })(enemy);
-            area.getColliders().add(collider);
+            collider.addUserInteraction(null, attackEnemy, null, null);
+            if (area)
+                area.getColliders().add(collider);
         }
-        enemy.setColliderLayer(area.getColliders());
+        if (area)
+            enemy.setColliderLayer(area.getColliders());
         return enemy;
     });
 }
@@ -202,7 +222,7 @@ function dispatchClickEventToColliders(event) {
 }
 function attackEnemy(enemy) {
     const ATTACK_RADIUS = 200;
-    if (enemy)
+    if (player && enemy)
         if (distance(player.x, player.y, enemy.x, enemy.y) < ATTACK_RADIUS) {
             player.setAttacking(true);
             enemy.blink(BLINK_PROPERTIES.blink, BLINK_PROPERTIES.time);
@@ -239,7 +259,7 @@ document.addEventListener("keydown", (event) => __awaiter(void 0, void 0, void 0
         });
         enemies.push(enemy);
     }
-    else if (event.key == "h") {
+    else if (event.key == "h" && player) {
         player.setHealth(100);
     }
 }));
@@ -250,6 +270,13 @@ function renderDebug() {
     var scrollX = GraphicsRenderer.instance.scrollX;
     var scrollY = GraphicsRenderer.instance.scrollY;
     ctx.lineWidth = 1;
+    if (area)
+        area.getColliders().render(ctx, scrollX, scrollY);
+    if (player)
+        player.renderDebug(ctx, scrollX, scrollY);
+    if (enemy) {
+        enemy.renderDebug(ctx, scrollX, scrollY);
+
     area.getColliders().render(ctx, scrollX, scrollY);
     player.renderDebug(ctx, scrollX, scrollY);
     for (let enemy of enemies) {
