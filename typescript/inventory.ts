@@ -4,8 +4,11 @@ import FileLoader from "./fileloader.js";
 import { BoxCollider, CircleCollider } from "./collider.js";
 import GameLoop from "./gameloop.js";
 import Interface, { exitingInventory} from "./ui/interface.js";
-import { FarmlandManager } from "./farmland.js";
 import { TileEntity } from "./graphics/areamap.js";
+import { unloadArea } from "./worldload.js";
+import { MainMenu } from "./ui/mainmenu.js";
+import { Hud } from "./ui/hud.js";
+import { sleep } from "./util.js";
 
 
 export class Inventory{
@@ -478,7 +481,16 @@ export class Inventory{
         background.setCollider(true, 0, 0, 1024, 696);
         exit.setCollider(true, 481, 547, 176, 77, (x,y)=>{
             console.log("SALIR AL MENÚ AL PRINCIPAL");
-            // TODO Hacer lo de salir al menú principal
+            GraphicsRenderer.instance.fadeOutAndIn(0.3, async () => {
+                Inventory.instance.deactivate();
+                Inventory.instance.hide();
+                Hud.instance.deactivate();
+                Hud.instance.hide();
+                await sleep(50);
+                await unloadArea();
+                MainMenu.instance.activate();
+                MainMenu.instance.show();
+            });
         })
 
 

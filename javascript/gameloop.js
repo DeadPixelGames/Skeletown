@@ -8,9 +8,9 @@ const FRAMERATE = 30;
  */
 const DELTATIME_FACTOR = 0.001;
 /**
- * Valor máximo de `deltaTime` que emitirá un evento `update`.
+ * Valor máximo de `deltaTime` que emitirá un evento `update`, en segundos.
  */
-const MAX_DELTATIME = 1000;
+const MAX_DELTATIME = 1;
 /**
  * Clase singleton que gestiona de manera general los eventos de progreso del juego. Se puede acceder a los eventos y métodos
  * mediante `GameLoop.instance`.

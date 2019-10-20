@@ -61,6 +61,11 @@ export default class AreaMap {
     private palette :[null, ... TilePrototype[]];
 
     /**
+     * Referencia a los tiles del área, para poder borrarlos al descargarla.
+     */
+    private tiles :TileEntity[];
+
+    /**
      * Evento que se dispara al terminar de cargar el mapa colocando todos los tiles.
      */
     private onLoaded :GameEvent<() => void>;
@@ -71,6 +76,7 @@ export default class AreaMap {
         this.height = 0;
         this.backgroundColor = "#000000";
         this.palette = [null];
+        this.tiles = [];
         this.onLoaded = new GameEvent();
         this.colliders = new ColliderLayer();
     }
@@ -144,6 +150,17 @@ export default class AreaMap {
      */
     public static getCurrent() {
         return AreaMap.current;
+    }
+
+    /**
+     * Elimina los tiles de esta área del GraphicsRenderer, y elimina sus colliders.
+     */
+    public unload() {
+        for(let tile of this.tiles) {
+            tile.dispose();
+            GraphicsRenderer.instance.removeEntity(tile);
+        }
+        this.tiles = [];
     }
 
     /**
@@ -241,6 +258,9 @@ export default class AreaMap {
             
                 // Se lo pasamos al `GraphicsRenderer` para que se encargue de renderizarlo
                 GraphicsRenderer.instance.addExistingEntity(tile);
+
+                // Almacenamos la referencia al tile recién creado
+                this.tiles.push(tile);
             }
 
             // Siguiente tile del mapa
@@ -546,6 +566,12 @@ export class TileEntity extends GraphicEntity {
             ret = true;
         }
         return ret;
+    }
+
+    public dispose() {
+        if(this.collider) {
+            this.collider.discarded = true;
+        }
     }
 
     public onClick(){

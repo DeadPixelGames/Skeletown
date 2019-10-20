@@ -34,6 +34,7 @@ export default class AreaMap {
         this.height = 0;
         this.backgroundColor = "#000000";
         this.palette = [null];
+        this.tiles = [];
         this.onLoaded = new GameEvent();
         this.colliders = new ColliderLayer();
     }
@@ -97,6 +98,16 @@ export default class AreaMap {
      */
     static getCurrent() {
         return AreaMap.current;
+    }
+    /**
+     * Elimina los tiles de esta área del GraphicsRenderer, y elimina sus colliders.
+     */
+    unload() {
+        for (let tile of this.tiles) {
+            tile.dispose();
+            GraphicsRenderer.instance.removeEntity(tile);
+        }
+        this.tiles = [];
     }
     /**
      * Actualiza las colisiones de la capa correspondiente al área.
@@ -177,6 +188,8 @@ export default class AreaMap {
                 }
                 // Se lo pasamos al `GraphicsRenderer` para que se encargue de renderizarlo
                 GraphicsRenderer.instance.addExistingEntity(tile);
+                // Almacenamos la referencia al tile recién creado
+                this.tiles.push(tile);
             }
             // Siguiente tile del mapa
             count++;
@@ -406,6 +419,11 @@ export class TileEntity extends GraphicEntity {
             ret = true;
         }
         return ret;
+    }
+    dispose() {
+        if (this.collider) {
+            this.collider.discarded = true;
+        }
     }
     onClick() {
         FarmlandManager.instance.activateThis(this);
